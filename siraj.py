@@ -295,7 +295,7 @@ def main():
         mode="w",
         level=logging.DEBUG,  
         datefmt='%d/%m/%y|%H:%M:%S')
-#     logging.disable(CRITICAL)
+    logging.disable(CRITICAL)
     logging.debug('Entering...')
     APP = QApplication(sys.argv)
     MAIN = LogSParserMain()
