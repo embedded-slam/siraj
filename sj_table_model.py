@@ -54,7 +54,8 @@ class MyTableModel(QAbstractTableModel):
             if(role == Qt.DisplayRole):
                 return self.arraydata[index.row()][index.column()]
             elif(role == Qt.ForegroundRole):
-                return QColor("red")
+                row = index.row()
+                return self.getForgroundColor(row)#QColor("red")
             else:
                 return None
 
@@ -68,3 +69,11 @@ class MyTableModel(QAbstractTableModel):
             elif(orientation == Qt.Vertical):
                 return section
         return None
+
+    def getForgroundColor(self, row):
+        if(self.arraydata[row][0] == "DEBUG"):
+            return QColor("red")
+        else:            
+            return QColor("green")
+
+        
