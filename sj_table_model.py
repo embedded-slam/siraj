@@ -19,6 +19,7 @@
 # 
 ################################################################################
 from PyQt4.QtCore import QAbstractTableModel, Qt
+from PyQt4.QtGui import QColor
 import logging
 
 class MyTableModel(QAbstractTableModel):
@@ -49,9 +50,13 @@ class MyTableModel(QAbstractTableModel):
         """
         if(False == index.isValid()):
             return None
-        elif(role != Qt.DisplayRole):
-            return None
-        return self.arraydata[index.row()][index.column()]
+        else:
+            if(role == Qt.DisplayRole):
+                return self.arraydata[index.row()][index.column()]
+            elif(role == Qt.ForegroundRole):
+                return QColor("red")
+            else:
+                return None
 
     def headerData(self, section, orientation, role):
         """
