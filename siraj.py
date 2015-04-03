@@ -32,7 +32,8 @@ from sj_table_model import MyTableModel
 from ui_siraj import Ui_Siraj  # import generated interface
 import logging
 from logging import CRITICAL
-
+from functools import partial
+import functools
 
 class LogSParserMain(QMainWindow):
     """
@@ -182,19 +183,33 @@ siraj.  If not, see
         logging.debug("Cell[%d, %d] was right-clicked. Contents = %s", row, column, index.data())
         self.context_menu = QMenu(self)
         
-        hide_action = QAction('Hide selected values from column "{}"'.format(self.header[column]), self)
-        show_only_action = QAction('Show only selected values from column "{}"'.format(self.header[column]), self)
-        clear_all_filters_action = QAction('Clear all filters'.format(self.header[column]), self)
+        hide_action                 = QAction('Hide selected values from column "{}"'.format(self.header[column]), self)
+#         unhide_action               = QAction('Unhide item from column "{}"...'.format(self.header[column]), self)
+        unhide_menu = QMenu('Unhide item from column "{}"...'.format(self.header[column]), self.context_menu)
+        show_only_action            = QAction('Show only selected values from column "{}"'.format(self.header[column]), self)
+        clear_all_filters_action    = QAction('Clear all filters'.format(self.header[column]), self)
         
         hide_action.triggered.connect(self.context_menu_hide_selected_rows)
+#         unhide_action.triggered.connect(self.context_menu_unhide_selected_rows)
         show_only_action.triggered.connect(self.context_menu_show_selected_rows_only)
         clear_all_filters_action.triggered.connect(self.clear_all_filters)
         
         self.context_menu.addAction(hide_action)
+#         self.context_menu.addAction(unhide_action)
+        self.context_menu.addMenu(unhide_menu)
         self.context_menu.addAction(show_only_action)
         self.context_menu.addAction(clear_all_filters_action)
-        self.context_menu.popup(QCursor.pos())
         
+        if(len(self.items_to_hide_per_column[column]) > 0):
+            unhide_menu.setEnabled(True)
+            for filtered_string in self.items_to_hide_per_column[column]:
+                temp_action = QAction(filtered_string, unhide_menu);
+                temp_action.triggered.connect(functools.partial(self.context_menu_unhide_selected_rows, filtered_string))
+                unhide_menu.addAction(temp_action)
+        else:
+            unhide_menu.setEnabled(False)
+
+        self.context_menu.popup(QCursor.pos())
         self.right_clicked_cell_index = index
 
     def cell_double_clicked(self, index):
@@ -253,30 +268,28 @@ siraj.  If not, see
         """
         self.show_selected_rows_only_based_on_column(self.right_clicked_cell_index.column())
     
-    def hide_selected_rows_based_on_column(self, column):
+    def context_menu_unhide_selected_rows(self, filtered_out_string):
+        """
+        Unhides the selected string from the right clicked column
+        """
+        self.unhide_selected_rows_only_based_on_column(self.right_clicked_cell_index.column(), filtered_out_string)
+        
+    def hide_selected_rows_based_on_column(self, filter_column):
         """
         Hides the selected rows and any other rows with matching data.
         
-        The filtering works on one column only. That column is the one which
-        was right-clicked to show the context menu.
+        The filtering works on one column only.
         """
         selected_indexes = [self.proxy_model.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
-        filter_column = column
-        unique_items_to_hide_list = list(set([index.data() for index in selected_indexes if index.column() == column]))
-        self.items_to_hide_per_column[column].extend(unique_items_to_hide_list)
-        logging.debug("filtering: %s", self.items_to_hide_per_column[filter_column])
-        regex_pattern_to_hide =  r"|".join([r"({})".format(re.escape(item)) for item in self.items_to_hide_per_column[filter_column]])    
-        regex_pattern_to_hide = r"^(?!{})".format(regex_pattern_to_hide)
-        logging.debug("Regex pattern to hide: %s", regex_pattern_to_hide)
-        self.proxy_model.setFilterKeyColumn(filter_column)
-        self.proxy_model.setFilterRegExp(regex_pattern_to_hide)        
+        unique_items_to_hide_list = list(set([index.data() for index in selected_indexes if index.column() == filter_column]))
+        self.items_to_hide_per_column[filter_column].extend(unique_items_to_hide_list)
+        self.hide_filtered_out_entries(filter_column)       
             
     def show_selected_rows_only_based_on_column(self, column):
         """
         Shows the selected rows and any other rows with matching data only.
         
-        The filtering works on one column only. That column is the one which
-        was right-clicked to show the context menu.
+        The filtering works on one column only.
         """
         selected_indexes = [self.proxy_model.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
         filter_column = column
@@ -287,7 +300,31 @@ siraj.  If not, see
         self.proxy_model.setFilterKeyColumn(filter_column)
         self.proxy_model.setFilterRegExp(regex_pattern_to_show)
 
-
+    def unhide_selected_rows_only_based_on_column(self, filter_column, filtered_out_string):
+        """
+        Unhides the selected rows and any other rows with matching data.
+        
+        The filtering works on one column only.
+        """
+        self.items_to_hide_per_column[filter_column].remove(filtered_out_string)
+        logging.debug("Unhiding: %s", filtered_out_string)
+        self.hide_filtered_out_entries(filter_column)
+        
+    def hide_filtered_out_entries(self, filter_column):    
+        """
+        Hides the filtered out pattern from the given colum 
+        """
+        logging.debug("Hiding: %s", self.items_to_hide_per_column[filter_column])
+        if (len(self.items_to_hide_per_column[filter_column]) > 0):
+            regex_pattern_to_hide =  r"|".join([r"({})".format(re.escape(item)) for item in self.items_to_hide_per_column[filter_column]])    
+            regex_pattern_to_hide = r"^(?!{})".format(regex_pattern_to_hide)
+            logging.debug("Regex pattern to hide: %s", regex_pattern_to_hide)
+        else:
+            regex_pattern_to_hide = ""
+        
+        self.proxy_model.setFilterKeyColumn(filter_column)
+        self.proxy_model.setFilterRegExp(regex_pattern_to_hide)    
+        
 def main():
     logging.basicConfig(
         format='%(levelname)s|%(funcName)s|%(message)s|%(created)f|%(filename)s:%(lineno)s', 
