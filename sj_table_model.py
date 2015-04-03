@@ -47,9 +47,9 @@ class MyTableModel(QAbstractTableModel):
         """
         Returns the data stored at the given index (row and column)
         """
-        if not index.isValid():
+        if(False == index.isValid()):
             return None
-        elif role != Qt.DisplayRole:
+        elif(role != Qt.DisplayRole):
             return None
         return self.arraydata[index.row()][index.column()]
 
@@ -57,9 +57,9 @@ class MyTableModel(QAbstractTableModel):
         """
         Returns the header data
         """
-        if role == Qt.DisplayRole:
-            if orientation == Qt.Horizontal:
+        if(role == Qt.DisplayRole):
+            if(orientation == Qt.Horizontal):
                 return self.headerdata[section]
-            elif orientation == Qt.Vertical:
+            elif(orientation == Qt.Vertical):
                 return section
         return None
