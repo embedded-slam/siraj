@@ -19,6 +19,7 @@
 # 
 ################################################################################
 from PyQt4.QtCore import QAbstractTableModel, Qt
+from PyQt4.QtGui import QColor, QBrush
 import logging
 
 class MyTableModel(QAbstractTableModel):
@@ -26,10 +27,14 @@ class MyTableModel(QAbstractTableModel):
     This class subclasses QAbstractTableModel and provides the data to be 
     displayed in the table.
     """
-    def __init__(self, datain, headerdata, parent=None, *args):
+    def __init__(self, datain, headerdata, conditional_formatting_config_dict, parent=None, *args):
         QAbstractTableModel.__init__(self, parent, *args)
         self.arraydata = datain
         self.headerdata = headerdata
+        self.foreground_key_column = conditional_formatting_config_dict["foreground_key_column"]
+        self.foreground_color_dict = conditional_formatting_config_dict["foreground_color_dict"]
+        self.background_key_column = conditional_formatting_config_dict["background_key_column"]
+        self.background_color_dict = conditional_formatting_config_dict["background_color_dict"]
 
     def rowCount(self, parent):
         """
@@ -47,19 +52,41 @@ class MyTableModel(QAbstractTableModel):
         """
         Returns the data stored at the given index (row and column)
         """
-        if not index.isValid():
+        if(False == index.isValid()):
             return None
-        elif role != Qt.DisplayRole:
-            return None
-        return self.arraydata[index.row()][index.column()]
+        else:
+            if(role == Qt.DisplayRole):
+                return self.arraydata[index.row()][index.column()]
+            elif(role == Qt.ForegroundRole):
+                return self.getConditionalFormattingColor(
+                    index.row(),
+                    self.foreground_color_dict,
+                    self.foreground_key_column)
+            elif(role == Qt.BackgroundRole):
+                return QBrush(self.getConditionalFormattingColor(
+                    index.row(),
+                    self.background_color_dict,
+                    self.background_key_column))
+            else:
+                return None
 
     def headerData(self, section, orientation, role):
         """
-        Returns the header data
+        Returns the header data.
         """
-        if role == Qt.DisplayRole:
-            if orientation == Qt.Horizontal:
+        if(role == Qt.DisplayRole):
+            if(orientation == Qt.Horizontal):
                 return self.headerdata[section]
-            elif orientation == Qt.Vertical:
+            elif(orientation == Qt.Vertical):
                 return section
         return None
+
+    def getConditionalFormattingColor(self, row, color_dict, key_column):
+        """
+        Returns a color to use in colorizing the given row's foreground/background
+        based on the matching the key cell with the given color dictionary.
+        """
+        cell_value = self.arraydata[row][key_column]
+        if(cell_value in color_dict):
+            return QColor(color_dict[cell_value])
+

@@ -43,6 +43,7 @@ class LogSParserMain(QMainWindow):
     """
     items_to_hide_per_column = list()
     header = list()
+    table_conditional_formatting_config = None
     def __init__(self):
         QMainWindow.__init__(self)
         self.context_menu = None
@@ -63,9 +64,10 @@ class LogSParserMain(QMainWindow):
         self.config = LogSParserConfigs("siraj_configs.json")
         self.log_trace_regex_pattern = self.config.get_config_item("log_row_pattern")
         self.full_path = self.config.get_config_item("log_file_full_path")
-        self.load_log_file()
         self.file_line_column = self.config.get_config_item("file_line_column_number_zero_based")
         self.root_prefix = self.config.get_config_item("root_source_path_prefix")
+        self.table_conditional_formatting_config = self.config.get_config_item("table_conditional_formatting_config")
+        self.load_log_file()
 
     def menu_about(self):
         """
@@ -129,7 +131,7 @@ siraj.  If not, see
         self.table_data = [list(re.match(self.log_trace_regex_pattern, line).groups()) for line in log_file_content_lines if(re.match(self.log_trace_regex_pattern, line) is not None)]
         m = re.match(self.log_trace_regex_pattern, log_file_content_lines[1])
         self.header = [group_name for group_name in sorted(m.groupdict().keys(), key=m.span)]
-        table_model = MyTableModel(self.table_data, self.header, self)
+        table_model = MyTableModel(self.table_data, self.header, self.table_conditional_formatting_config, self)
         logging.info("Headers: %s", self.header)
         logging.info("%s has %d lines", self.full_path, len(self.table_data))
         self.proxy_model = QSortFilterProxyModel(self)
@@ -233,6 +235,7 @@ siraj.  If not, see
         """
         Handles the event of pressing a keyboard key while on the table.
         """
+        logging.warning("A key was pressed!!!")
         key = q_key_event.key()
 
         if key == Qt.Key_Delete:
@@ -332,7 +335,7 @@ def main():
         mode="w",
         level=logging.DEBUG,  
         datefmt='%d/%m/%y|%H:%M:%S')
-    logging.disable(CRITICAL)
+#     logging.disable(CRITICAL)
     logging.debug('Entering...')
     APP = QApplication(sys.argv)
     MAIN = LogSParserMain()
