@@ -66,6 +66,7 @@ class LogSParserMain(QMainWindow):
         self.full_path = self.config.get_config_item("log_file_full_path")
         self.file_line_column = self.config.get_config_item("file_line_column_number_zero_based")
         self.root_prefix = self.config.get_config_item("root_source_path_prefix")
+        self.time_stamp_column = self.config.get_config_item("time_stamp_column_number_zero_based")
         self.table_conditional_formatting_config = self.config.get_config_item("table_conditional_formatting_config")
         self.load_log_file()
 
@@ -169,7 +170,24 @@ siraj.  If not, see
             text_cursor.movePosition(QTextCursor.EndOfLine, 1)
             text_cursor.mergeCharFormat(text_format)
             self.user_interface.txtSourceFile.setTextCursor(text_cursor)
-                        
+        
+        self.update_status_bar()
+                    
+    def update_status_bar(self):
+        """
+        Updates the status bar with relevant informations
+        """
+        selected_indexes = self.user_interface.tblLogData.selectedIndexes()
+        if(len(selected_indexes) == 2):
+            row_1 = selected_indexes[0].row()
+            row_2 = selected_indexes[1].row()
+            
+            time_stamp1 = float(self.table_data[row_1][self.time_stamp_column])
+            time_stamp2 = float(self.table_data[row_2][self.time_stamp_column])
+            self.user_interface.statusbar.showMessage("Time difference = {}".format(abs(time_stamp2 - time_stamp1)))
+        else:
+            self.user_interface.statusbar.showMessage("")
+
     def cell_right_clicked(self, point):
         """
         Handle the event of right-clicking on a table cell.
