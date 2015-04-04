@@ -68,6 +68,7 @@ class LogSParserMain(QMainWindow):
         self.root_prefix = self.config.get_config_item("root_source_path_prefix")
         self.table_conditional_formatting_config = self.config.get_config_item("table_conditional_formatting_config")
         self.load_log_file()
+        self.user_interface.statusbar.showMessage("Hello")
 
     def menu_about(self):
         """
