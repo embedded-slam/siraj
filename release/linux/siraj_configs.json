@@ -1,0 +1,23 @@
+{
+	"log_file_full_path": "sample.log", 
+	"file_line_column_number_zero_based": 4,
+	"log_row_pattern" : "^(?P<LEVEL>[^|]+)\\|(?P<FUNCTION>[^|]+)\\|(?P<MESSAGE>[^|]+)\\|(?P<TIME>[^|]+)\\|(?P<FILE_AND_LINE>[^|]+)$",
+	"root_source_path_prefix" : "",
+	"time_stamp_column_number_zero_based": 3,
+	"table_conditional_formatting_config" : 
+	{
+		"foreground_key_column" : 0,
+		"foreground_color_dict" : 
+		{
+			"DEBUG" 	: "green",
+			"INFO" 		: "blue",
+			"WARNING" 	: "white"
+		},
+		"background_key_column" : 0,
+		"background_color_dict" : 
+		{
+		    "WARNING" 	: "red"
+		
+		}		
+	}
+}
