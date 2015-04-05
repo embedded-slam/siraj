@@ -51,9 +51,9 @@ class LogSParserMain(QMainWindow):
         self.table_data = None
         self.user_interface = Ui_Siraj()  
         self.user_interface.setupUi(self) 
-        self.user_interface.mnuActionOpen.activated.connect(self.menu_open_file)
-        self.user_interface.mnuActionExit.activated.connect(self.menu_exit)
-        self.user_interface.mnuActionAbout.activated.connect(self.menu_about)
+        self.user_interface.mnuActionOpen.triggered.connect(self.menu_open_file)
+        self.user_interface.mnuActionExit.triggered.connect(self.menu_exit)
+        self.user_interface.mnuActionAbout.triggered.connect(self.menu_about)
         self.user_interface.centralwidget.setLayout(self.user_interface.verticalLayout)
         self.user_interface.tblLogData.doubleClicked.connect(self.cell_double_clicked)
         self.user_interface.tblLogData.clicked.connect(self.cell_left_clicked)
@@ -350,7 +350,7 @@ def main():
     logging.basicConfig(
         format='%(levelname)s|%(funcName)s|%(message)s|%(created)f|%(filename)s:%(lineno)s', 
         filename='siraj.log',
-        mode="w",
+        filemode="w",
         level=logging.DEBUG,  
         datefmt='%d/%m/%y|%H:%M:%S')
 #     logging.disable(CRITICAL)
