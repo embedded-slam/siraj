@@ -100,7 +100,7 @@ siraj.  If not, see
         message_box.setTextFormat(Qt.RichText);   
         message_box.setText(about_text)
         message_box.setIcon(QMessageBox.Information)
-        message_box.exec()
+        message_box.exec_()
     
     def menu_exit(self):
         """
