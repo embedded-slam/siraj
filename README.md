@@ -32,7 +32,7 @@ Before you use *Siraj* you'll need to install and configure the following:
 If you only need to use the tool and don't have/need python or Qt, you can 
 download one of the following archives based on your system. 
 
-1.	[Linux](https://github.com/embedded-slam/siraj/raw/10fa334951a4d384e28e5f4cc48dac8556055029/release/linux/siraj_linux.tar.gz)
+1.	[Linux.](https://github.com/embedded-slam/siraj/raw/10fa334951a4d384e28e5f4cc48dac8556055029/release/linux/siraj_linux.tar.gz)
 2. 	Windows. _Comming soon!_ 
 3.	Mac.  _Comming soon!_  
 
