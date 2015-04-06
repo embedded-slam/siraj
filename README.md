@@ -1,16 +1,16 @@
 *Siraj* is a cross-platform textual log parser that was built using Python3 and QT
 ![Siraj GUI](siraj_screenshot.png "Siraj") 
 
-# The Problem
+# Problem
 Textual logs can sometimes be huge. And going through them with standard text 
 editor without color coding or filtering can be really frustrating job.
 
-# The Solution [as offered by *Siraj*]
+# Solution [as offered by *Siraj*]
 *Siraj*  aims to facilitate textual logs analysis by presenting the textual
 log in a user-friendly tabular format, it also allows the user to show/hide rows 
 based on their contents.
 
-# Quick Feature List:
+# Quick feature list
 1.  Parsing any textual log and present matched fields as a **tabular format**.
 2.  Matching logs is based on **Regular Expressions** for maximum flexibility.
 2.  **Conditionally formatting** the table cells foreground/background colors based on the contents.
@@ -20,15 +20,21 @@ based on their contents.
 6.	Calculating the **time difference** between any two rows in the table if applicable.
 
 # Using Siraj
-## Running from the source
-### Prerequisites 
-Before you use *Siraj* you'll need to install and configure the following:
+## Running the source
+
+Before you use *Siraj* you'll need to install and configure the following based
+on your target system:
 
 1.  [Python3](https://www.python.org/downloads/). 
 2.  [SIP](http://www.riverbankcomputing.com/software/sip/download).
 3.  [PyQt4](http://www.riverbankcomputing.com/software/pyqt/download).
 
-## Running from the binaries
+Once you have the prerequisites you can run the tool using it's main module as
+follows:
+
+`python siraj.py` 
+
+## Running the binaries
 If you only need to use the tool and don't have/need python or Qt, you can 
 download one of the following archives based on your system. 
 
