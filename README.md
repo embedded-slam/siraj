@@ -8,7 +8,8 @@ editor without color coding or filtering can be really frustrating job.
 # Solution [as offered by *Siraj*]
 *Siraj*  aims to facilitate textual logs analysis by presenting the textual
 log in a user-friendly tabular format, it also allows the user to show/hide rows 
-based on their contents.
+based on their contents. As well as linking each log trace with the source line
+that generated it to give context while analyzing the log.
 
 ------------------------------------------------------------
 
