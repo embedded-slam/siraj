@@ -20,6 +20,9 @@ based on their contents.
 4.	**Showing** only specific rows and hiding everything else.
 5.  **Cross-referencing the source code** file/line that generated the log if applicable.
 6.	Calculating the **time difference** between any two rows in the table if applicable.
+7.  **Cross-platform**, Works on Linux, Windows, and Mac (not tested on Mac yet but it should work).
+8.  **Light-weight**, It relies on the Qt (written in C++) to do the heavy-lifting.
+
 
 ------------------------------------------------------------
 
