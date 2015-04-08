@@ -19,8 +19,8 @@ based on their contents.
 5.  **Cross-referencing the source code** file/line that generated the log if applicable.
 6.	Calculating the **time difference** between any two rows in the table if applicable.
 
-# Using Siraj
-## Running the source
+# Running Siraj
+## From the source (Preferred method)
 
 Before you use *Siraj* you'll need to install and configure the following based
 on your target system:
@@ -34,7 +34,7 @@ follows:
 
 `python siraj.py` 
 
-## Running the binaries
+## From the binaries
 If you only need to use the tool and don't have/need python or Qt, you can 
 download one of the following archives based on your system. 
 
