@@ -1,4 +1,4 @@
-*Siraj* is a cross-platform textual log parser that was built using Python3 and QT
+*Siraj* is a cross-platform textual log parser that was built using Python3 and Qt
 ![Siraj GUI](siraj_screenshot.png "Siraj") 
 
 # Problem
@@ -10,6 +10,8 @@ editor without color coding or filtering can be really frustrating job.
 log in a user-friendly tabular format, it also allows the user to show/hide rows 
 based on their contents.
 
+------------------------------------------------------------
+
 # Quick feature list
 1.  Parsing any textual log and present matched fields as a **tabular format**.
 2.  Matching logs is based on **Regular Expressions** for maximum flexibility.
@@ -18,6 +20,8 @@ based on their contents.
 4.	**Showing** only specific rows and hiding everything else.
 5.  **Cross-referencing the source code** file/line that generated the log if applicable.
 6.	Calculating the **time difference** between any two rows in the table if applicable.
+
+------------------------------------------------------------
 
 # Running Siraj
 ## From the source (Preferred method)
@@ -46,3 +50,77 @@ Once downloaded, you'll need to extract it and run *sirag*. This will run with
 the provided sample log `sample.log` and the provided sample configuration 
 `siraj_configs.json`. You can then fine tune the configuration and load the 
 log of your choice.
+
+------------------------------------------------------------
+
+# Using Siraj
+## Configuration
+Siraj relies on a configuration file called siraj_configs.json which looks as shown below, and since JSON doesn't allow inline comments, the file is commented here in the wiki
+
+
+	{
+		"log_file_full_path": "sample.log", 
+		"file_line_column_number_zero_based": 4,
+		"log_row_pattern" : "^(?P<LEVEL>[^|]+)\\|(?P<FUNCTION>[^|]+)\\|(?P<MESSAGE>[^|]+)\\|(?P<TIME>[^|]+)\\|(?P<FILE_AND_LINE>[^|]+)$",
+		"root_source_path_prefix" : "",
+		"time_stamp_column_number_zero_based": 3,
+		"table_conditional_formatting_config" : 
+		{
+			"foreground_key_column" : 0,
+			"foreground_color_dict" : 
+			{
+				"DEBUG" 	: "green",
+				"INFO" 		: "blue",
+				"WARNING" 	: "white"
+			},
+			"background_key_column" : 0,
+			"background_color_dict" : 
+			{
+			    "WARNING" 	: "red"
+			}		
+		}
+	}
+
+
+------------------------------------------------------------
+
+
+
+`log_file_full_path`
+
+The log file to load initially on startup. Other log files can be opened from the GUI through File > Open menu. Currently the configuration file name is hard-coded. Later it can be loaded from the GUI.
+
+`file_line_column_number_zero_based`
+
+The column number that contains the file and line information, assumption here that
+file and line will be separated by a colon (file:line). This also can be changed in the future to make it more flexible.
+
+This is the column based on the log___row___pattern regex criteria. First column is index 0.
+
+`log_row_pattern`
+
+This is the most important configuration. This tells Siraj how to identify fields in the log lines. Matched log line is placed in the table. This uses RegEx named group to achieve two goals:
+
+1.	Extract the different fields from each log line.
+2.	Name the columns after the group names (compare the configuration to the screenshot).
+
+`root_source_path_prefix`
+
+For logs that contains file:line information. This field contains the path prefix that if appended to the file mentioned in the log it produce the full file path. This is used to load the corresponding file if the file:line field was clicked.
+
+`time_stamp_column_number_zero_based`
+ 
+Determines the column index that contains the timing information (if any). This is mainly used to calculate the elapsed time between any two selected logs.
+
+`table_conditional_formatting_config`
+
+Contains the conditional formatting dictionary for forground and background colors
+
+`foreground_key_column and background_key_column`
+
+Determines which columns will be used to determine the foreground and background colors respectively.
+
+`foreground_color_dict and background_color_dict`
+Dictionaries that hold pairs for key/values. Where the key is a match to perform against each row at cell of intersection with the respective column, and the value is the color to use for Foreground/background.
+
+
