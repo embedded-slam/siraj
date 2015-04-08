@@ -55,9 +55,11 @@ log of your choice.
 
 # Using Siraj
 ## Configuration
-Siraj relies on a configuration file called siraj_configs.json which looks as shown below, and since JSON doesn't allow inline comments, the file is commented here in the wiki
+Siraj relies on a configuration file called siraj_configs.json which looks as shown below, You'll need to modify this file to suite your needs.
 
+Since JSON doesn't allow inline comments, the different configuration items are described below:
 
+------------------------------------------------------------
 	{
 		"log_file_full_path": "sample.log", 
 		"file_line_column_number_zero_based": 4,
@@ -80,10 +82,7 @@ Siraj relies on a configuration file called siraj_configs.json which looks as sh
 			}		
 		}
 	}
-
-
 ------------------------------------------------------------
-
 
 
 `log_file_full_path`
