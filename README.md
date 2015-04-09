@@ -55,6 +55,9 @@ the provided sample log `sample.log` and the provided sample configuration
 `siraj_configs.json`. You can then fine tune the configuration and load the 
 log of your choice.
 
+Note:
+Linux and Windows binaries were created using [cx_freeze](http://cx-freeze.sourceforge.net/ "cx_freeze") 
+
 ------------------------------------------------------------
 
 # Using Siraj
