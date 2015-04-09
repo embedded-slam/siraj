@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Siraj by embedded-slam</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>Siraj</h1>
+        <h2>Cross-platform, RegEx-based, GUI Textual Log Parser</h2>
+        <a href="https://github.com/embedded-slam/siraj" class="button"><small>View project on</small> GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <p><em>Siraj</em> is a cross-platform textual log parser that was built using Python3 and Qt</p>
+
+<p><img src="https://raw.githubusercontent.com/embedded-slam/siraj/master/siraj_screenshot.png" alt="Siraj UI"></p>
+
+<h1>
+<a id="problem" class="anchor" href="#problem" aria-hidden="true"><span class="octicon octicon-link"></span></a>Problem</h1>
+
+<p>Textual logs can sometimes be huge. And going through them with standard text 
+editor without color coding or filtering can be really frustrating job.</p>
+
+<h1>
+<a id="solution-as-offered-by-siraj" class="anchor" href="#solution-as-offered-by-siraj" aria-hidden="true"><span class="octicon octicon-link"></span></a>Solution [as offered by <em>Siraj</em>]</h1>
+
+<p><em>Siraj</em>  aims to facilitate textual logs analysis by presenting the textual
+log in a user-friendly tabular format, it also allows the user to show/hide rows 
+based on their contents. As well as linking each log trace with the source line
+that generated it to give context while analyzing the log.</p>
+
+<hr>
+
+<h1>
+<a id="quick-feature-list" class="anchor" href="#quick-feature-list" aria-hidden="true"><span class="octicon octicon-link"></span></a>Quick feature list</h1>
+
+<ol>
+<li> Parsing any textual log and present matched fields as a <strong>tabular format</strong>.</li>
+<li> Matching logs is based on <strong>Regular Expressions</strong> for maximum flexibility.</li>
+<li> <strong>Conditionally formatting</strong> the table cells foreground/background colors based on the contents.</li>
+<li> <strong>Hiding</strong> one or more rows based on the contents.</li>
+<li> <strong>Showing</strong> only specific rows and hiding everything else.</li>
+<li> <strong>Cross-referencing the source code</strong> file/line that generated the log if applicable.</li>
+<li> Calculating the <strong>time difference</strong> between any two rows in the table if applicable.</li>
+<li> <strong>Cross-platform</strong>, Works on Linux, Windows, and Mac (not tested on Mac yet but it should work).</li>
+<li> <strong>Light-weight</strong>, It relies on the Qt (written in C++) to do the heavy-lifting.</li>
+</ol>
+
+<hr>
+
+<h1>
+<a id="running-siraj" class="anchor" href="#running-siraj" aria-hidden="true"><span class="octicon octicon-link"></span></a>Running Siraj</h1>
+
+<h2>
+<a id="from-the-source-preferred-method" class="anchor" href="#from-the-source-preferred-method" aria-hidden="true"><span class="octicon octicon-link"></span></a>From the source (Preferred method)</h2>
+
+<p>Before you use <em>Siraj</em> you'll need to install and configure the following based
+on your target system:</p>
+
+<ol>
+<li> <a href="https://www.python.org/downloads/">Python3</a>. </li>
+<li> <a href="http://www.riverbankcomputing.com/software/sip/download">SIP</a>.</li>
+<li> <a href="http://www.riverbankcomputing.com/software/pyqt/download">PyQt4</a>.</li>
+</ol>
+
+<p>Once you have the prerequisites you can run the tool using it's main module as
+follows:</p>
+
+<p><code>python siraj.py</code> </p>
+
+<h2>
+<a id="from-the-binaries" class="anchor" href="#from-the-binaries" aria-hidden="true"><span class="octicon octicon-link"></span></a>From the binaries</h2>
+
+<p>If you only need to use the tool and don't have/need python or Qt, you can 
+download one of the following archives based on your system. </p>
+
+<ol>
+<li> <a href="https://github.com/embedded-slam/siraj/raw/release/release/linux/siraj_linux.tar.gz">Linux.</a>
+</li>
+<li> <a href="https://github.com/embedded-slam/siraj/raw/release/release/windows/siraj_windows.zip">Windows.</a> </li>
+<li> Mac.  <em>Comming soon!</em><br>
+</li>
+</ol>
+
+<p>Once downloaded, you'll need to extract it and run <em>sirag</em>. This will run with 
+the provided sample log <code>sample.log</code> and the provided sample configuration 
+<code>siraj_configs.json</code>. You can then fine tune the configuration and load the 
+log of your choice.</p>
+
+<p>Note:
+Linux and Windows binaries were created using <a href="http://cx-freeze.sourceforge.net/" title="cx_freeze">cx_freeze</a> </p>
+
+<hr>
+
+<h1>
+<a id="using-siraj" class="anchor" href="#using-siraj" aria-hidden="true"><span class="octicon octicon-link"></span></a>Using Siraj</h1>
+
+<h2>
+<a id="configuration" class="anchor" href="#configuration" aria-hidden="true"><span class="octicon octicon-link"></span></a>Configuration</h2>
+
+<p>Siraj relies on a configuration file called siraj_configs.json which looks as shown below, You'll need to modify this file to suite your needs.</p>
+
+<p>Since JSON doesn't allow inline comments, the different configuration items are described below:</p>
+
+<hr>
+
+<pre><code>{
+    "log_file_full_path": "sample.log", 
+    "file_line_column_number_zero_based": 4,
+    "log_row_pattern" : "^(?P&lt;LEVEL&gt;[^|]+)\\|(?P&lt;FUNCTION&gt;[^|]+)\\|(?P&lt;MESSAGE&gt;[^|]+)\\|(?P&lt;TIME&gt;[^|]+)\\|(?P&lt;FILE_AND_LINE&gt;[^|]+)$",
+    "root_source_path_prefix" : "",
+    "time_stamp_column_number_zero_based": 3,
+    "table_conditional_formatting_config" : 
+    {
+        "foreground_key_column" : 0,
+        "foreground_color_dict" : 
+        {
+            "DEBUG"     : "green",
+            "INFO"      : "blue",
+            "WARNING"   : "white"
+        },
+        "background_key_column" : 0,
+        "background_color_dict" : 
+        {
+            "WARNING"   : "red"
+        }       
+    }
+}
+</code></pre>
+
+<hr>
+
+<p><code>log_file_full_path</code></p>
+
+<p>The log file to load initially on startup. Other log files can be opened from the GUI through File &gt; Open menu. Currently the configuration file name is hard-coded. Later it can be loaded from the GUI.</p>
+
+<p><code>file_line_column_number_zero_based</code></p>
+
+<p>The column number that contains the file and line information, assumption here that
+file and line will be separated by a colon (file:line). This also can be changed in the future to make it more flexible.</p>
+
+<p>This is the column based on the log___row___pattern regex criteria. First column is index 0.</p>
+
+<p><code>log_row_pattern</code></p>
+
+<p>This is the most important configuration. This tells Siraj how to identify fields in the log lines. Matched log line is placed in the table. This uses RegEx named group to achieve two goals:</p>
+
+<ol>
+<li> Extract the different fields from each log line.</li>
+<li> Name the columns after the group names (compare the configuration to the screenshot).</li>
+</ol>
+
+<p><code>root_source_path_prefix</code></p>
+
+<p>For logs that contains file:line information. This field contains the path prefix that if appended to the file mentioned in the log it produce the full file path. This is used to load the corresponding file if the file:line field was clicked.</p>
+
+<p><code>time_stamp_column_number_zero_based</code></p>
+
+<p>Determines the column index that contains the timing information (if any). This is mainly used to calculate the elapsed time between any two selected logs.</p>
+
+<p><code>table_conditional_formatting_config</code></p>
+
+<p>Contains the conditional formatting dictionary for forground and background colors</p>
+
+<p><code>foreground_key_column and background_key_column</code></p>
+
+<p>Determines which columns will be used to determine the foreground and background colors respectively.</p>
+
+<p><code>foreground_color_dict and background_color_dict</code>
+Dictionaries that hold pairs for key/values. Where the key is a match to perform against each row at cell of intersection with the respective column, and the value is the color to use for Foreground/background.</p>
+
+<h2>
+<a id="functions" class="anchor" href="#functions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Functions</h2>
+
+<p><code>H</code><br>
+Hide all the rows with fields that matches the selected cells(s).<br>
+<code>O</code><br>
+Hides everything except rows with fields that matches the selected cell(s).<br>
+<code>Del</code><br>
+Clear all current filter.</p>
+
+<p>The three options are also accessible via context menu. To unhide a previously hidden row, you can select the unhide option from the context menu for a list of hidden value of the current column, then select the value to unhide.</p>
+
+<p>NOTE: Filtering works on a single column for now. <a href="https://github.com/embedded-slam/siraj/issues/3" title="Issue #3">Issue #3</a> is there to fix that and extend the filtering to be multi-columns.</p>
+
+<p><code>Selecting two cells from different columns</code>
+will show the elapsed time between the two logs. This is only applicable if the log fields contains a time field and it is specified in the configuration via <code>time_stamp_column_number_zero_based</code>.</p>
+
+<p><code>Selecting a cell from the file/line column</code>
+This will display the code that generated the current log in the <code>TextView</code> at the bottom.</p>
+
+<p><code>Double-clicking a cell from the file/line column</code>
+This will open the file that generated the current log and highlight the current line in an external text editor for more appealing code view (eg. syntax highlighting). Currently this text editor is hard-coded to gedit which only works on Linux AFAIK. <a href="https://github.com/embedded-slam/siraj/issues/15" title="Issue #15">Issue #15</a> is there to fix that. </p>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/embedded-slam/siraj/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/embedded-slam/siraj/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/embedded-slam/siraj"></a> is maintained by <a href="https://github.com/embedded-slam">embedded-slam</a>.</p>
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+  
+  </body>
+</html>
