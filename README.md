@@ -140,7 +140,11 @@ The three options are also accessible via context menu. To unhide a previously h
 
 NOTE: Filtering works on a single column for now. [Issue #3](https://github.com/embedded-slam/siraj/issues/3 "Issue #3") is there to fix that and extend the filtering to be multi-columns.
 
-Selecting any two cells will show the elapsed time between the two logs. This is only applicable if the log fields contains a time field and it is specified in the configuration via `time_stamp_column_number_zero_based`.
+`Selecting two cells from different columns`
+will show the elapsed time between the two logs. This is only applicable if the log fields contains a time field and it is specified in the configuration via `time_stamp_column_number_zero_based`.
 
+`Selecting a cell from the file/line column`
+This will display the code that generated the current log in the `TextView` at the bottom.
 
-
+`Double-clicking a cell from the file/line column`
+This will open the file that generated the current log and highlight the current line in an external text editor for more appealing code view (eg. syntax highlighting). Currently this text editor is hard-coded to gedit which only works on Linux AFAIK. [Issue #15](https://github.com/embedded-slam/siraj/issues/15 "Issue #15") is there to fix that. 
