@@ -16,13 +16,13 @@ that generated it to give context while analyzing the log.
 # Quick feature list
 1.  Parsing any textual log and present matched fields as a **tabular format**.
 2.  Matching logs is based on **Regular Expressions** for maximum flexibility.
-2.  **Conditionally formatting** the table cells foreground/background colors based on the contents.
-3.	**Hiding** one or more rows based on the contents.
-4.	**Showing** only specific rows and hiding everything else.
-5.  **Cross-referencing the source code** file/line that generated the log if applicable.
-6.	Calculating the **time difference** between any two rows in the table if applicable.
-7.  **Cross-platform**, Works on Linux, Windows, and Mac (not tested on Mac yet but it should work).
-8.  **Light-weight**, It relies on the Qt (written in C++) to do the heavy-lifting.
+3.  **Conditionally formatting** the table cells foreground/background colors based on the contents.
+4.	**Hiding** one or more rows based on the contents.
+5.	**Showing** only specific rows and hiding everything else.
+6.  **Cross-referencing the source code** file/line that generated the log if applicable.
+7.	Calculating the **time difference** between any two rows in the table if applicable.
+8.  **Cross-platform**, Works on Linux, Windows, and Mac (not tested on Mac yet but it should work).
+9.  **Light-weight**, It relies on the Qt (written in C++) to do the heavy-lifting.
 
 
 ------------------------------------------------------------
