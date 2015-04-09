@@ -126,4 +126,21 @@ Determines which columns will be used to determine the foreground and background
 `foreground_color_dict and background_color_dict`
 Dictionaries that hold pairs for key/values. Where the key is a match to perform against each row at cell of intersection with the respective column, and the value is the color to use for Foreground/background.
 
+## Functions
+
+
+`H` 	
+Hide all the rows with fields that matches the selected cells(s).  
+`O`		
+Hides everything except rows with fields that matches the selected cell(s).  
+`Del` 	
+Clear all current filter.
+
+The three options are also accessible via context menu. To unhide a previously hidden row, you can select the unhide option from the context menu for a list of hidden value of the current column, then select the value to unhide.
+
+NOTE: Filtering works on a single column for now. [Issue #3](https://github.com/embedded-slam/siraj/issues/3 "Issue #3") is there to fix that and extend the filtering to be multi-columns.
+
+Selecting any two cells will show the elapsed time between the two logs. This is only applicable if the log fields contains a time field and it is specified in the configuration via `time_stamp_column_number_zero_based`.
+
+
 
