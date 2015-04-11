@@ -34,6 +34,7 @@ import logging
 from logging import CRITICAL
 from functools import partial
 import functools
+import json
 
 class LogSParserMain(QMainWindow):
     """
@@ -181,7 +182,35 @@ siraj.  If not, see
         self.user_interface.tblLogData.setModel(self.proxy_model)
         if(len(self.items_to_hide_per_column) == 0):
             self.items_to_hide_per_column = [[] for column in range(len(self.table_data[0]))]
-            
+        
+        self.extract_column_dictionaries(self.header, self.table_data)    
+    
+    def extract_column_dictionaries(self, header_vector_list, data_matrix_list):
+        """
+        This function extracts a dictionary of dictionaries
+        
+        The extracted is a dictionary of columns where key is the column name, 
+        and the data is another dictionary.
+        
+        The inner dictionary has a key equal to a specific cell value of the 
+        current column, and the value is a list of row number where this value
+        appeared in.
+        
+        This will be used to provide quick navigation through the log.        
+        """
+        column_count = len(header_vector_list)
+        self.columns_dict = {}
+        for column_name in header_vector_list:
+            self.columns_dict[column_name] = {}
+        for row, log in enumerate(data_matrix_list):
+            for column, field in enumerate(log):
+                if(len(self.columns_dict[header_vector_list[column]]) == 0):
+                    self.columns_dict[header_vector_list[column]] = {}
+                if(log[column] not in self.columns_dict[header_vector_list[column]]):
+                    self.columns_dict[header_vector_list[column]][log[column]] = []
+                self.columns_dict[header_vector_list[column]][log[column]].append(row)
+#         print(json.dumps(self.columns_dict, sort_keys=True, indent=4, separators=(',', ': ')))       
+    
     def cell_left_clicked(self, index):
         """
         Handles the event of clicking on a table cell.
