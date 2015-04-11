@@ -46,7 +46,7 @@ class LogSParserMain(QMainWindow):
     table_conditional_formatting_config = None
     def __init__(self):
         QMainWindow.__init__(self)
-        self.context_menu = None
+        self.menuFilter = None
         self.proxy_model = None
         self.table_data = None
         self.user_interface = Ui_Siraj()  
@@ -81,7 +81,32 @@ class LogSParserMain(QMainWindow):
         
         self.is_table_visible = True
         self.is_source_visible = True
+        
+        self.setup_context_menu()
 
+
+    def setup_context_menu(self):
+        self.menuFilter = QMenu(self)
+        
+        self.hide_action                 = QAction('Hide selected values', self)
+        self.show_only_action            = QAction('Show only selected values', self)
+        self.clear_all_filters_action    = QAction('Clear all filters', self)
+       
+        self.unhide_menu = QMenu('Unhide item from selected column', self.menuFilter)
+
+        self.hide_action.triggered.connect(self.context_menu_hide_selected_rows)
+        self.show_only_action.triggered.connect(self.context_menu_show_selected_rows_only)
+        self.clear_all_filters_action.triggered.connect(self.clear_all_filters)
+        
+        self.menuFilter.addAction(self.hide_action)
+        self.menuFilter.addMenu(self.unhide_menu)
+        self.menuFilter.addAction(self.show_only_action)
+        self.menuFilter.addAction(self.clear_all_filters_action)
+        
+        self.hide_action.setShortcut('H')
+        self.show_only_action.setShortcut('O')
+        self.clear_all_filters_action.setShortcut('Del')
+        
     def toggle_source_view(self):
         self.is_source_visible = not self.is_source_visible
         self.user_interface.splitter.setSizes([self.is_table_visible, self.is_source_visible])
@@ -221,35 +246,20 @@ siraj.  If not, see
         column = index.column()
         cell_text = self.table_data[row][column].strip()
         logging.debug("Cell[%d, %d] was right-clicked. Contents = %s", row, column, index.data())
-        self.context_menu = QMenu(self)
-        
-        hide_action                 = QAction('Hide selected values from column "{}"'.format(self.header[column]), self)
-#         unhide_action               = QAction('Unhide item from column "{}"...'.format(self.header[column]), self)
-        unhide_menu = QMenu('Unhide item from column "{}"...'.format(self.header[column]), self.context_menu)
-        show_only_action            = QAction('Show only selected values from column "{}"'.format(self.header[column]), self)
-        clear_all_filters_action    = QAction('Clear all filters'.format(self.header[column]), self)
-        
-        hide_action.triggered.connect(self.context_menu_hide_selected_rows)
-#         unhide_action.triggered.connect(self.context_menu_unhide_selected_rows)
-        show_only_action.triggered.connect(self.context_menu_show_selected_rows_only)
-        clear_all_filters_action.triggered.connect(self.clear_all_filters)
-        
-        self.context_menu.addAction(hide_action)
-#         self.context_menu.addAction(unhide_action)
-        self.context_menu.addMenu(unhide_menu)
-        self.context_menu.addAction(show_only_action)
-        self.context_menu.addAction(clear_all_filters_action)
-        
-        if(len(self.items_to_hide_per_column[column]) > 0):
-            unhide_menu.setEnabled(True)
-            for filtered_string in self.items_to_hide_per_column[column]:
-                temp_action = QAction(filtered_string, unhide_menu);
-                temp_action.triggered.connect(functools.partial(self.context_menu_unhide_selected_rows, filtered_string))
-                unhide_menu.addAction(temp_action)
-        else:
-            unhide_menu.setEnabled(False)
 
-        self.context_menu.popup(QCursor.pos())
+
+        self.unhide_menu.clear()
+        if(len(self.items_to_hide_per_column[column]) > 0):
+            self.unhide_menu.setEnabled(True)
+            for filtered_string in self.items_to_hide_per_column[column]:
+                temp_action = QAction(filtered_string, self.unhide_menu);
+                temp_action.triggered.connect(functools.partial(self.context_menu_unhide_selected_rows, filtered_string))
+                self.unhide_menu.addAction(temp_action)
+        else:
+            self.unhide_menu.setEnabled(False)
+
+
+        self.menuFilter.popup(QCursor.pos())
         self.right_clicked_cell_index = index
 
     def cell_double_clicked(self, index):
@@ -275,7 +285,7 @@ siraj.  If not, see
         """
         logging.warning("A key was pressed!!!")
         key = q_key_event.key()
-
+ 
         if key == Qt.Key_Delete:
             logging.info("Delete key pressed while in the table. Clear all filters")
             self.clear_all_filters()
