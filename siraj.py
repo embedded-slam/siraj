@@ -51,6 +51,15 @@ class LogSParserMain(QMainWindow):
         self.table_data = None
         self.user_interface = Ui_Siraj()  
         self.user_interface.setupUi(self) 
+        
+        self.user_interface.tbrActionToggleSourceView = QAction('<>', self)
+        self.user_interface.tbrActionToggleSourceView.triggered.connect(self.toggle_source_view)
+        self.user_interface.tbrActionToggleSourceView.setToolTip("Toggle source code view")
+        self.user_interface.tbrActionToggleSourceView.setCheckable(True)
+        self.user_interface.tbrActionToggleSourceView.setChecked(True)
+        self.user_interface.toolbar = self.addToolBar('Toolbar')
+        self.user_interface.toolbar.addAction(self.user_interface.tbrActionToggleSourceView)
+        
         self.user_interface.mnuActionOpen.triggered.connect(self.menu_open_file)
         self.user_interface.mnuActionExit.triggered.connect(self.menu_exit)
         self.user_interface.mnuActionAbout.triggered.connect(self.menu_about)
@@ -69,6 +78,13 @@ class LogSParserMain(QMainWindow):
         self.time_stamp_column = self.config.get_config_item("time_stamp_column_number_zero_based")
         self.table_conditional_formatting_config = self.config.get_config_item("table_conditional_formatting_config")
         self.load_log_file()
+        
+        self.is_table_visible = True
+        self.is_source_visible = True
+
+    def toggle_source_view(self):
+        self.is_source_visible = not self.is_source_visible
+        self.user_interface.splitter.setSizes([self.is_table_visible, self.is_source_visible])
 
     def menu_about(self):
         """
@@ -148,28 +164,32 @@ siraj.  If not, see
         If the clicked column was the the column that contain the source file:line
         information from the log, the function also populate the the EditView
         with the source file contents with a marker highlighting the line.
+        
+        This is only done if the source view is visible.
         """
-        self.user_interface.txtSourceFile.setTextCursor(QTextCursor())
-        logging.info("cell[%d][%d] = %s", index.row(), index.column(), index.data())
-        self.left_clicked_cell_index = index
-
-        if(index.column() == self.file_line_column):
-            [file, line] = index.data().split(":")
-            full_path = "{}{}".format(self.root_prefix, file.strip())
-            self.user_interface.lblSourceFileName.setText(full_path)
-            file_contents = "\n".join(["{0:4d}: {1:s}".format(i + 1, line) for(i, line) in enumerate(open(full_path).read().splitlines())])
-            self.user_interface.txtSourceFile.setText(file_contents)
-            line_number = int(line) - 1
-            logging.debug("file:line is %s:%s", file, line)
-            text_block = self.user_interface.txtSourceFile.document().findBlockByLineNumber(line_number)
-            text_cursor = self.user_interface.txtSourceFile.textCursor()
-            text_cursor.setPosition(text_block.position())
-            self.user_interface.txtSourceFile.setFocus()
-            text_format = QTextCharFormat()
-            text_format.setBackground(QBrush(QColor("yellow")))
-            text_cursor.movePosition(QTextCursor.EndOfLine, 1)
-            text_cursor.mergeCharFormat(text_format)
-            self.user_interface.txtSourceFile.setTextCursor(text_cursor)
+        
+        if(self.is_source_visible):
+            self.user_interface.txtSourceFile.setTextCursor(QTextCursor())
+            logging.info("cell[%d][%d] = %s", index.row(), index.column(), index.data())
+            self.left_clicked_cell_index = index
+    
+            if(index.column() == self.file_line_column):
+                [file, line] = index.data().split(":")
+                full_path = "{}{}".format(self.root_prefix, file.strip())
+                self.user_interface.lblSourceFileName.setText(full_path)
+                file_contents = "\n".join(["{0:4d}: {1:s}".format(i + 1, line) for(i, line) in enumerate(open(full_path).read().splitlines())])
+                self.user_interface.txtSourceFile.setText(file_contents)
+                line_number = int(line) - 1
+                logging.debug("file:line is %s:%s", file, line)
+                text_block = self.user_interface.txtSourceFile.document().findBlockByLineNumber(line_number)
+                text_cursor = self.user_interface.txtSourceFile.textCursor()
+                text_cursor.setPosition(text_block.position())
+                self.user_interface.txtSourceFile.setFocus()
+                text_format = QTextCharFormat()
+                text_format.setBackground(QBrush(QColor("yellow")))
+                text_cursor.movePosition(QTextCursor.EndOfLine, 1)
+                text_cursor.mergeCharFormat(text_format)
+                self.user_interface.txtSourceFile.setTextCursor(text_cursor)
         
         self.update_status_bar()
                     
