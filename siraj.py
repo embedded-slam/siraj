@@ -25,7 +25,7 @@ import sys
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import (QMainWindow, QFileDialog, QApplication, 
 QSortFilterProxyModel, QTextCursor, QTextCharFormat, QBrush, QColor, QMenu, 
-QAction, QCursor, QMessageBox)
+QAction, QCursor, QMessageBox, QItemSelectionModel)
 from subprocess import call
 from sj_configs import LogSParserConfigs
 from sj_table_model import MyTableModel
@@ -200,15 +200,14 @@ siraj.  If not, see
         """
         column_count = len(header_vector_list)
         self.columns_dict = {}
-        for column_name in header_vector_list:
-            self.columns_dict[column_name] = {}
+        for column, column_name in enumerate(header_vector_list):
+            self.columns_dict[column] = {}
+            
         for row, log in enumerate(data_matrix_list):
             for column, field in enumerate(log):
-                if(len(self.columns_dict[header_vector_list[column]]) == 0):
-                    self.columns_dict[header_vector_list[column]] = {}
-                if(log[column] not in self.columns_dict[header_vector_list[column]]):
-                    self.columns_dict[header_vector_list[column]][log[column]] = []
-                self.columns_dict[header_vector_list[column]][log[column]].append(row)
+                if(log[column] not in self.columns_dict[column]):
+                    self.columns_dict[column][log[column]] = []
+                self.columns_dict[column][log[column]].append(row)
 #         print(json.dumps(self.columns_dict, sort_keys=True, indent=4, separators=(',', ': ')))       
     
     def cell_left_clicked(self, index):
@@ -322,7 +321,45 @@ siraj.  If not, see
             self.hide_selected_rows_based_on_column(self.left_clicked_cell_index.column())
         elif key == Qt.Key_O:
             self.show_selected_rows_only_based_on_column(self.left_clicked_cell_index.column())
+        elif key == Qt.Key_N:
+            selected_indexes = [self.proxy_model.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
+            if(len(selected_indexes) == 1):
+                self.go_to_next_match(selected_indexes[0])        
+        elif key == Qt.Key_P:
+            selected_indexes = [self.proxy_model.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
+            if(len(selected_indexes) == 1):
+                self.go_to_prev_match(selected_indexes[0])
 
+    def go_to_prev_match(self, selected_cell):
+        """
+        Go to the prev cell that matches the currently selected cell in the 
+        same column
+        """
+        matches_list = self.columns_dict[selected_cell.column()][selected_cell.data()]
+        index = matches_list.index(selected_cell.row())
+        if(index > 0):
+            new_row = matches_list[index - 1]
+            new_index = self.user_interface.tblLogData.model().index(new_row, selected_cell.column())
+            self.user_interface.tblLogData.selectionModel().clearSelection()
+            self.user_interface.tblLogData.selectionModel().select(new_index, QItemSelectionModel.Select)
+            self.user_interface.tblLogData.scrollTo(new_index)
+
+            
+    def go_to_next_match(self, selected_cell):
+        """
+        Go to the prev cell that matches the currently selected cell in the 
+        same column
+        """
+        matches_list = self.columns_dict[selected_cell.column()][selected_cell.data()]
+        index = matches_list.index(selected_cell.row())
+        if(index < (len(matches_list) - 1)):
+            new_row = matches_list[index + 1]
+            new_index = self.user_interface.tblLogData.model().index(new_row, selected_cell.column())
+            self.user_interface.tblLogData.selectionModel().clearSelection()
+            self.user_interface.tblLogData.selectionModel().select(new_index, QItemSelectionModel.Select)
+            self.user_interface.tblLogData.scrollTo(new_index)
+        
+        
     def clear_all_filters(self):
         """
         Clears all the current filter and return the table to its initial view.
