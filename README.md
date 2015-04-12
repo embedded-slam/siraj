@@ -132,22 +132,30 @@ Dictionaries that hold pairs for key/values. Where the key is a match to perform
 ## Functions
 
 
-`H` 	
+`H`  
 Hide all the rows with fields that matches the selected cells(s).  
-`O`		
+
+`O`  
 Hides everything except rows with fields that matches the selected cell(s).  
-`Del` 	
-Clear all current filter.
 
-The three options are also accessible via context menu. To unhide a previously hidden row, you can select the unhide option from the context menu for a list of hidden value of the current column, then select the value to unhide.
+`Del`  
+Clear all current filter.  
 
-NOTE: Filtering works on a single column for now. [Issue #3](https://github.com/embedded-slam/siraj/issues/3 "Issue #3") is there to fix that and extend the filtering to be multi-columns.
+The three options are also accessible via context menu. To unhide a previously hidden row, you can select the unhide option from the context menu for a list of hidden value of the current column, then select the value to unhide.  
 
-`Selecting two cells from different columns`
-will show the elapsed time between the two logs. This is only applicable if the log fields contains a time field and it is specified in the configuration via `time_stamp_column_number_zero_based`.
+NOTE: Filtering works on a single column for now. [Issue #3](https://github.com/embedded-slam/siraj/issues/3 "Issue #3") is there to fix that and extend the filtering to be multi-columns.  
 
-`Selecting a cell from the file/line column`
-This will display the code that generated the current log in the `TextView` at the bottom.
+`P`  
+Jumps to the previous matching cell (if one exists) from the same column. Works only when a single cell is selected.  
 
-`Double-clicking a cell from the file/line column`
-This will open the file that generated the current log and highlight the current line in an external text editor for more appealing code view (eg. syntax highlighting). Currently this text editor is hard-coded to gedit which only works on Linux AFAIK. [Issue #15](https://github.com/embedded-slam/siraj/issues/15 "Issue #15") is there to fix that. 
+`N`  
+Jumps to the next matching cell (if one exists) from the same column. Works only when a single cell is selected.  
+
+`Selecting two cells from different columns`  
+will show the elapsed time between the two logs. This is only applicable if the log fields contains a time field and it is specified in the configuration via `time_stamp_column_number_zero_based`.  
+
+`Selecting a cell from the file/line column`  
+This will display the code that generated the current log in the `TextView` at the bottom.  
+
+`Double-clicking a cell from the file/line column`  
+This will open the file that generated the current log and highlight the current line in an external text editor for more appealing code view (eg. syntax highlighting). Currently this text editor is hard-coded to gedit which only works on Linux AFAIK. [Issue #15](https://github.com/embedded-slam/siraj/issues/15 "Issue #15") is there to fix that.  
