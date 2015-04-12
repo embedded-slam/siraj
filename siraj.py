@@ -83,6 +83,9 @@ class LogSParserMain(QMainWindow):
         self.is_table_visible = True
         self.is_source_visible = True
         
+        self.user_interface.tblLogData.resizeColumnsToContents() 
+        self.user_interface.tblLogData.resizeRowsToContents() 
+        
         self.setup_context_menu()
 
 
