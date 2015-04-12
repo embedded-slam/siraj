@@ -256,11 +256,16 @@ siraj.  If not, see
         selected_indexes = [self.proxy_model.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
         
         if(len(selected_indexes) == 1):
-            pass
+            selected_cell_index = selected_indexes[0]
+            number_of_occurances = len(self.columns_dict[selected_cell_index.column()][selected_cell_index.data()])
+            self.user_interface.statusbar.showMessage(
+                '["{}"] occurred {} time(s). {}%'.format(
+                selected_cell_index.data(), 
+                number_of_occurances,
+                number_of_occurances * 100 // len(self.table_data)))
         elif(len(selected_indexes) == 2):
             row_1 = selected_indexes[0].row()
             row_2 = selected_indexes[1].row()
-            
             time_stamp1 = float(self.table_data[row_1][self.time_stamp_column])
             time_stamp2 = float(self.table_data[row_2][self.time_stamp_column])
             self.user_interface.statusbar.showMessage("Time difference = {}".format(abs(time_stamp2 - time_stamp1)))
