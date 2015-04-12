@@ -174,9 +174,18 @@ siraj.  If not, see
                 os.getcwd())
         with open(self.full_path, "r") as log_file_handle:
             log_file_content_lines = log_file_handle.read().splitlines()
+            
+#         self.table_data = []
+#         for log_line in log_file_content_lines:
+#             m = re.match(self.log_trace_regex_pattern, log_line)
+#             if(m is not None):
+#                 print(list(m.groups()))
+#                 self.table_data.append(sorted(list(m.groups()), key=m.start))
+#                 
+                
         self.table_data = [list(re.match(self.log_trace_regex_pattern, line).groups()) for line in log_file_content_lines if(re.match(self.log_trace_regex_pattern, line) is not None)]
         m = re.match(self.log_trace_regex_pattern, log_file_content_lines[1])
-        self.header = [group_name for group_name in sorted(m.groupdict().keys(), key=m.start)]
+        self.header = [group_name for group_name in sorted(m.groupdict().keys(), key=lambda k: m.start(k))]
         self.table_model = MyTableModel(self.table_data, self.header, self.table_conditional_formatting_config, self)
         logging.info("Headers: %s", self.header)
         logging.info("%s has %d lines", self.full_path, len(self.table_data))
