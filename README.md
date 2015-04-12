@@ -133,13 +133,13 @@ Dictionaries that hold pairs for key/values. Where the key is a match to perform
 
 
 `H`  
-Hide all the rows with fields that matches the selected cells(s).  
+Hides all the rows with fields that matches the selected cells(s).  
 
 `O`  
 Hides everything except rows with fields that matches the selected cell(s).  
 
 `Del`  
-Clear all current filter.  
+Clears all current filter.  
 
 The three options are also accessible via context menu. To unhide a previously hidden row, you can select the unhide option from the context menu for a list of hidden value of the current column, then select the value to unhide.  
 
