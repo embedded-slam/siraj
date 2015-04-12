@@ -18,6 +18,30 @@
 		{
 		    "WARNING" 	: "orange"
 		
-		}		
+		},		
+		"special_formatting_key_column" : 1,
+		"special_formatting_color_dict":
+		{
+			"cell_left_clicked" : 
+			{
+				"foreground" : "white",
+				"background" : "purple"
+			},
+			"cell_key_pressed" : 
+			{
+				"foreground" : "white",
+				"background" : "darkGray"
+			},
+			"hide_filtered_out_entries" : 
+			{
+				"foreground" : "white",
+				"background" : "blue"
+			},
+			"get_config_item" : 
+			{
+				"foreground" : "white",
+				"background" : "darkCyan"
+			}			
+		}
 	}
 }

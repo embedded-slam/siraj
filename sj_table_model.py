@@ -31,10 +31,12 @@ class MyTableModel(QAbstractTableModel):
         QAbstractTableModel.__init__(self, parent, *args)
         self.arraydata = datain
         self.headerdata = headerdata
-        self.foreground_key_column = conditional_formatting_config_dict["foreground_key_column"]
-        self.foreground_color_dict = conditional_formatting_config_dict["foreground_color_dict"]
-        self.background_key_column = conditional_formatting_config_dict["background_key_column"]
-        self.background_color_dict = conditional_formatting_config_dict["background_color_dict"]
+        self.foreground_key_column          = conditional_formatting_config_dict["foreground_key_column"]
+        self.foreground_color_dict          = conditional_formatting_config_dict["foreground_color_dict"]
+        self.background_key_column          = conditional_formatting_config_dict["background_key_column"]
+        self.background_color_dict          = conditional_formatting_config_dict["background_color_dict"]
+        self.special_formatting_column      = conditional_formatting_config_dict["special_formatting_key_column"]
+        self.special_formatting_color_dict  = conditional_formatting_config_dict["special_formatting_color_dict"]
 
     def rowCount(self, parent):
         """
@@ -58,15 +60,22 @@ class MyTableModel(QAbstractTableModel):
             if(role == Qt.DisplayRole):
                 return self.arraydata[index.row()][index.column()]
             elif(role == Qt.ForegroundRole):
-                return self.getConditionalFormattingColor(
-                    index.row(),
-                    self.foreground_color_dict,
-                    self.foreground_key_column)
+                if((index.column() == self.special_formatting_column) and (index.data() in self.special_formatting_color_dict)):
+                    return QColor(self.special_formatting_color_dict[index.data()]["foreground"])
+
+                else:
+                    return self.getConditionalFormattingColor(
+                        index.row(),
+                        self.foreground_color_dict,
+                        self.foreground_key_column)
             elif(role == Qt.BackgroundRole):
-                return QBrush(self.getConditionalFormattingColor(
-                    index.row(),
-                    self.background_color_dict,
-                    self.background_key_column))
+                if((index.column() == self.special_formatting_column) and (index.data() in self.special_formatting_color_dict)):
+                    return QBrush(QColor(self.special_formatting_color_dict[index.data()]["background"]))
+                else:
+                    return QBrush(self.getConditionalFormattingColor(
+                        index.row(),
+                        self.background_color_dict,
+                        self.background_key_column))
             else:
                 return None
 
