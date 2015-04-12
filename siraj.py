@@ -174,11 +174,11 @@ siraj.  If not, see
         self.table_data = [list(re.match(self.log_trace_regex_pattern, line).groups()) for line in log_file_content_lines if(re.match(self.log_trace_regex_pattern, line) is not None)]
         m = re.match(self.log_trace_regex_pattern, log_file_content_lines[1])
         self.header = [group_name for group_name in sorted(m.groupdict().keys(), key=m.span)]
-        table_model = MyTableModel(self.table_data, self.header, self.table_conditional_formatting_config, self)
+        self.table_model = MyTableModel(self.table_data, self.header, self.table_conditional_formatting_config, self)
         logging.info("Headers: %s", self.header)
         logging.info("%s has %d lines", self.full_path, len(self.table_data))
         self.proxy_model = QSortFilterProxyModel(self)
-        self.proxy_model.setSourceModel(table_model)
+        self.proxy_model.setSourceModel(self.table_model)
         self.user_interface.tblLogData.setModel(self.proxy_model)
         if(len(self.items_to_hide_per_column) == 0):
             self.items_to_hide_per_column = [[] for column in range(len(self.table_data[0]))]
@@ -339,10 +339,9 @@ siraj.  If not, see
         index = matches_list.index(selected_cell.row())
         if(index > 0):
             new_row = matches_list[index - 1]
-            new_index = self.user_interface.tblLogData.model().index(new_row, selected_cell.column())
-            self.user_interface.tblLogData.selectionModel().clearSelection()
-            self.user_interface.tblLogData.selectionModel().select(new_index, QItemSelectionModel.Select)
-            self.user_interface.tblLogData.scrollTo(new_index)
+            new_index = self.table_model.createIndex(new_row, selected_cell.column())
+            new_index = self.proxy_model.mapFromSource(new_index)
+            self.user_interface.tblLogData.setCurrentIndex(new_index)
 
             
     def go_to_next_match(self, selected_cell):
@@ -354,11 +353,10 @@ siraj.  If not, see
         index = matches_list.index(selected_cell.row())
         if(index < (len(matches_list) - 1)):
             new_row = matches_list[index + 1]
-            new_index = self.user_interface.tblLogData.model().index(new_row, selected_cell.column())
-            self.user_interface.tblLogData.selectionModel().clearSelection()
-            self.user_interface.tblLogData.selectionModel().select(new_index, QItemSelectionModel.Select)
-            self.user_interface.tblLogData.scrollTo(new_index)
-        
+            new_index = self.table_model.createIndex(new_row, selected_cell.column())
+            new_index = self.proxy_model.mapFromSource(new_index)
+            self.user_interface.tblLogData.setCurrentIndex(new_index)
+
         
     def clear_all_filters(self):
         """
