@@ -409,7 +409,8 @@ siraj.  If not, see
         selected_indexes = [self.proxy_model.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
         unique_items_to_hide_list = list(set([index.data() for index in selected_indexes if index.column() == filter_column]))
         self.items_to_hide_per_column[filter_column].extend(unique_items_to_hide_list)
-        self.hide_filtered_out_entries(filter_column)       
+        self.hide_filtered_out_entries(filter_column)    
+        self.update_status_bar()   
             
     def show_selected_rows_only_based_on_column(self, column):
         """
@@ -425,6 +426,7 @@ siraj.  If not, see
         logging.debug("Regex pattern to show: '%s'", regex_pattern_to_show)
         self.proxy_model.setFilterKeyColumn(filter_column)
         self.proxy_model.setFilterRegExp(regex_pattern_to_show)
+        self.update_status_bar()   
 
     def unhide_selected_rows_only_based_on_column(self, filter_column, filtered_out_string):
         """
@@ -435,6 +437,7 @@ siraj.  If not, see
         self.items_to_hide_per_column[filter_column].remove(filtered_out_string)
         logging.debug("Unhiding: %s", filtered_out_string)
         self.hide_filtered_out_entries(filter_column)
+        self.update_status_bar()   
         
     def hide_filtered_out_entries(self, filter_column):    
         """
