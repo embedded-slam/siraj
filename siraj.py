@@ -454,7 +454,7 @@ def main():
     logging.debug('Entering...')
     APP = QApplication(sys.argv)
     MAIN = LogSParserMain()
-    MAIN.show()
+    MAIN.showMaximized()
     logging.debug('Exiting...')
     sys.exit(APP.exec_())
 
