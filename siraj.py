@@ -253,8 +253,11 @@ siraj.  If not, see
         """
         Updates the status bar with relevant informations
         """
-        selected_indexes = self.user_interface.tblLogData.selectedIndexes()
-        if(len(selected_indexes) == 2):
+        selected_indexes = [self.proxy_model.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
+        
+        if(len(selected_indexes) == 1):
+            pass
+        elif(len(selected_indexes) == 2):
             row_1 = selected_indexes[0].row()
             row_2 = selected_indexes[1].row()
             
