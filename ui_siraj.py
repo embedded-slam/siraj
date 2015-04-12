@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'siraj.ui'
 #
-# Created: Wed Apr  1 08:05:09 2015
+# Created: Sun Apr 12 00:47:44 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -27,6 +27,11 @@ class Ui_Siraj(object):
     def setupUi(self, Siraj):
         Siraj.setObjectName(_fromUtf8("Siraj"))
         Siraj.resize(994, 905)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Maximum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(Siraj.sizePolicy().hasHeightForWidth())
+        Siraj.setSizePolicy(sizePolicy)
         self.centralwidget = QtGui.QWidget(Siraj)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.verticalLayoutWidget = QtGui.QWidget(self.centralwidget)
@@ -44,7 +49,10 @@ class Ui_Siraj(object):
         self.tblLogData.setDragDropOverwriteMode(False)
         self.tblLogData.setSelectionBehavior(QtGui.QAbstractItemView.SelectItems)
         self.tblLogData.setObjectName(_fromUtf8("tblLogData"))
-        self.tblLogData.horizontalHeader().setStretchLastSection(False)
+        self.tblLogData.horizontalHeader().setCascadingSectionResizes(False)
+        self.tblLogData.horizontalHeader().setStretchLastSection(True)
+        self.tblLogData.verticalHeader().setCascadingSectionResizes(False)
+        self.tblLogData.verticalHeader().setMinimumSectionSize(18)
         self.layoutWidget = QtGui.QWidget(self.splitter)
         self.layoutWidget.setObjectName(_fromUtf8("layoutWidget"))
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.layoutWidget)
