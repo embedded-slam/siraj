@@ -259,7 +259,7 @@ siraj.  If not, see
             selected_cell_index = selected_indexes[0]
             number_of_occurances = len(self.columns_dict[selected_cell_index.column()][selected_cell_index.data()])
             self.user_interface.statusbar.showMessage(
-                '["{}"] occurred {} time(s). {}%'.format(
+                '["{}"] occurred {} time(s) ~ {}%'.format(
                 selected_cell_index.data(), 
                 number_of_occurances,
                 number_of_occurances * 100 // len(self.table_data)))
@@ -306,7 +306,7 @@ siraj.  If not, see
         Handles the event of double-clicking on a table cell.
         
         If the double clicked cell was at the column of file:line, the function
-        triggers external text editor (currently this is gedit on linux) and make 
+        triggers external text editor (currently this is gedit on Linux) and make 
         it point on the corresponding line.
         """
         if(index.column() == self.file_line_column):

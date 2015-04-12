@@ -1,47 +1,51 @@
-DEBUG|main|Entering...|1428771457.459085|siraj.py:416
-INFO|load_log_file|Headers: ['LEVEL', 'FUNCTION', 'MESSAGE', 'TIME', 'FILE_AND_LINE']|1428771457.523045|siraj.py:178
-INFO|load_log_file|sample.log has 28 lines|1428771457.523139|siraj.py:179
-DEBUG|main|Exiting...|1428771457.531098|siraj.py:420
-INFO|cell_left_clicked|cell[8][0] = INFO|1428771465.133148|siraj.py:227
-WARNING|cell_key_pressed|A key was pressed!!!|1428771466.298017|siraj.py:315
-DEBUG|hide_filtered_out_entries|Hiding: ['INFO']|1428771466.298259|siraj.py:397
-DEBUG|hide_filtered_out_entries|Regex pattern to hide: ^(?!(INFO))|1428771466.298319|siraj.py:401
-INFO|cell_left_clicked|cell[3][1] = cell_left_clicked|1428771466.908530|siraj.py:227
-WARNING|cell_key_pressed|A key was pressed!!!|1428771467.242190|siraj.py:315
-DEBUG|hide_filtered_out_entries|Hiding: ['cell_left_clicked']|1428771467.242678|siraj.py:397
-DEBUG|hide_filtered_out_entries|Regex pattern to hide: ^(?!(cell_left_clicked))|1428771467.242755|siraj.py:401
-INFO|cell_left_clicked|cell[10][2] = Unhiding: WARNING|1428771468.325465|siraj.py:227
-WARNING|cell_key_pressed|A key was pressed!!!|1428771468.471078|siraj.py:315
-DEBUG|hide_filtered_out_entries|Hiding: ['Unhiding: WARNING']|1428771468.471375|siraj.py:397
-DEBUG|hide_filtered_out_entries|Regex pattern to hide: ^(?!(Unhiding\:\ WARNING))|1428771468.471458|siraj.py:401
-INFO|cell_left_clicked|cell[9][3] = 1428751829.417139|1428771469.157570|siraj.py:227
-WARNING|cell_key_pressed|A key was pressed!!!|1428771469.343159|siraj.py:315
-DEBUG|hide_filtered_out_entries|Hiding: ['1428751829.417139']|1428771469.343431|siraj.py:397
-DEBUG|hide_filtered_out_entries|Regex pattern to hide: ^(?!(1428751829\.417139))|1428771469.343540|siraj.py:401
-DEBUG|cell_right_clicked|Cell[8, 2] was right-clicked. Contents = cell[4][1] = main|1428771470.446477|siraj.py:277
-DEBUG|unhide_selected_rows_only_based_on_column|Unhiding: Unhiding: WARNING|1428771473.294232|siraj.py:390
-DEBUG|hide_filtered_out_entries|Hiding: []|1428771473.294585|siraj.py:397
-DEBUG|cell_right_clicked|Cell[8, 1] was right-clicked. Contents = cell_left_clicked|1428771474.678133|siraj.py:277
-DEBUG|unhide_selected_rows_only_based_on_column|Unhiding: cell_left_clicked|1428771477.350666|siraj.py:390
-DEBUG|hide_filtered_out_entries|Hiding: []|1428771477.350818|siraj.py:397
-DEBUG|cell_right_clicked|Cell[11, 3] was right-clicked. Contents = 1428751829.865786|1428771481.919862|siraj.py:277
-DEBUG|unhide_selected_rows_only_based_on_column|Unhiding: 1428751829.417139|1428771483.863833|siraj.py:390
-DEBUG|hide_filtered_out_entries|Hiding: []|1428771483.864028|siraj.py:397
-DEBUG|cell_right_clicked|Cell[10, 3] was right-clicked. Contents = 1428751829.425816|1428771484.728141|siraj.py:277
-INFO|cell_left_clicked|cell[6][4] = siraj.py:173|1428771488.519487|siraj.py:227
-DEBUG|cell_left_clicked|file:line is siraj.py:173|1428771488.531266|siraj.py:237
-INFO|cell_left_clicked|cell[9][4] = siraj.py:173|1428771488.993219|siraj.py:227
-DEBUG|cell_left_clicked|file:line is siraj.py:173|1428771489.002194|siraj.py:237
-INFO|cell_left_clicked|cell[13][4] = siraj.py:173|1428771489.368846|siraj.py:227
-DEBUG|cell_left_clicked|file:line is siraj.py:173|1428771489.374249|siraj.py:237
-INFO|cell_left_clicked|cell[13][4] = siraj.py:173|1428771490.008696|siraj.py:227
-DEBUG|cell_left_clicked|file:line is siraj.py:173|1428771490.015387|siraj.py:237
-INFO|cell_left_clicked|cell[10][2] = file:line is siraj.py:339|1428771490.696998|siraj.py:227
-WARNING|cell_key_pressed|A key was pressed!!!|1428771492.494620|siraj.py:315
-INFO|cell_key_pressed|Delete key pressed while in the table. Clear all filters|1428771492.494846|siraj.py:319
-INFO|cell_left_clicked|cell[12][1] = cell_left_clicked|1428771529.502537|siraj.py:227
-INFO|cell_left_clicked|cell[12][4] = siraj.py:183|1428771530.862611|siraj.py:227
-DEBUG|cell_left_clicked|file:line is siraj.py:183|1428771530.869224|siraj.py:237
-INFO|cell_double_clicked|Using external editor (gedit) to open siraj.py at line 183|1428771530.910859|siraj.py:304
-INFO|cell_left_clicked|cell[12][4] = siraj.py:183|1428771538.767968|siraj.py:227
-DEBUG|cell_left_clicked|file:line is siraj.py:183|1428771538.776789|siraj.py:237
+DEBUG|main|Entering...|1428817550.424479|siraj.py:462
+INFO|load_configs|Loading configuration file...|1428817550.491477|sj_configs.py:45
+INFO|__init__|siraj_configs.json|1428817550.491699|sj_configs.py:36
+INFO|get_config_item|Getting item ['log_row_pattern'] value...|1428817550.491746|sj_configs.py:66
+INFO|get_config_item|Getting item ['log_file_full_path'] value...|1428817550.491778|sj_configs.py:66
+INFO|get_config_item|Getting item ['file_line_column_number_zero_based'] value...|1428817550.491806|sj_configs.py:66
+INFO|get_config_item|Getting item ['root_source_path_prefix'] value...|1428817550.491832|sj_configs.py:66
+INFO|get_config_item|Getting item ['time_stamp_column_number_zero_based'] value...|1428817550.491859|sj_configs.py:66
+INFO|get_config_item|Getting item ['table_conditional_formatting_config'] value...|1428817550.491885|sj_configs.py:66
+INFO|load_log_file|Headers: ['LEVEL', 'FUNCTION', 'MESSAGE', 'TIME', 'FILE_AND_LINE']|1428817550.493226|siraj.py:181
+INFO|load_log_file|sample.log has 47 lines|1428817550.493294|siraj.py:182
+DEBUG|main|Exiting...|1428817550.517029|siraj.py:466
+INFO|cell_left_clicked|cell[4][0] = INFO|1428817552.285703|siraj.py:229
+INFO|cell_left_clicked|cell[6][0] = DEBUG|1428817552.805436|siraj.py:229
+INFO|cell_left_clicked|cell[7][1] = hide_filtered_out_entries|1428817553.396868|siraj.py:229
+INFO|cell_left_clicked|cell[7][4] = siraj.py:401|1428817554.966100|siraj.py:229
+DEBUG|cell_left_clicked|file:line is siraj.py:401|1428817554.974696|siraj.py:239
+INFO|cell_left_clicked|cell[12][4] = siraj.py:227|1428817555.685628|siraj.py:229
+DEBUG|cell_left_clicked|file:line is siraj.py:227|1428817555.692776|siraj.py:239
+INFO|cell_left_clicked|cell[15][4] = siraj.py:401|1428817556.326628|siraj.py:229
+DEBUG|cell_left_clicked|file:line is siraj.py:401|1428817556.330649|siraj.py:239
+INFO|cell_left_clicked|cell[11][1] = hide_filtered_out_entries|1428817557.621630|siraj.py:229
+WARNING|cell_key_pressed|A key was pressed!!!|1428817558.762960|siraj.py:325
+DEBUG|hide_filtered_out_entries|Hiding: ['hide_filtered_out_entries']|1428817558.763486|siraj.py:443
+DEBUG|hide_filtered_out_entries|Regex pattern to hide: ^(?!(hide_filtered_out_entries))|1428817558.763718|siraj.py:447
+INFO|cell_left_clicked|cell[12][1] = cell_right_clicked|1428817559.870556|siraj.py:229
+WARNING|cell_key_pressed|A key was pressed!!!|1428817560.062952|siraj.py:325
+DEBUG|hide_filtered_out_entries|Hiding: ['hide_filtered_out_entries', 'cell_right_clicked']|1428817560.063156|siraj.py:443
+DEBUG|hide_filtered_out_entries|Regex pattern to hide: ^(?!(hide_filtered_out_entries)|(cell_right_clicked))|1428817560.063235|siraj.py:447
+INFO|cell_left_clicked|cell[9][2] = A key was pressed!!!|1428817561.590508|siraj.py:229
+WARNING|cell_key_pressed|A key was pressed!!!|1428817563.001808|siraj.py:325
+WARNING|cell_key_pressed|A key was pressed!!!|1428817563.383137|siraj.py:325
+WARNING|cell_key_pressed|A key was pressed!!!|1428817564.628937|siraj.py:325
+WARNING|cell_key_pressed|A key was pressed!!!|1428817564.866352|siraj.py:325
+WARNING|cell_key_pressed|A key was pressed!!!|1428817565.112694|siraj.py:325
+WARNING|cell_key_pressed|A key was pressed!!!|1428817565.457404|siraj.py:325
+INFO|cell_left_clicked|cell[19][1] = cell_left_clicked|1428817567.599580|siraj.py:229
+INFO|cell_left_clicked|cell[19][1] = cell_left_clicked|1428817568.255623|siraj.py:229
+INFO|cell_left_clicked|cell[17][1] = cell_left_clicked|1428817568.688115|siraj.py:229
+INFO|cell_left_clicked|cell[20][1] = cell_left_clicked|1428817569.305171|siraj.py:229
+INFO|cell_left_clicked|cell[18][1] = cell_left_clicked|1428817569.848155|siraj.py:229
+INFO|cell_left_clicked|cell[22][1] = cell_left_clicked|1428817580.513923|siraj.py:229
+WARNING|cell_key_pressed|A key was pressed!!!|1428817581.447421|siraj.py:325
+DEBUG|show_selected_rows_only_based_on_column|Showing the following from column FUNCTION: ['cell_left_clicked']|1428817581.447657|siraj.py:423
+DEBUG|show_selected_rows_only_based_on_column|Regex pattern to show: '(cell_left_clicked)'|1428817581.447748|siraj.py:425
+DEBUG|cell_right_clicked|Cell[41, 1] was right-clicked. Contents = cell_left_clicked|1428817585.891233|siraj.py:287
+DEBUG|unhide_selected_rows_only_based_on_column|Unhiding: cell_right_clicked|1428817587.546913|siraj.py:436
+DEBUG|hide_filtered_out_entries|Hiding: ['hide_filtered_out_entries']|1428817587.547044|siraj.py:443
+DEBUG|hide_filtered_out_entries|Regex pattern to hide: ^(?!(hide_filtered_out_entries))|1428817587.547122|siraj.py:447
+WARNING|cell_key_pressed|A key was pressed!!!|1428817589.546883|siraj.py:325
+INFO|cell_key_pressed|Delete key pressed while in the table. Clear all filters|1428817589.547207|siraj.py:329

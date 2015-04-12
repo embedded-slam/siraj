@@ -33,7 +33,7 @@ class LogSParserConfigs(object):
     def __init__(self, config_file_path=""):
         if(config_file_path != ""):
             self.load_configs(config_file_path)
-#             logging.info(self.config_items)
+            logging.info(config_file_path)
             
     def load_configs(self, config_file_path):
         """
@@ -42,22 +42,26 @@ class LogSParserConfigs(object):
         Configuration items are stored in a dictionary to simplify 
         reading and writing.
         """
+        logging.info("Loading configuration file...")
         self.config_items = json.load(open(config_file_path))
         
     def save_configs(self, config_file_path):
         """
         Saves the configuration currently sotred in the dictionary to a file.
         """
+        logging.info("Saving configuration file...")
         json.dump(self.config_items, open(config_file_path, 'w'), indent=4, sort_keys=True)
         
     def set_config_item(self, item_name, item_value):
         """
         Writes the given value into the given configuration item key.
         """
+        logging.info("Setting item ['{}'] value...".format(item_name))
         self.config_items[item_name] = item_value
         
     def get_config_item(self, item_name):
         """
         Reads the value of the given configuration key.
         """
+        logging.info("Getting item ['{}'] value...".format(item_name))
         return self.config_items[item_name]
