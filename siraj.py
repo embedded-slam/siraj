@@ -65,6 +65,7 @@ class LogSParserMain(QMainWindow):
         self.user_interface.mnuActionExit.triggered.connect(self.menu_exit)
         self.user_interface.mnuActionAbout.triggered.connect(self.menu_about)
         self.user_interface.centralwidget.setLayout(self.user_interface.verticalLayout)
+        self.user_interface.dckSourceContents.setLayout(self.user_interface.lytSource)
         self.user_interface.tblLogData.doubleClicked.connect(self.cell_double_clicked)
         self.user_interface.tblLogData.clicked.connect(self.cell_left_clicked)
         self.user_interface.tblLogData.keyPressEvent = self.cell_key_pressed
