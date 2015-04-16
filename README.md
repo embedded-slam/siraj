@@ -1,5 +1,6 @@
-*Siraj* is a cross-platform textual log parser that was built using Python3 and Qt
-![Siraj GUI](siraj_screenshot.png "Siraj") 
+*Siraj* is a cross-platform textual log parser that was built using Python3 and Qt  
+![](https://github.com/embedded-slam/siraj/blob/master/siraj_screenshot.png)
+
 
 # Problem
 Textual logs can sometimes be huge. And going through them with standard text 
