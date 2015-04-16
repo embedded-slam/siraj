@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'siraj.ui'
 #
-# Created: Wed Apr 15 08:03:32 2015
+# Created: Thu Apr 16 06:05:41 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -64,6 +64,9 @@ class Ui_Siraj(object):
         self.statusbar.setObjectName(_fromUtf8("statusbar"))
         Siraj.setStatusBar(self.statusbar)
         self.dckSource = QtGui.QDockWidget(Siraj)
+        self.dckSource.setMinimumSize(QtCore.QSize(0, 0))
+        self.dckSource.setAutoFillBackground(True)
+        self.dckSource.setFeatures(QtGui.QDockWidget.DockWidgetFloatable|QtGui.QDockWidget.DockWidgetMovable)
         self.dckSource.setObjectName(_fromUtf8("dckSource"))
         self.dckSourceContents = QtGui.QWidget()
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
@@ -72,26 +75,13 @@ class Ui_Siraj(object):
         sizePolicy.setHeightForWidth(self.dckSourceContents.sizePolicy().hasHeightForWidth())
         self.dckSourceContents.setSizePolicy(sizePolicy)
         self.dckSourceContents.setObjectName(_fromUtf8("dckSourceContents"))
-        self.widget = QtGui.QWidget(self.dckSourceContents)
-        self.widget.setGeometry(QtCore.QRect(460, 40, 258, 219))
-        self.widget.setObjectName(_fromUtf8("widget"))
-        self.lytSource = QtGui.QVBoxLayout(self.widget)
-        self.lytSource.setSizeConstraint(QtGui.QLayout.SetMaximumSize)
+        self.verticalLayoutWidget_2 = QtGui.QWidget(self.dckSourceContents)
+        self.verticalLayoutWidget_2.setGeometry(QtCore.QRect(150, 210, 160, 80))
+        self.verticalLayoutWidget_2.setObjectName(_fromUtf8("verticalLayoutWidget_2"))
+        self.lytSource = QtGui.QVBoxLayout(self.verticalLayoutWidget_2)
         self.lytSource.setMargin(0)
         self.lytSource.setObjectName(_fromUtf8("lytSource"))
-        self.lblSourceFileName = QtGui.QLabel(self.widget)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.lblSourceFileName.sizePolicy().hasHeightForWidth())
-        self.lblSourceFileName.setSizePolicy(sizePolicy)
-        self.lblSourceFileName.setFrameShape(QtGui.QFrame.Box)
-        self.lblSourceFileName.setFrameShadow(QtGui.QFrame.Plain)
-        self.lblSourceFileName.setText(_fromUtf8(""))
-        self.lblSourceFileName.setAlignment(QtCore.Qt.AlignCenter)
-        self.lblSourceFileName.setObjectName(_fromUtf8("lblSourceFileName"))
-        self.lytSource.addWidget(self.lblSourceFileName)
-        self.txtSourceFile = QtGui.QTextEdit(self.widget)
+        self.txtSourceFile = QtGui.QTextEdit(self.verticalLayoutWidget_2)
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Courier New"))
         self.txtSourceFile.setFont(font)
