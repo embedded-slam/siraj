@@ -65,6 +65,7 @@ class LogSParserMain(QMainWindow):
         self.user_interface.mnuActionExit.triggered.connect(self.menu_exit)
         self.user_interface.mnuActionAbout.triggered.connect(self.menu_about)
         self.user_interface.centralwidget.setLayout(self.user_interface.verticalLayout)
+        self.user_interface.dckSourceContents.setLayout(self.user_interface.lytSource)
         self.user_interface.tblLogData.doubleClicked.connect(self.cell_double_clicked)
         self.user_interface.tblLogData.clicked.connect(self.cell_left_clicked)
         self.user_interface.tblLogData.keyPressEvent = self.cell_key_pressed
@@ -113,7 +114,8 @@ class LogSParserMain(QMainWindow):
         
     def toggle_source_view(self):
         self.is_source_visible = not self.is_source_visible
-        self.user_interface.splitter.setSizes([self.is_table_visible, self.is_source_visible])
+        self.user_interface.dckSource.setVisible(self.is_source_visible)
+        logging.info("Source view is now {}".format("Visible" if self.is_source_visible else "Invisible"))
 
     def menu_about(self):
         """
@@ -232,7 +234,7 @@ siraj.  If not, see
         
         This is only done if the source view is visible.
         """
-        
+        index = self.proxy_model.mapToSource(index)
         if(self.is_source_visible):
             self.user_interface.txtSourceFile.setTextCursor(QTextCursor())
             logging.info("cell[%d][%d] = %s", index.row(), index.column(), index.data())
@@ -241,7 +243,6 @@ siraj.  If not, see
             if(index.column() == self.file_line_column):
                 [file, line] = index.data().split(":")
                 full_path = "{}{}".format(self.root_prefix, file.strip())
-                self.user_interface.lblSourceFileName.setText(full_path)
                 file_contents = "\n".join(["{0:4d}: {1:s}".format(i + 1, line) for(i, line) in enumerate(open(full_path).read().splitlines())])
                 self.user_interface.txtSourceFile.setText(file_contents)
                 line_number = int(line) - 1
@@ -255,6 +256,8 @@ siraj.  If not, see
                 text_cursor.movePosition(QTextCursor.EndOfLine, 1)
                 text_cursor.mergeCharFormat(text_format)
                 self.user_interface.txtSourceFile.setTextCursor(text_cursor)
+                self.user_interface.dckSource.setWindowTitle(full_path)
+                self.user_interface.tblLogData.setFocus()
         
         self.update_status_bar()
                     
@@ -333,7 +336,8 @@ siraj.  If not, see
         """
         logging.warning("A key was pressed!!!")
         key = q_key_event.key()
- 
+        logging.info("Key = {}".format(key))
+
         if key == Qt.Key_Delete:
             logging.info("Delete key pressed while in the table. Clear all filters")
             self.clear_all_filters()
@@ -465,7 +469,7 @@ siraj.  If not, see
         
 def main():
     logging.basicConfig(
-        format='%(levelname)s|%(funcName)s|%(message)s|%(created)f|%(filename)s:%(lineno)s', 
+        format='%(levelname)s||%(funcName)s||%(message)s||%(created)f||%(filename)s:%(lineno)s', 
         filename='siraj.log',
         filemode="w",
         level=logging.DEBUG,  

@@ -1,51 +1,122 @@
-DEBUG|main|Entering...|1428817550.424479|siraj.py:462
-INFO|load_configs|Loading configuration file...|1428817550.491477|sj_configs.py:45
-INFO|__init__|siraj_configs.json|1428817550.491699|sj_configs.py:36
-INFO|get_config_item|Getting item ['log_row_pattern'] value...|1428817550.491746|sj_configs.py:66
-INFO|get_config_item|Getting item ['log_file_full_path'] value...|1428817550.491778|sj_configs.py:66
-INFO|get_config_item|Getting item ['file_line_column_number_zero_based'] value...|1428817550.491806|sj_configs.py:66
-INFO|get_config_item|Getting item ['root_source_path_prefix'] value...|1428817550.491832|sj_configs.py:66
-INFO|get_config_item|Getting item ['time_stamp_column_number_zero_based'] value...|1428817550.491859|sj_configs.py:66
-INFO|get_config_item|Getting item ['table_conditional_formatting_config'] value...|1428817550.491885|sj_configs.py:66
-INFO|load_log_file|Headers: ['LEVEL', 'FUNCTION', 'MESSAGE', 'TIME', 'FILE_AND_LINE']|1428817550.493226|siraj.py:181
-INFO|load_log_file|sample.log has 47 lines|1428817550.493294|siraj.py:182
-DEBUG|main|Exiting...|1428817550.517029|siraj.py:466
-INFO|cell_left_clicked|cell[4][0] = INFO|1428817552.285703|siraj.py:229
-INFO|cell_left_clicked|cell[6][0] = DEBUG|1428817552.805436|siraj.py:229
-INFO|cell_left_clicked|cell[7][1] = hide_filtered_out_entries|1428817553.396868|siraj.py:229
-INFO|cell_left_clicked|cell[7][4] = siraj.py:401|1428817554.966100|siraj.py:229
-DEBUG|cell_left_clicked|file:line is siraj.py:401|1428817554.974696|siraj.py:239
-INFO|cell_left_clicked|cell[12][4] = siraj.py:227|1428817555.685628|siraj.py:229
-DEBUG|cell_left_clicked|file:line is siraj.py:227|1428817555.692776|siraj.py:239
-INFO|cell_left_clicked|cell[15][4] = siraj.py:401|1428817556.326628|siraj.py:229
-DEBUG|cell_left_clicked|file:line is siraj.py:401|1428817556.330649|siraj.py:239
-INFO|cell_left_clicked|cell[11][1] = hide_filtered_out_entries|1428817557.621630|siraj.py:229
-WARNING|cell_key_pressed|A key was pressed!!!|1428817558.762960|siraj.py:325
-DEBUG|hide_filtered_out_entries|Hiding: ['hide_filtered_out_entries']|1428817558.763486|siraj.py:443
-DEBUG|hide_filtered_out_entries|Regex pattern to hide: ^(?!(hide_filtered_out_entries))|1428817558.763718|siraj.py:447
-INFO|cell_left_clicked|cell[12][1] = cell_right_clicked|1428817559.870556|siraj.py:229
-WARNING|cell_key_pressed|A key was pressed!!!|1428817560.062952|siraj.py:325
-DEBUG|hide_filtered_out_entries|Hiding: ['hide_filtered_out_entries', 'cell_right_clicked']|1428817560.063156|siraj.py:443
-DEBUG|hide_filtered_out_entries|Regex pattern to hide: ^(?!(hide_filtered_out_entries)|(cell_right_clicked))|1428817560.063235|siraj.py:447
-INFO|cell_left_clicked|cell[9][2] = A key was pressed!!!|1428817561.590508|siraj.py:229
-WARNING|cell_key_pressed|A key was pressed!!!|1428817563.001808|siraj.py:325
-WARNING|cell_key_pressed|A key was pressed!!!|1428817563.383137|siraj.py:325
-WARNING|cell_key_pressed|A key was pressed!!!|1428817564.628937|siraj.py:325
-WARNING|cell_key_pressed|A key was pressed!!!|1428817564.866352|siraj.py:325
-WARNING|cell_key_pressed|A key was pressed!!!|1428817565.112694|siraj.py:325
-WARNING|cell_key_pressed|A key was pressed!!!|1428817565.457404|siraj.py:325
-INFO|cell_left_clicked|cell[19][1] = cell_left_clicked|1428817567.599580|siraj.py:229
-INFO|cell_left_clicked|cell[19][1] = cell_left_clicked|1428817568.255623|siraj.py:229
-INFO|cell_left_clicked|cell[17][1] = cell_left_clicked|1428817568.688115|siraj.py:229
-INFO|cell_left_clicked|cell[20][1] = cell_left_clicked|1428817569.305171|siraj.py:229
-INFO|cell_left_clicked|cell[18][1] = cell_left_clicked|1428817569.848155|siraj.py:229
-INFO|cell_left_clicked|cell[22][1] = cell_left_clicked|1428817580.513923|siraj.py:229
-WARNING|cell_key_pressed|A key was pressed!!!|1428817581.447421|siraj.py:325
-DEBUG|show_selected_rows_only_based_on_column|Showing the following from column FUNCTION: ['cell_left_clicked']|1428817581.447657|siraj.py:423
-DEBUG|show_selected_rows_only_based_on_column|Regex pattern to show: '(cell_left_clicked)'|1428817581.447748|siraj.py:425
-DEBUG|cell_right_clicked|Cell[41, 1] was right-clicked. Contents = cell_left_clicked|1428817585.891233|siraj.py:287
-DEBUG|unhide_selected_rows_only_based_on_column|Unhiding: cell_right_clicked|1428817587.546913|siraj.py:436
-DEBUG|hide_filtered_out_entries|Hiding: ['hide_filtered_out_entries']|1428817587.547044|siraj.py:443
-DEBUG|hide_filtered_out_entries|Regex pattern to hide: ^(?!(hide_filtered_out_entries))|1428817587.547122|siraj.py:447
-WARNING|cell_key_pressed|A key was pressed!!!|1428817589.546883|siraj.py:325
-INFO|cell_key_pressed|Delete key pressed while in the table. Clear all filters|1428817589.547207|siraj.py:329
+DEBUG||main||Entering...||1429180958.323946||siraj.py:478
+INFO||load_configs||Loading configuration file...||1429180958.374116||sj_configs.py:45
+INFO||__init__||siraj_configs.json||1429180958.374342||sj_configs.py:36
+INFO||get_config_item||Getting item ['log_row_pattern'] value...||1429180958.374389||sj_configs.py:66
+INFO||get_config_item||Getting item ['log_file_full_path'] value...||1429180958.374422||sj_configs.py:66
+INFO||get_config_item||Getting item ['file_line_column_number_zero_based'] value...||1429180958.374451||sj_configs.py:66
+INFO||get_config_item||Getting item ['root_source_path_prefix'] value...||1429180958.374479||sj_configs.py:66
+INFO||get_config_item||Getting item ['time_stamp_column_number_zero_based'] value...||1429180958.374505||sj_configs.py:66
+INFO||get_config_item||Getting item ['table_conditional_formatting_config'] value...||1429180958.374531||sj_configs.py:66
+INFO||load_log_file||Headers: ['LEVEL', 'FUNCTION', 'MESSAGE', 'TIME', 'FILE_AND_LINE', 'FILE']||1429180958.375541||siraj.py:192
+INFO||load_log_file||sample.log has 37 lines||1429180958.375595||siraj.py:193
+DEBUG||main||Exiting...||1429180958.398205||siraj.py:482
+INFO||cell_left_clicked||cell[8][0] = INFO||1429180964.407792||siraj.py:240
+INFO||cell_left_clicked||cell[12][1] = cell_left_clicked||1429180964.894057||siraj.py:240
+WARNING||cell_key_pressed||A key was pressed!!!||1429180966.193166||siraj.py:337
+INFO||cell_key_pressed||Key = 16777249||1429180966.193399||siraj.py:339
+INFO||cell_left_clicked||cell[21][1] = cell_key_pressed||1429180966.695023||siraj.py:240
+WARNING||cell_key_pressed||A key was pressed!!!||1429180971.284808||siraj.py:337
+INFO||cell_key_pressed||Key = 72||1429180971.284936||siraj.py:339
+DEBUG||hide_filtered_out_entries||Hiding: ['cell_left_clicked', 'cell_key_pressed']||1429180971.285077||siraj.py:459
+DEBUG||hide_filtered_out_entries||Regex pattern to hide: ^(?!(cell_left_clicked)|(cell_key_pressed))||1429180971.285878||siraj.py:463
+INFO||cell_left_clicked||cell[7][2] = Getting item ['time_stamp_column_number_zero_based'] value...||1429180973.241213||siraj.py:240
+WARNING||cell_key_pressed||A key was pressed!!!||1429180973.416428||siraj.py:337
+INFO||cell_key_pressed||Key = 72||1429180973.416552||siraj.py:339
+DEBUG||hide_filtered_out_entries||Hiding: ["Getting item ['time_stamp_column_number_zero_based'] value..."]||1429180973.416675||siraj.py:459
+DEBUG||hide_filtered_out_entries||Regex pattern to hide: ^(?!(Getting\ item\ \[\'time_stamp_column_number_zero_based\'\]\ value\.\.\.))||1429180973.416749||siraj.py:463
+INFO||cell_left_clicked||cell[19][3] = 1429180764.483556||1429180974.944088||siraj.py:240
+WARNING||cell_key_pressed||A key was pressed!!!||1429180975.056845||siraj.py:337
+INFO||cell_key_pressed||Key = 72||1429180975.056970||siraj.py:339
+DEBUG||hide_filtered_out_entries||Hiding: ['1429180764.483556']||1429180975.057094||siraj.py:459
+DEBUG||hide_filtered_out_entries||Regex pattern to hide: ^(?!(1429180764\.483556))||1429180975.057160||siraj.py:463
+INFO||cell_left_clicked||cell[7][4] = sj_configs.py:66||1429180976.328337||siraj.py:240
+DEBUG||cell_left_clicked||file:line is sj_configs.py:66||1429180976.336585||siraj.py:249
+WARNING||cell_key_pressed||A key was pressed!!!||1429180976.446863||siraj.py:337
+INFO||cell_key_pressed||Key = 72||1429180976.446987||siraj.py:339
+DEBUG||hide_filtered_out_entries||Hiding: ['sj_configs.py:66']||1429180976.447112||siraj.py:459
+DEBUG||hide_filtered_out_entries||Regex pattern to hide: ^(?!(sj_configs\.py\:66))||1429180976.447180||siraj.py:463
+WARNING||cell_key_pressed||A key was pressed!!!||1429180981.360062||siraj.py:337
+INFO||cell_key_pressed||Key = 16777223||1429180981.360194||siraj.py:339
+INFO||cell_key_pressed||Delete key pressed while in the table. Clear all filters||1429180981.360239||siraj.py:342
+INFO||cell_left_clicked||cell[15][2] = cell[15][0] = INFO||1429180981.865840||siraj.py:240
+INFO||cell_left_clicked||cell[10][2] = sample.log has 51 lines||1429180982.265665||siraj.py:240
+INFO||cell_left_clicked||cell[5][2] = Getting item ['file_line_column_number_zero_based'] value...||1429180982.665683||siraj.py:240
+INFO||cell_left_clicked||cell[11][4] = siraj.py:482||1429180984.176961||siraj.py:240
+DEBUG||cell_left_clicked||file:line is siraj.py:482||1429180984.180869||siraj.py:249
+INFO||cell_left_clicked||cell[14][4] = siraj.py:339||1429180984.586175||siraj.py:240
+DEBUG||cell_left_clicked||file:line is siraj.py:339||1429180984.590251||siraj.py:249
+INFO||cell_left_clicked||cell[18][4] = siraj.py:459||1429180984.978150||siraj.py:240
+DEBUG||cell_left_clicked||file:line is siraj.py:459||1429180984.982249||siraj.py:249
+INFO||cell_left_clicked||cell[9][4] = siraj.py:192||1429180985.409102||siraj.py:240
+DEBUG||cell_left_clicked||file:line is siraj.py:192||1429180985.412920||siraj.py:249
+INFO||cell_left_clicked||cell[11][2] = Exiting...||1429180988.002231||siraj.py:240
+WARNING||cell_key_pressed||A key was pressed!!!||1429180988.235286||siraj.py:337
+INFO||cell_key_pressed||Key = 16777223||1429180988.235409||siraj.py:339
+INFO||cell_key_pressed||Delete key pressed while in the table. Clear all filters||1429180988.235452||siraj.py:342
+WARNING||cell_key_pressed||A key was pressed!!!||1429180988.749697||siraj.py:337
+INFO||cell_key_pressed||Key = 16777223||1429180988.749820||siraj.py:339
+INFO||cell_key_pressed||Delete key pressed while in the table. Clear all filters||1429180988.749864||siraj.py:342
+INFO||cell_left_clicked||cell[12][1] = cell_left_clicked||1429180991.570108||siraj.py:240
+WARNING||cell_key_pressed||A key was pressed!!!||1429180991.664224||siraj.py:337
+INFO||cell_key_pressed||Key = 79||1429180991.664346||siraj.py:339
+DEBUG||show_selected_rows_only_based_on_column||Showing the following from column FUNCTION: ['cell_left_clicked']||1429180991.664469||siraj.py:437
+DEBUG||show_selected_rows_only_based_on_column||Regex pattern to show: '(cell_left_clicked)'||1429180991.664532||siraj.py:439
+WARNING||cell_key_pressed||A key was pressed!!!||1429180996.237272||siraj.py:337
+INFO||cell_key_pressed||Key = 16777223||1429180996.237412||siraj.py:339
+INFO||cell_key_pressed||Delete key pressed while in the table. Clear all filters||1429180996.237463||siraj.py:342
+INFO||cell_left_clicked||cell[17][1] = cell_key_pressed||1429181000.667056||siraj.py:240
+WARNING||cell_key_pressed||A key was pressed!!!||1429181002.279749||siraj.py:337
+INFO||cell_key_pressed||Key = 79||1429181002.279872||siraj.py:339
+DEBUG||show_selected_rows_only_based_on_column||Showing the following from column FUNCTION: ['cell_key_pressed']||1429181002.279994||siraj.py:437
+DEBUG||show_selected_rows_only_based_on_column||Regex pattern to show: '(cell_key_pressed)'||1429181002.280056||siraj.py:439
+WARNING||cell_key_pressed||A key was pressed!!!||1429181005.492712||siraj.py:337
+INFO||cell_key_pressed||Key = 80||1429181005.492835||siraj.py:339
+WARNING||cell_key_pressed||A key was pressed!!!||1429181005.792470||siraj.py:337
+INFO||cell_key_pressed||Key = 80||1429181005.792590||siraj.py:339
+WARNING||cell_key_pressed||A key was pressed!!!||1429181006.208374||siraj.py:337
+INFO||cell_key_pressed||Key = 80||1429181006.208494||siraj.py:339
+WARNING||cell_key_pressed||A key was pressed!!!||1429181008.222072||siraj.py:337
+INFO||cell_key_pressed||Key = 78||1429181008.222390||siraj.py:339
+WARNING||cell_key_pressed||A key was pressed!!!||1429181008.503792||siraj.py:337
+INFO||cell_key_pressed||Key = 78||1429181008.503917||siraj.py:339
+WARNING||cell_key_pressed||A key was pressed!!!||1429181008.776740||siraj.py:337
+INFO||cell_key_pressed||Key = 78||1429181008.776859||siraj.py:339
+WARNING||cell_key_pressed||A key was pressed!!!||1429181009.085468||siraj.py:337
+INFO||cell_key_pressed||Key = 78||1429181009.085588||siraj.py:339
+WARNING||cell_key_pressed||A key was pressed!!!||1429181009.313946||siraj.py:337
+INFO||cell_key_pressed||Key = 78||1429181009.314256||siraj.py:339
+WARNING||cell_key_pressed||A key was pressed!!!||1429181009.506350||siraj.py:337
+INFO||cell_key_pressed||Key = 78||1429181009.506472||siraj.py:339
+WARNING||cell_key_pressed||A key was pressed!!!||1429181009.699839||siraj.py:337
+INFO||cell_key_pressed||Key = 78||1429181009.700214||siraj.py:339
+WARNING||cell_key_pressed||A key was pressed!!!||1429181009.882539||siraj.py:337
+INFO||cell_key_pressed||Key = 78||1429181009.882676||siraj.py:339
+WARNING||cell_key_pressed||A key was pressed!!!||1429181010.075214||siraj.py:337
+INFO||cell_key_pressed||Key = 78||1429181010.075353||siraj.py:339
+WARNING||cell_key_pressed||A key was pressed!!!||1429181010.258812||siraj.py:337
+INFO||cell_key_pressed||Key = 78||1429181010.258949||siraj.py:339
+WARNING||cell_key_pressed||A key was pressed!!!||1429181010.442453||siraj.py:337
+INFO||cell_key_pressed||Key = 78||1429181010.442585||siraj.py:339
+WARNING||cell_key_pressed||A key was pressed!!!||1429181012.056996||siraj.py:337
+INFO||cell_key_pressed||Key = 80||1429181012.057125||siraj.py:339
+WARNING||cell_key_pressed||A key was pressed!!!||1429181012.222781||siraj.py:337
+INFO||cell_key_pressed||Key = 80||1429181012.222911||siraj.py:339
+WARNING||cell_key_pressed||A key was pressed!!!||1429181012.388560||siraj.py:337
+INFO||cell_key_pressed||Key = 80||1429181012.388683||siraj.py:339
+WARNING||cell_key_pressed||A key was pressed!!!||1429181012.554386||siraj.py:337
+INFO||cell_key_pressed||Key = 80||1429181012.554509||siraj.py:339
+WARNING||cell_key_pressed||A key was pressed!!!||1429181012.711203||siraj.py:337
+INFO||cell_key_pressed||Key = 80||1429181012.711325||siraj.py:339
+WARNING||cell_key_pressed||A key was pressed!!!||1429181012.859124||siraj.py:337
+INFO||cell_key_pressed||Key = 80||1429181012.859246||siraj.py:339
+WARNING||cell_key_pressed||A key was pressed!!!||1429181013.024891||siraj.py:337
+INFO||cell_key_pressed||Key = 80||1429181013.025012||siraj.py:339
+WARNING||cell_key_pressed||A key was pressed!!!||1429181013.181702||siraj.py:337
+INFO||cell_key_pressed||Key = 80||1429181013.181825||siraj.py:339
+WARNING||cell_key_pressed||A key was pressed!!!||1429181013.338622||siraj.py:337
+INFO||cell_key_pressed||Key = 80||1429181013.338749||siraj.py:339
+WARNING||cell_key_pressed||A key was pressed!!!||1429181014.748419||siraj.py:337
+INFO||cell_key_pressed||Key = 16777223||1429181014.748544||siraj.py:339
+INFO||cell_key_pressed||Delete key pressed while in the table. Clear all filters||1429181014.748588||siraj.py:342
+INFO||toggle_source_view||Source view is now Invisible||1429181018.903623||siraj.py:118
+INFO||toggle_source_view||Source view is now Visible||1429181019.416568||siraj.py:118
