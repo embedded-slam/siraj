@@ -62,6 +62,7 @@ class LogSParserMain(QMainWindow):
         self.user_interface.toolbar.addAction(self.user_interface.tbrActionToggleSourceView)
         
         self.user_interface.mnuActionOpen.triggered.connect(self.menu_open_file)
+        self.user_interface.mnuActionLoadConfigs.triggered.connect(self.menu_load_configs)
         self.user_interface.mnuActionExit.triggered.connect(self.menu_exit)
         self.user_interface.mnuActionAbout.triggered.connect(self.menu_about)
         self.user_interface.centralwidget.setLayout(self.user_interface.verticalLayout)
@@ -72,14 +73,8 @@ class LogSParserMain(QMainWindow):
         self.user_interface.tblLogData.setContextMenuPolicy(Qt.CustomContextMenu)
         self.user_interface.tblLogData.customContextMenuRequested.connect(self.cell_right_clicked)
         self.user_interface.txtSourceFile.setReadOnly(True)
-        self.config = LogSParserConfigs("siraj_configs.json")
-        self.log_trace_regex_pattern = self.config.get_config_item("log_row_pattern")
-        self.full_path = self.config.get_config_item("log_file_full_path")
-        self.file_line_column = self.config.get_config_item("file_line_column_number_zero_based")
-        self.root_prefix = self.config.get_config_item("root_source_path_prefix")
-        self.time_stamp_column = self.config.get_config_item("time_stamp_column_number_zero_based")
-        self.table_conditional_formatting_config = self.config.get_config_item("table_conditional_formatting_config")
-        self.load_log_file()
+        self.load_configuration_file()
+
         
         self.is_table_visible = True
         self.is_source_visible = True
@@ -89,7 +84,16 @@ class LogSParserMain(QMainWindow):
         
         self.setup_context_menu()
 
-
+    def load_configuration_file(self, config_file_path="siraj_configs.json"):
+        self.config = LogSParserConfigs(config_file_path)
+        self.log_trace_regex_pattern = self.config.get_config_item("log_row_pattern")
+        self.log_file_full_path = self.config.get_config_item("log_file_full_path")
+        self.file_line_column = self.config.get_config_item("file_line_column_number_zero_based")
+        self.root_prefix = self.config.get_config_item("root_source_path_prefix")
+        self.time_stamp_column = self.config.get_config_item("time_stamp_column_number_zero_based")
+        self.table_conditional_formatting_config = self.config.get_config_item("table_conditional_formatting_config")
+        self.load_log_file(self.log_file_full_path)
+        
     def setup_context_menu(self):
         self.menuFilter = QMenu(self)
         
@@ -159,38 +163,39 @@ siraj.  If not, see
         """
         Handles the open menu clicked event.
         """
-        self.full_path = ""
-        self.load_log_file()
+        self.log_file_full_path = QFileDialog.getOpenFileName(
+            self,
+            'Open Log File',
+            os.getcwd())
+        if(self.log_file_full_path != ''):
+            self.load_log_file(self.log_file_full_path)
         
-    def load_log_file(self):
+    def menu_load_configs(self):
+        """
+        Loads a new configuration file.
+        """
+        self.config_file_full_path = QFileDialog.getOpenFileName(
+            self,
+            'Open Config File',
+            os.getcwd())
+        if(self.config_file_full_path != ''):
+            self.load_configuration_file(self.config_file_full_path)
+            
+        
+    def load_log_file(self, log_file_full_path):
         """
         Loads the given log file into the table.
-        
-        If no file was specified, the function triggers the open file dialog, so
-        that the user can select a log file to load.
         """
-        if self.full_path == "":
-            self.full_path = QFileDialog.getOpenFileName(
-                self,
-                'Open file',
-                os.getcwd())
-        with open(self.full_path, "r") as log_file_handle:
+
+        with open(log_file_full_path, "r") as log_file_handle:
             log_file_content_lines = log_file_handle.read().splitlines()
-            
-#         self.table_data = []
-#         for log_line in log_file_content_lines:
-#             m = re.match(self.log_trace_regex_pattern, log_line)
-#             if(m is not None):
-#                 print(list(m.groups()))
-#                 self.table_data.append(sorted(list(m.groups()), key=m.start))
-#                 
                 
         self.table_data = [list(re.match(self.log_trace_regex_pattern, line).groups()) for line in log_file_content_lines if(re.match(self.log_trace_regex_pattern, line) is not None)]
         m = re.match(self.log_trace_regex_pattern, log_file_content_lines[1])
         self.header = [group_name for group_name in sorted(m.groupdict().keys(), key=lambda k: m.start(k))]
         self.table_model = MyTableModel(self.table_data, self.header, self.table_conditional_formatting_config, self)
         logging.info("Headers: %s", self.header)
-        logging.info("%s has %d lines", self.full_path, len(self.table_data))
+        logging.info("%s has %d lines", self.log_file_full_path, len(self.table_data))
         self.proxy_model = QSortFilterProxyModel(self)
         self.proxy_model.setSourceModel(self.table_model)
         self.user_interface.tblLogData.setModel(self.proxy_model)
@@ -243,7 +248,7 @@ siraj.  If not, see
             if(index.column() == self.file_line_column):
                 [file, line] = index.data().split(":")
                 full_path = "{}{}".format(self.root_prefix, file.strip())
-                file_contents = "\n".join(["{0:4d}: {1:s}".format(i + 1, line) for(i, line) in enumerate(open(full_path).read().splitlines())])
+                file_contents = "\n".join(["{0:4d}: {1:s}".format(i + 1, line) for(i, line) in enumerate(open(log_file_full_path).read().splitlines())])
                 self.user_interface.txtSourceFile.setText(file_contents)
                 line_number = int(line) - 1
                 logging.debug("file:line is %s:%s", file, line)

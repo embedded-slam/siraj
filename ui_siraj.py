@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'siraj.ui'
 #
-# Created: Thu Apr 16 06:05:41 2015
+# Created: Fri Apr 17 06:56:18 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -64,7 +64,7 @@ class Ui_Siraj(object):
         self.statusbar.setObjectName(_fromUtf8("statusbar"))
         Siraj.setStatusBar(self.statusbar)
         self.dckSource = QtGui.QDockWidget(Siraj)
-        self.dckSource.setMinimumSize(QtCore.QSize(0, 0))
+        self.dckSource.setMinimumSize(QtCore.QSize(56, 41))
         self.dckSource.setAutoFillBackground(True)
         self.dckSource.setFeatures(QtGui.QDockWidget.DockWidgetFloatable|QtGui.QDockWidget.DockWidgetMovable)
         self.dckSource.setObjectName(_fromUtf8("dckSource"))
@@ -95,7 +95,10 @@ class Ui_Siraj(object):
         self.mnuActionExit.setObjectName(_fromUtf8("mnuActionExit"))
         self.mnuActionAbout = QtGui.QAction(Siraj)
         self.mnuActionAbout.setObjectName(_fromUtf8("mnuActionAbout"))
+        self.mnuActionLoadConfigs = QtGui.QAction(Siraj)
+        self.mnuActionLoadConfigs.setObjectName(_fromUtf8("mnuActionLoadConfigs"))
         self.menuFile.addAction(self.mnuActionOpen)
+        self.menuFile.addAction(self.mnuActionLoadConfigs)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.mnuActionExit)
         self.menuAbout.addAction(self.mnuActionAbout)
@@ -109,7 +112,8 @@ class Ui_Siraj(object):
         Siraj.setWindowTitle(_translate("Siraj", "Siraj", None))
         self.menuFile.setTitle(_translate("Siraj", "File", None))
         self.menuAbout.setTitle(_translate("Siraj", "Help", None))
-        self.mnuActionOpen.setText(_translate("Siraj", "Open...", None))
+        self.mnuActionOpen.setText(_translate("Siraj", "Open log file...", None))
         self.mnuActionExit.setText(_translate("Siraj", "Exit", None))
         self.mnuActionAbout.setText(_translate("Siraj", "About", None))
+        self.mnuActionLoadConfigs.setText(_translate("Siraj", "Load configuration...", None))
 
