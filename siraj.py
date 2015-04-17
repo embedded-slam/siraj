@@ -248,7 +248,7 @@ siraj.  If not, see
             if(index.column() == self.file_line_column):
                 [file, line] = index.data().split(":")
                 full_path = "{}{}".format(self.root_prefix, file.strip())
-                file_contents = "\n".join(["{0:4d}: {1:s}".format(i + 1, line) for(i, line) in enumerate(open(log_file_full_path).read().splitlines())])
+                file_contents = "\n".join(["{0:4d}: {1:s}".format(i + 1, line) for(i, line) in enumerate(open(full_path).read().splitlines())])
                 self.user_interface.txtSourceFile.setText(file_contents)
                 line_number = int(line) - 1
                 logging.debug("file:line is %s:%s", file, line)
