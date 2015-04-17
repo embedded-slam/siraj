@@ -37,18 +37,20 @@ class MyTableModel(QAbstractTableModel):
         self.background_color_dict          = conditional_formatting_config_dict["background_color_dict"]
         self.special_formatting_column      = conditional_formatting_config_dict["special_formatting_key_column"]
         self.special_formatting_color_dict  = conditional_formatting_config_dict["special_formatting_color_dict"]
+        self.row_count                      = len(self.arraydata)
+        self.column_count                   = len(self.arraydata[0])
 
     def rowCount(self, parent):
         """
         Returns the number of rows in the table
         """
-        return len(self.arraydata)
+        return self.row_count
 
     def columnCount(self, parent):
         """
         Returns the number of columns in a table.
         """
-        return len(self.arraydata[0])
+        return self.column_count
 
     def data(self, index, role):
         """
