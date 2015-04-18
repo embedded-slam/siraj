@@ -137,14 +137,16 @@ Dictionaries that hold pairs for key/values. Where the key is a match to perform
 Hides all the rows with fields that matches the selected cells(s).  
 
 `O`  
-Hides everything except rows with fields that matches the selected cell(s).  
+Shows Only selected. Hides everything except rows with fields that matches the selected cell(s).  
 
 `Del`  
 Clears all current filter.  
 
 The three options are also accessible via context menu. To unhide a previously hidden row, you can select the unhide option from the context menu for a list of hidden value of the current column, then select the value to unhide.  
 
-NOTE: Filtering works on a single column for now. [Issue #3](https://github.com/embedded-slam/siraj/issues/3 "Issue #3") is there to fix that and extend the filtering to be multi-columns.  
+When multiple cells are selected which belong to one or more column(s) and the hide option is triggered, then a row will be hidden if any of its fields(columns) matches any filtered-out value in the corresponding column.
+
+When multiple cells are selected which belong to one or more column(s) and the show-only option is triggered, then a row will be shown only if all of its fields(columns) matches the corresponding filtered-in column.
 
 `P`  
 Jumps to the previous matching cell (if one exists) from the same column. Works only when a single cell is selected.  
