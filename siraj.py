@@ -231,7 +231,6 @@ siraj.  If not, see
                 if(log[column] not in self.columns_dict[column]):
                     self.columns_dict[column][log[column]] = []
                 self.columns_dict[column][log[column]].append(row)
-#         print(json.dumps(self.columns_dict, sort_keys=True, indent=4, separators=(',', ': ')))       
     
     def cell_left_clicked(self, index):
         """
@@ -302,25 +301,28 @@ siraj.  If not, see
         """
         index = self.proxy_model.mapToSource(
             self.user_interface.tblLogData.indexAt(point))
-        row = index.row()
-        column = index.column()
-        cell_text = self.table_data[row][column].strip()
-        logging.debug("Cell[%d, %d] was right-clicked. Contents = %s", row, column, index.data())
+        logging.debug("Cell[%d, %d] was right-clicked. Contents = %s", index.row(), index.column(), index.data())
 
-
+        self.right_clicked_cell_index = index
+        self.populate_unhide_context_menu(index.column())
+        
+    def populate_unhide_context_menu(self, column):    
         self.unhide_menu.clear()
-        if(len(self.per_column_filter_out_set_list[column]) > 0):
+        if(self.is_filtering_mode_out):
+            filtered_out_set = self.per_column_filter_out_set_list[column]
+        else:
+            filtered_out_set = set(self.columns_dict[column].keys()) - self.per_column_filter_in_set_list[column]
+        
+        if(len(filtered_out_set) > 0):
             self.unhide_menu.setEnabled(True)
-            for filtered_string in self.per_column_filter_out_set_list[column]:
+            for filtered_string in filtered_out_set:
                 temp_action = QAction(filtered_string, self.unhide_menu);
                 temp_action.triggered.connect(functools.partial(self.context_menu_unhide_selected_rows, filtered_string))
                 self.unhide_menu.addAction(temp_action)
         else:
             self.unhide_menu.setEnabled(False)
-
-
+            
         self.menuFilter.popup(QCursor.pos())
-        self.right_clicked_cell_index = index
 
     def cell_double_clicked(self, index):
         """
@@ -398,7 +400,7 @@ siraj.  If not, see
         self.proxy_model.setFilterFixedString("")
         self.per_column_filter_out_set_list = [set() for column in range(len(self.table_data[0]))]
         self.per_column_filter_in_set_list = [set() for column in range(len(self.table_data[0]))]
-        self.apply_filter(is_filter_out = True)
+        self.apply_filter(is_filtering_mode_out = True)
         
     def hide_rows_based_on_selected_cells(self):
         """
@@ -408,7 +410,7 @@ siraj.  If not, see
         for index in selected_indexes:
             column = index.column()
             self.per_column_filter_out_set_list[column].add(index.data())
-        self.apply_filter(is_filter_out=True)    
+        self.apply_filter(is_filtering_mode_out=True)    
         self.update_status_bar()   
             
     def show_rows_based_on_selected_cells(self):
@@ -419,9 +421,8 @@ siraj.  If not, see
         self.per_column_filter_in_set_list = [set() for column in range(len(self.table_data[0]))]
         for index in selected_indexes:
             column = index.column()
-            print(column)
             self.per_column_filter_in_set_list[column].add(index.data())
-        self.apply_filter(is_filter_out=False)    
+        self.apply_filter(is_filtering_mode_out=False)    
         self.update_status_bar()   
         
     def context_menu_unhide_selected_rows(self, filtered_out_string):
@@ -436,16 +437,22 @@ siraj.  If not, see
         
         The filtering works on one column only.
         """
-        self.per_column_filter_out_set_list[filter_column].remove(filtered_out_string)
+        
+        if(self.is_filtering_mode_out):
+            self.per_column_filter_out_set_list[filter_column].remove(filtered_out_string)
+        else:
+            self.per_column_filter_in_set_list[filter_column].add(filtered_out_string)
+            
         logging.debug("Unhiding: %s", filtered_out_string)
-        self.apply_filter(is_filter_out=True)
+        self.apply_filter(self.is_filtering_mode_out)
         self.update_status_bar()   
         
-    def apply_filter(self, is_filter_out):    
+    def apply_filter(self, is_filtering_mode_out):    
         """
         Applies the filter based on the given mode. 
         """
-        if(is_filter_out):
+        self.is_filtering_mode_out = is_filtering_mode_out
+        if(is_filtering_mode_out):
             self.proxy_model.setFilterOutList(self.per_column_filter_out_set_list)
         else:
             self.proxy_model.setFilterInList(self.per_column_filter_in_set_list)
