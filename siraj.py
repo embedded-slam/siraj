@@ -276,12 +276,20 @@ siraj.  If not, see
                 self.user_interface.tblLogData.setFocus()
         
         self.update_status_bar()
+    
+    def get_selected_indexes(self):
+        """
+        Returns a list of the currently selected indexes mapped to the source numbering.
+        
+        mapToSource is needed to retrive the actual row number regardless of whether filtering is applied or not.
+        """
+        return [self.proxy_model.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
                     
     def update_status_bar(self):
         """
         Updates the status bar with relevant informations
         """
-        selected_indexes = [self.proxy_model.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
+        selected_indexes = self.get_selected_indexes()
         
         if(len(selected_indexes) == 1):
             selected_cell_index = selected_indexes[0]
@@ -368,20 +376,20 @@ siraj.  If not, see
         elif key == Qt.Key_O:
             self.show_rows_based_on_selected_cells()
         elif key == Qt.Key_N:
-            selected_indexes = [self.proxy_model.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
+            selected_indexes = self.get_selected_indexes()
             if(len(selected_indexes) == 1):
                 self.go_to_next_match(selected_indexes[0])        
         elif key == Qt.Key_P:
-            selected_indexes = [self.proxy_model.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
+            selected_indexes = self.get_selected_indexes()
             if(len(selected_indexes) == 1):
                 self.go_to_prev_match(selected_indexes[0])
         elif key == Qt.Key_C:
             if(int(q_key_event.modifiers()) == (Qt.ControlModifier)):
-                selected_indexes = [self.proxy_model.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
+                selected_indexes = self.get_selected_indexes()
                 self.prepare_clipboard_text()
     
     def prepare_clipboard_text(self):
-        selected_indexes = [self.proxy_model.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
+        selected_indexes = self.get_selected_indexes()
         if(len(selected_indexes) == 0):
             clipboard_text = ""
         elif(len(selected_indexes) == 1):
@@ -434,7 +442,7 @@ siraj.  If not, see
         """
         Hides the selected rows and any other rows with matching data.
         """
-        selected_indexes = [self.proxy_model.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
+        selected_indexes = self.get_selected_indexes()
         for index in selected_indexes:
             column = index.column()
             self.per_column_filter_out_set_list[column].add(index.data())
@@ -445,7 +453,7 @@ siraj.  If not, see
         """
         Shows the selected rows and any other rows with matching data only.
         """
-        selected_indexes = [self.proxy_model.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
+        selected_indexes = self.get_selected_indexes()
         self.per_column_filter_in_set_list = [set() for column in range(len(self.table_data[0]))]
         for index in selected_indexes:
             column = index.column()
