@@ -22,7 +22,7 @@
 import re
 import os
 import sys
-from PyQt4.QtCore import Qt
+from PyQt4.QtCore import (Qt, QModelIndex)
 from PyQt4.QtGui import (QMainWindow, QFileDialog, QApplication, 
 QSortFilterProxyModel, QTextCursor, QTextCharFormat, QBrush, QColor, QMenu, 
 QAction, QCursor, QMessageBox, QItemSelectionModel)
@@ -85,6 +85,9 @@ class LogSParserMain(QMainWindow):
         self.user_interface.tblLogData.resizeRowsToContents() 
         
         self.setup_context_menu()
+        
+        self.clipboard = QApplication.clipboard()
+        self.is_filtering_mode_out = True
 
     def load_configuration_file(self, config_file_path="siraj_configs.json"):
         self.config = LogSParserConfigs(config_file_path)
@@ -102,21 +105,26 @@ class LogSParserMain(QMainWindow):
         self.hide_action                 = QAction('Hide selected values', self)
         self.show_only_action            = QAction('Show only selected values', self)
         self.clear_all_filters_action    = QAction('Clear all filters', self)
+        self.copy_selection_action       = QAction('Copy selection', self)
        
         self.unhide_menu = QMenu('Unhide item from selected column', self.menuFilter)
 
         self.hide_action.triggered.connect(self.hide_rows_based_on_selected_cells)
         self.show_only_action.triggered.connect(self.show_rows_based_on_selected_cells)
         self.clear_all_filters_action.triggered.connect(self.clear_all_filters)
+        self.copy_selection_action.triggered.connect(self.prepare_clipboard_text)
         
         self.menuFilter.addAction(self.hide_action)
         self.menuFilter.addMenu(self.unhide_menu)
         self.menuFilter.addAction(self.show_only_action)
         self.menuFilter.addAction(self.clear_all_filters_action)
-        
+        self.menuFilter.addSeparator()
+        self.menuFilter.addAction(self.copy_selection_action)
+
         self.hide_action.setShortcut('H')
         self.show_only_action.setShortcut('O')
         self.clear_all_filters_action.setShortcut('Del')
+        self.copy_selection_action.setShortcut("Ctrl+C")
         
     def toggle_source_view(self):
         self.is_source_visible = not self.is_source_visible
@@ -305,6 +313,10 @@ siraj.  If not, see
 
         self.right_clicked_cell_index = index
         self.populate_unhide_context_menu(index.column())
+
+        self.prepare_clipboard_text()
+        
+        self.menuFilter.popup(QCursor.pos())
         
     def populate_unhide_context_menu(self, column):    
         self.unhide_menu.clear()
@@ -322,7 +334,6 @@ siraj.  If not, see
         else:
             self.unhide_menu.setEnabled(False)
             
-        self.menuFilter.popup(QCursor.pos())
 
     def cell_double_clicked(self, index):
         """
@@ -364,6 +375,23 @@ siraj.  If not, see
             selected_indexes = [self.proxy_model.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
             if(len(selected_indexes) == 1):
                 self.go_to_prev_match(selected_indexes[0])
+        elif key == Qt.Key_C:
+            if(int(q_key_event.modifiers()) == (Qt.ControlModifier)):
+                selected_indexes = [self.proxy_model.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
+                self.prepare_clipboard_text()
+    
+    def prepare_clipboard_text(self):
+        selected_indexes = [self.proxy_model.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
+        if(len(selected_indexes) == 0):
+            clipboard_text = ""
+        elif(len(selected_indexes) == 1):
+            clipboard_text = self.user_interface.tblLogData.currentIndex().data()
+        else:
+            unique_rows_set = set([index.row() for index in sorted(selected_indexes)])
+            row_text_list = [str(row) + "," + ",".join([self.proxy_model.index(row, column, QModelIndex()).data() for column in range(self.proxy_model.columnCount())]) for row in sorted(unique_rows_set)]
+            clipboard_text = "\n".join(row_text_list)
+        self.clipboard.setText(clipboard_text)
+
 
     def go_to_prev_match(self, selected_cell):
         """
