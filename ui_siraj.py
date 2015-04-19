@@ -81,7 +81,7 @@ class Ui_Siraj(object):
         self.lytSource = QtGui.QVBoxLayout(self.verticalLayoutWidget_2)
         self.lytSource.setMargin(0)
         self.lytSource.setObjectName(_fromUtf8("lytSource"))
-        self.txtSourceFile = QtGui.QTextEdit(self.verticalLayoutWidget_2)
+        self.txtSourceFile = QtGui.QPlainTextEdit(self.verticalLayoutWidget_2)
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Courier New"))
         self.txtSourceFile.setFont(font)

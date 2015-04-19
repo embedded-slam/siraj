@@ -36,6 +36,7 @@ from logging import CRITICAL
 from functools import partial
 import functools
 import json
+from sj_syntax_highlight import PythonHighlighter
 
 class LogSParserMain(QMainWindow):
     """
@@ -257,10 +258,11 @@ siraj.  If not, see
             self.left_clicked_cell_index = index
     
             if(index.column() == self.file_line_column):
+                highlight = PythonHighlighter(self.user_interface.txtSourceFile.document())
                 [file, line] = index.data().split(":")
                 full_path = "{}{}".format(self.root_prefix, file.strip())
                 file_contents = "\n".join(["{0:4d}: {1:s}".format(i + 1, line) for(i, line) in enumerate(open(full_path).read().splitlines())])
-                self.user_interface.txtSourceFile.setText(file_contents)
+                self.user_interface.txtSourceFile.setPlainText(file_contents)
                 line_number = int(line) - 1
                 logging.debug("file:line is %s:%s", file, line)
                 text_block = self.user_interface.txtSourceFile.document().findBlockByLineNumber(line_number)
