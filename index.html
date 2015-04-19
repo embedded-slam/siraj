@@ -40,7 +40,7 @@
       </nav>
       <section>
         <p><em>Siraj</em> is a cross-platform textual log parser that was built using Python3 and Qt<br>
-<img src="https://github.com/embedded-slam/siraj/blob/master/siraj_screenshot.png" alt=""></p>
+<img src="https://raw.githubusercontent.com/embedded-slam/siraj/master/siraj_screenshot.png" alt="Siraj UI"></p>
 
 <h1>
 <a id="problem" class="anchor" href="#problem" aria-hidden="true"><span class="octicon octicon-link"></span></a>Problem</h1>
@@ -49,7 +49,7 @@
 editor without color coding or filtering can be really frustrating job.</p>
 
 <h1>
-<a id="solution-as-offered-by-siraj" class="anchor" href="#solution-as-offered-by-siraj" aria-hidden="true"><span class="octicon octicon-link"></span></a>Solution [as offered by <em>Siraj</em>]</h1>
+<a id="solution" class="anchor" href="#solution" aria-hidden="true"><span class="octicon octicon-link"></span></a>Solution</h1>
 
 <p><em>Siraj</em>  aims to facilitate textual logs analysis by presenting the textual
 log in a user-friendly tabular format, it also allows the user to show/hide rows 
@@ -59,7 +59,7 @@ that generated it to give context while analyzing the log.</p>
 <hr>
 
 <h1>
-<a id="quick-feature-list" class="anchor" href="#quick-feature-list" aria-hidden="true"><span class="octicon octicon-link"></span></a>Quick feature list</h1>
+<a id="quick-feature-list" class="anchor" href="#quick-feature-list" aria-hidden="true"><span class="octicon octicon-link"></span></a>Quick Feature List</h1>
 
 <ol>
 <li> Parsing any textual log and present matched fields as a <strong>tabular format</strong>.</li>
@@ -79,7 +79,7 @@ that generated it to give context while analyzing the log.</p>
 <a id="running-siraj" class="anchor" href="#running-siraj" aria-hidden="true"><span class="octicon octicon-link"></span></a>Running Siraj</h1>
 
 <h2>
-<a id="from-the-source-preferred-method" class="anchor" href="#from-the-source-preferred-method" aria-hidden="true"><span class="octicon octicon-link"></span></a>From the source (Preferred method)</h2>
+<a id="from-source-preferred" class="anchor" href="#from-source-preferred" aria-hidden="true"><span class="octicon octicon-link"></span></a>From Source (Preferred)</h2>
 
 <p>Before you use <em>Siraj</em> you'll need to install and configure the following based
 on your target system:</p>
@@ -96,7 +96,7 @@ follows:</p>
 <p><code>python siraj.py</code> </p>
 
 <h2>
-<a id="from-the-binaries" class="anchor" href="#from-the-binaries" aria-hidden="true"><span class="octicon octicon-link"></span></a>From the binaries</h2>
+<a id="from-binaries" class="anchor" href="#from-binaries" aria-hidden="true"><span class="octicon octicon-link"></span></a>From Binaries</h2>
 
 <p>If you only need to use the tool and don't have/need python or Qt, you can 
 download one of the following archives based on your system. </p>
@@ -241,6 +241,9 @@ Jumps to the previous matching cell (if one exists) from the same column. Works 
 
 <p><code>N</code><br>
 Jumps to the next matching cell (if one exists) from the same column. Works only when a single cell is selected.  </p>
+
+<p><code>Ctrl+C</code><br>
+Copies the selected cell text into the clipboard. If a single cell is selected when the copy is performed, the text of that cell is copied into clipboard. If multiple cells are selected at the time of copy, then the whole rows representing the selected cells are copied into the clipboard.</p>
 
 <p><code>Selecting two cells from different columns</code><br>
 will show the elapsed time between the two logs. This is only applicable if the log fields contains a time field and it is specified in the configuration via <code>time_stamp_column_number_zero_based</code>.  </p>
