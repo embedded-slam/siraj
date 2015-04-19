@@ -337,7 +337,7 @@ siraj.  If not, see
             self.unhide_menu.setEnabled(True)
             for filtered_string in filtered_out_set:
                 temp_action = QAction(filtered_string, self.unhide_menu);
-                temp_action.triggered.connect(functools.partial(self.context_menu_unhide_selected_rows, filtered_string))
+                temp_action.triggered.connect(functools.partial(self.unhide_selected_rows_only_based_on_column, self.right_clicked_cell_index.column(), filtered_string))
                 self.unhide_menu.addAction(temp_action)
         else:
             self.unhide_menu.setEnabled(False)
@@ -460,12 +460,6 @@ siraj.  If not, see
             self.per_column_filter_in_set_list[column].add(index.data())
         self.apply_filter(is_filtering_mode_out=False)    
         self.update_status_bar()   
-        
-    def context_menu_unhide_selected_rows(self, filtered_out_string):
-        """
-        Unhides the selected string from the right clicked column
-        """
-        self.unhide_selected_rows_only_based_on_column(self.right_clicked_cell_index.column(), filtered_out_string)
 
     def unhide_selected_rows_only_based_on_column(self, filter_column, filtered_out_string):
         """
