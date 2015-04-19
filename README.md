@@ -6,7 +6,7 @@
 Textual logs can sometimes be huge. And going through them with standard text 
 editor without color coding or filtering can be really frustrating job.
 
-# Solution [as offered by *Siraj*]
+# Solution
 *Siraj*  aims to facilitate textual logs analysis by presenting the textual
 log in a user-friendly tabular format, it also allows the user to show/hide rows 
 based on their contents. As well as linking each log trace with the source line
@@ -14,7 +14,7 @@ that generated it to give context while analyzing the log.
 
 ------------------------------------------------------------
 
-# Quick feature list
+# Quick Feature List
 1.  Parsing any textual log and present matched fields as a **tabular format**.
 2.  Matching logs is based on **Regular Expressions** for maximum flexibility.
 3.  **Conditionally formatting** the table cells foreground/background colors based on the contents.
@@ -29,7 +29,7 @@ that generated it to give context while analyzing the log.
 ------------------------------------------------------------
 
 # Running Siraj
-## From the source (Preferred method)
+## From Source (Preferred)
 
 Before you use *Siraj* you'll need to install and configure the following based
 on your target system:
@@ -43,7 +43,7 @@ follows:
 
 `python siraj.py` 
 
-## From the binaries
+## From Binaries
 If you only need to use the tool and don't have/need python or Qt, you can 
 download one of the following archives based on your system. 
                  
@@ -175,6 +175,9 @@ Jumps to the previous matching cell (if one exists) from the same column. Works 
 `N`  
 Jumps to the next matching cell (if one exists) from the same column. Works only when a single cell is selected.  
 
+`Ctrl+C`  
+Copies the selected cell text into the clipboard. If a single cell is selected when the copy is performed, the text of that cell is copied into clipboard. If multiple cells are selected at the time of copy, then the whole rows representing the selected cells are copied into the clipboard.
+
 `Selecting two cells from different columns`  
 will show the elapsed time between the two logs. This is only applicable if the log fields contains a time field and it is specified in the configuration via `time_stamp_column_number_zero_based`.  
 
@@ -183,3 +186,5 @@ This will display the code that generated the current log in the `TextView` at t
 
 `Double-clicking a cell from the file/line column`  
 This will open the file that generated the current log and highlight the current line in an external text editor for more appealing code view (eg. syntax highlighting). Currently this text editor is hard-coded to gedit which only works on Linux AFAIK. [Issue #15](https://github.com/embedded-slam/siraj/issues/15 "Issue #15") is there to fix that.  
+
+
