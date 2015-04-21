@@ -36,7 +36,12 @@ from logging import CRITICAL
 from functools import partial
 import functools
 import json
-from sj_syntax_highlight import PythonHighlighter
+# from sj_syntax_highlight import PythonHighlighter
+from pygments import highlight
+from pygments.lexers import PythonLexer
+from pygments.formatters import HtmlFormatter
+from pip.util import file_contents
+from pygments.lexers import get_lexer_by_name
 
 class LogSParserMain(QMainWindow):
     """
@@ -253,31 +258,52 @@ siraj.  If not, see
         """
         index = self.proxy_model.mapToSource(index)
         if(self.is_source_visible):
-            self.user_interface.txtSourceFile.setTextCursor(QTextCursor())
+#             self.user_interface.txtSourceFile.setTextCursor(QTextCursor())
             logging.info("cell[%d][%d] = %s", index.row(), index.column(), index.data())
             self.left_clicked_cell_index = index
     
             if(index.column() == self.file_line_column):
-                highlight = PythonHighlighter(self.user_interface.txtSourceFile.document())
+#                 highlight = PythonHighlighter(self.user_interface.txtSourceFile.document())
                 [file, line] = index.data().split(":")
                 full_path = "{}{}".format(self.root_prefix, file.strip())
-                file_contents = "\n".join(["{0:4d}: {1:s}".format(i + 1, line) for(i, line) in enumerate(open(full_path).read().splitlines())])
-                self.user_interface.txtSourceFile.setPlainText(file_contents)
-                line_number = int(line) - 1
-                logging.debug("file:line is %s:%s", file, line)
-                text_block = self.user_interface.txtSourceFile.document().findBlockByLineNumber(line_number)
-                text_cursor = self.user_interface.txtSourceFile.textCursor()
-                text_cursor.setPosition(text_block.position())
-                self.user_interface.txtSourceFile.setFocus()
-                text_format = QTextCharFormat()
-                text_format.setBackground(QBrush(QColor("yellow")))
-                text_cursor.movePosition(QTextCursor.EndOfLine, 1)
-                text_cursor.mergeCharFormat(text_format)
-                self.user_interface.txtSourceFile.setTextCursor(text_cursor)
-                self.user_interface.dckSource.setWindowTitle(full_path)
-                self.user_interface.tblLogData.setFocus()
-        
+                self.load_source_file(full_path, line)
+                self.user_interface.tblLogData.setFocus() 
         self.update_status_bar()
+        
+    def load_source_file(self, file, line):    
+        code = open(file).read()
+        lexer = get_lexer_by_name("python", stripall=True)
+        formatter = HtmlFormatter(
+                                  linenos = True,
+                                  full = True,
+                                  style = "vs",
+                                  hl_lines = [line])
+        result = highlight(code, lexer, formatter)
+        self.user_interface.txtSourceFile.setHtml(result)
+        
+        text_block = self.user_interface.txtSourceFile.document().findBlockByLineNumber(int(line))      
+        text_cursor = self.user_interface.txtSourceFile.textCursor()
+        text_cursor.setPosition(text_block.position())        
+        self.user_interface.txtSourceFile.setTextCursor(text_cursor)
+        self.user_interface.txtSourceFile.ensureCursorVisible()
+
+        
+#                 file_contents = "\n".join(["{0:4d}: {1:s}".format(i + 1, line) for(i, line) in enumerate(open(file).read().splitlines())])
+
+#         self.user_interface.txtSourceFile.setHtml(formatted_code)
+#         self.user_interface.txtSourceFile.setPlainText(file_contents)
+#         line_number = int(line) - 1
+#         logging.debug("file:line is %s:%s", file, line)
+#         text_block = self.user_interface.txtSourceFile.document().findBlockByLineNumber(line_number)
+#         text_cursor = self.user_interface.txtSourceFile.textCursor()
+#         text_cursor.setPosition(text_block.position())
+#         self.user_interface.txtSourceFile.setFocus()
+#         text_format = QTextCharFormat()
+#         text_format.setBackground(QBrush(QColor("yellow")))
+#         text_cursor.movePosition(QTextCursor.EndOfLine, 1)
+#         text_cursor.mergeCharFormat(text_format)
+#         self.user_interface.txtSourceFile.setTextCursor(text_cursor)
+#         self.user_interface.dckSource.setWindowTitle(full_path)
     
     def get_selected_indexes(self):
         """
