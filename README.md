@@ -185,6 +185,6 @@ will show the elapsed time between the two logs. This is only applicable if the 
 This will display the code that generated the current log in the `TextView` at the bottom.  
 
 `Double-clicking a cell from the file/line column`  
-This will open the file that generated the current log and highlight the current line in an external text editor for more appealing code view (eg. syntax highlighting). Currently this text editor is hard-coded to gedit which only works on Linux AFAIK. [Issue #15](https://github.com/embedded-slam/siraj/issues/15 "Issue #15") is there to fix that.  
+This will open the file that generated the current log and highlight the current line in an external text editor for more additional facilities (eg. source code cross-reference). Currently this text editor is hard-coded to gedit which only works on Linux AFAIK.
 
 
