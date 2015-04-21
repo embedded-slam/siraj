@@ -22,19 +22,26 @@
 import re
 import os
 import sys
-from PyQt4.QtCore import Qt
+from PyQt4.QtCore import (Qt, QModelIndex)
 from PyQt4.QtGui import (QMainWindow, QFileDialog, QApplication, 
 QSortFilterProxyModel, QTextCursor, QTextCharFormat, QBrush, QColor, QMenu, 
 QAction, QCursor, QMessageBox, QItemSelectionModel)
 from subprocess import call
 from sj_configs import LogSParserConfigs
 from sj_table_model import MyTableModel
+from sj_filter_proxy import MySortFilterProxyModel
 from ui_siraj import Ui_Siraj  # import generated interface
 import logging
 from logging import CRITICAL
 from functools import partial
 import functools
 import json
+# from sj_syntax_highlight import PythonHighlighter
+from pygments import highlight
+from pygments.lexers import PythonLexer
+from pygments.formatters import HtmlFormatter
+from pip.util import file_contents
+from pygments.lexers import get_lexer_by_name
 
 class LogSParserMain(QMainWindow):
     """
@@ -42,7 +49,8 @@ class LogSParserMain(QMainWindow):
     the log data in a tabular format as well as allowing the user to filter the
     logs displayed.
     """
-    items_to_hide_per_column = list()
+    per_column_filter_out_set_list = list()
+    per_column_filter_in_set_list = list()
     header = list()
     table_conditional_formatting_config = None
     def __init__(self):
@@ -62,6 +70,7 @@ class LogSParserMain(QMainWindow):
         self.user_interface.toolbar.addAction(self.user_interface.tbrActionToggleSourceView)
         
         self.user_interface.mnuActionOpen.triggered.connect(self.menu_open_file)
+        self.user_interface.mnuActionLoadConfigs.triggered.connect(self.menu_load_configs)
         self.user_interface.mnuActionExit.triggered.connect(self.menu_exit)
         self.user_interface.mnuActionAbout.triggered.connect(self.menu_about)
         self.user_interface.centralwidget.setLayout(self.user_interface.verticalLayout)
@@ -72,14 +81,8 @@ class LogSParserMain(QMainWindow):
         self.user_interface.tblLogData.setContextMenuPolicy(Qt.CustomContextMenu)
         self.user_interface.tblLogData.customContextMenuRequested.connect(self.cell_right_clicked)
         self.user_interface.txtSourceFile.setReadOnly(True)
-        self.config = LogSParserConfigs("siraj_configs.json")
-        self.log_trace_regex_pattern = self.config.get_config_item("log_row_pattern")
-        self.full_path = self.config.get_config_item("log_file_full_path")
-        self.file_line_column = self.config.get_config_item("file_line_column_number_zero_based")
-        self.root_prefix = self.config.get_config_item("root_source_path_prefix")
-        self.time_stamp_column = self.config.get_config_item("time_stamp_column_number_zero_based")
-        self.table_conditional_formatting_config = self.config.get_config_item("table_conditional_formatting_config")
-        self.load_log_file()
+        self.load_configuration_file()
+
         
         self.is_table_visible = True
         self.is_source_visible = True
@@ -88,29 +91,46 @@ class LogSParserMain(QMainWindow):
         self.user_interface.tblLogData.resizeRowsToContents() 
         
         self.setup_context_menu()
+        
+        self.clipboard = QApplication.clipboard()
+        self.is_filtering_mode_out = True
 
-
+    def load_configuration_file(self, config_file_path="siraj_configs.json"):
+        self.config = LogSParserConfigs(config_file_path)
+        self.log_trace_regex_pattern = self.config.get_config_item("log_row_pattern")
+        self.log_file_full_path = self.config.get_config_item("log_file_full_path")
+        self.file_line_column = self.config.get_config_item("file_line_column_number_zero_based")
+        self.root_prefix = self.config.get_config_item("root_source_path_prefix")
+        self.time_stamp_column = self.config.get_config_item("time_stamp_column_number_zero_based")
+        self.table_conditional_formatting_config = self.config.get_config_item("table_conditional_formatting_config")
+        self.load_log_file(self.log_file_full_path)
+        
     def setup_context_menu(self):
         self.menuFilter = QMenu(self)
         
         self.hide_action                 = QAction('Hide selected values', self)
         self.show_only_action            = QAction('Show only selected values', self)
         self.clear_all_filters_action    = QAction('Clear all filters', self)
+        self.copy_selection_action       = QAction('Copy selection', self)
        
         self.unhide_menu = QMenu('Unhide item from selected column', self.menuFilter)
 
-        self.hide_action.triggered.connect(self.context_menu_hide_selected_rows)
-        self.show_only_action.triggered.connect(self.context_menu_show_selected_rows_only)
+        self.hide_action.triggered.connect(self.hide_rows_based_on_selected_cells)
+        self.show_only_action.triggered.connect(self.show_rows_based_on_selected_cells)
         self.clear_all_filters_action.triggered.connect(self.clear_all_filters)
+        self.copy_selection_action.triggered.connect(self.prepare_clipboard_text)
         
         self.menuFilter.addAction(self.hide_action)
         self.menuFilter.addMenu(self.unhide_menu)
         self.menuFilter.addAction(self.show_only_action)
         self.menuFilter.addAction(self.clear_all_filters_action)
-        
+        self.menuFilter.addSeparator()
+        self.menuFilter.addAction(self.copy_selection_action)
+
         self.hide_action.setShortcut('H')
         self.show_only_action.setShortcut('O')
         self.clear_all_filters_action.setShortcut('Del')
+        self.copy_selection_action.setShortcut("Ctrl+C")
         
     def toggle_source_view(self):
         self.is_source_visible = not self.is_source_visible
@@ -159,43 +179,46 @@ siraj.  If not, see
         """
         Handles the open menu clicked event.
         """
-        self.full_path = ""
-        self.load_log_file()
+        self.log_file_full_path = QFileDialog.getOpenFileName(
+            self,
+            'Open Log File',
+            os.getcwd())
+        if(self.log_file_full_path != ''):
+            self.load_log_file(self.log_file_full_path)
         
-    def load_log_file(self):
+    def menu_load_configs(self):
+        """
+        Loads a new configuration file.
+        """
+        self.config_file_full_path = QFileDialog.getOpenFileName(
+            self,
+            'Open Config File',
+            os.getcwd())
+        if(self.config_file_full_path != ''):
+            self.load_configuration_file(self.config_file_full_path)
+            
+        
+    def load_log_file(self, log_file_full_path):
         """
         Loads the given log file into the table.
-        
-        If no file was specified, the function triggers the open file dialog, so
-        that the user can select a log file to load.
         """
-        if self.full_path == "":
-            self.full_path = QFileDialog.getOpenFileName(
-                self,
-                'Open file',
-                os.getcwd())
-        with open(self.full_path, "r") as log_file_handle:
+
+        with open(log_file_full_path, "r") as log_file_handle:
             log_file_content_lines = log_file_handle.read().splitlines()
-            
-#         self.table_data = []
-#         for log_line in log_file_content_lines:
-#             m = re.match(self.log_trace_regex_pattern, log_line)
-#             if(m is not None):
-#                 print(list(m.groups()))
-#                 self.table_data.append(sorted(list(m.groups()), key=m.start))
-#                 
                 
         self.table_data = [list(re.match(self.log_trace_regex_pattern, line).groups()) for line in log_file_content_lines if(re.match(self.log_trace_regex_pattern, line) is not None)]
         m = re.match(self.log_trace_regex_pattern, log_file_content_lines[1])
         self.header = [group_name for group_name in sorted(m.groupdict().keys(), key=lambda k: m.start(k))]
         self.table_model = MyTableModel(self.table_data, self.header, self.table_conditional_formatting_config, self)
         logging.info("Headers: %s", self.header)
-        logging.info("%s has %d lines", self.full_path, len(self.table_data))
-        self.proxy_model = QSortFilterProxyModel(self)
+        logging.info("%s has %d lines", self.log_file_full_path, len(self.table_data))
+        self.proxy_model = MySortFilterProxyModel(self)
         self.proxy_model.setSourceModel(self.table_model)
         self.user_interface.tblLogData.setModel(self.proxy_model)
-        if(len(self.items_to_hide_per_column) == 0):
-            self.items_to_hide_per_column = [[] for column in range(len(self.table_data[0]))]
+        if(len(self.per_column_filter_out_set_list) == 0):
+            self.per_column_filter_out_set_list = [set() for column in range(len(self.table_data[0]))]
+        if(len(self.per_column_filter_in_set_list) == 0):
+            self.per_column_filter_in_set_list = [set() for column in range(len(self.table_data[0]))]
         
         self.extract_column_dictionaries(self.header, self.table_data)    
     
@@ -222,7 +245,6 @@ siraj.  If not, see
                 if(log[column] not in self.columns_dict[column]):
                     self.columns_dict[column][log[column]] = []
                 self.columns_dict[column][log[column]].append(row)
-#         print(json.dumps(self.columns_dict, sort_keys=True, indent=4, separators=(',', ': ')))       
     
     def cell_left_clicked(self, index):
         """
@@ -236,36 +258,66 @@ siraj.  If not, see
         """
         index = self.proxy_model.mapToSource(index)
         if(self.is_source_visible):
-            self.user_interface.txtSourceFile.setTextCursor(QTextCursor())
+#             self.user_interface.txtSourceFile.setTextCursor(QTextCursor())
             logging.info("cell[%d][%d] = %s", index.row(), index.column(), index.data())
             self.left_clicked_cell_index = index
     
             if(index.column() == self.file_line_column):
+#                 highlight = PythonHighlighter(self.user_interface.txtSourceFile.document())
                 [file, line] = index.data().split(":")
                 full_path = "{}{}".format(self.root_prefix, file.strip())
-                file_contents = "\n".join(["{0:4d}: {1:s}".format(i + 1, line) for(i, line) in enumerate(open(full_path).read().splitlines())])
-                self.user_interface.txtSourceFile.setText(file_contents)
-                line_number = int(line) - 1
-                logging.debug("file:line is %s:%s", file, line)
-                text_block = self.user_interface.txtSourceFile.document().findBlockByLineNumber(line_number)
-                text_cursor = self.user_interface.txtSourceFile.textCursor()
-                text_cursor.setPosition(text_block.position())
-                self.user_interface.txtSourceFile.setFocus()
-                text_format = QTextCharFormat()
-                text_format.setBackground(QBrush(QColor("yellow")))
-                text_cursor.movePosition(QTextCursor.EndOfLine, 1)
-                text_cursor.mergeCharFormat(text_format)
-                self.user_interface.txtSourceFile.setTextCursor(text_cursor)
-                self.user_interface.dckSource.setWindowTitle(full_path)
-                self.user_interface.tblLogData.setFocus()
-        
+                self.load_source_file(full_path, line)
+                self.user_interface.tblLogData.setFocus() 
         self.update_status_bar()
+        
+    def load_source_file(self, file, line):    
+        code = open(file).read()
+        lexer = get_lexer_by_name("python", stripall=True)
+        formatter = HtmlFormatter(
+                                  linenos = True,
+                                  full = True,
+                                  style = "vs",
+                                  hl_lines = [line])
+        result = highlight(code, lexer, formatter)
+        self.user_interface.txtSourceFile.setHtml(result)
+        
+        text_block = self.user_interface.txtSourceFile.document().findBlockByLineNumber(int(line))      
+        text_cursor = self.user_interface.txtSourceFile.textCursor()
+        text_cursor.setPosition(text_block.position())        
+        self.user_interface.txtSourceFile.setTextCursor(text_cursor)
+        self.user_interface.txtSourceFile.ensureCursorVisible()
+
+        
+#                 file_contents = "\n".join(["{0:4d}: {1:s}".format(i + 1, line) for(i, line) in enumerate(open(file).read().splitlines())])
+
+#         self.user_interface.txtSourceFile.setHtml(formatted_code)
+#         self.user_interface.txtSourceFile.setPlainText(file_contents)
+#         line_number = int(line) - 1
+#         logging.debug("file:line is %s:%s", file, line)
+#         text_block = self.user_interface.txtSourceFile.document().findBlockByLineNumber(line_number)
+#         text_cursor = self.user_interface.txtSourceFile.textCursor()
+#         text_cursor.setPosition(text_block.position())
+#         self.user_interface.txtSourceFile.setFocus()
+#         text_format = QTextCharFormat()
+#         text_format.setBackground(QBrush(QColor("yellow")))
+#         text_cursor.movePosition(QTextCursor.EndOfLine, 1)
+#         text_cursor.mergeCharFormat(text_format)
+#         self.user_interface.txtSourceFile.setTextCursor(text_cursor)
+#         self.user_interface.dckSource.setWindowTitle(full_path)
+    
+    def get_selected_indexes(self):
+        """
+        Returns a list of the currently selected indexes mapped to the source numbering.
+        
+        mapToSource is needed to retrive the actual row number regardless of whether filtering is applied or not.
+        """
+        return [self.proxy_model.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
                     
     def update_status_bar(self):
         """
         Updates the status bar with relevant informations
         """
-        selected_indexes = [self.proxy_model.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
+        selected_indexes = self.get_selected_indexes()
         
         if(len(selected_indexes) == 1):
             selected_cell_index = selected_indexes[0]
@@ -293,25 +345,31 @@ siraj.  If not, see
         """
         index = self.proxy_model.mapToSource(
             self.user_interface.tblLogData.indexAt(point))
-        row = index.row()
-        column = index.column()
-        cell_text = self.table_data[row][column].strip()
-        logging.debug("Cell[%d, %d] was right-clicked. Contents = %s", row, column, index.data())
+        logging.debug("Cell[%d, %d] was right-clicked. Contents = %s", index.row(), index.column(), index.data())
 
+        self.right_clicked_cell_index = index
+        self.populate_unhide_context_menu(index.column())
 
+        self.prepare_clipboard_text()
+        
+        self.menuFilter.popup(QCursor.pos())
+        
+    def populate_unhide_context_menu(self, column):    
         self.unhide_menu.clear()
-        if(len(self.items_to_hide_per_column[column]) > 0):
+        if(self.is_filtering_mode_out):
+            filtered_out_set = self.per_column_filter_out_set_list[column]
+        else:
+            filtered_out_set = set(self.columns_dict[column].keys()) - self.per_column_filter_in_set_list[column]
+        
+        if(len(filtered_out_set) > 0):
             self.unhide_menu.setEnabled(True)
-            for filtered_string in self.items_to_hide_per_column[column]:
+            for filtered_string in filtered_out_set:
                 temp_action = QAction(filtered_string, self.unhide_menu);
-                temp_action.triggered.connect(functools.partial(self.context_menu_unhide_selected_rows, filtered_string))
+                temp_action.triggered.connect(functools.partial(self.unhide_selected_rows_only_based_on_column, self.right_clicked_cell_index.column(), filtered_string))
                 self.unhide_menu.addAction(temp_action)
         else:
             self.unhide_menu.setEnabled(False)
-
-
-        self.menuFilter.popup(QCursor.pos())
-        self.right_clicked_cell_index = index
+            
 
     def cell_double_clicked(self, index):
         """
@@ -342,17 +400,34 @@ siraj.  If not, see
             logging.info("Delete key pressed while in the table. Clear all filters")
             self.clear_all_filters()
         elif key == Qt.Key_H:
-            self.hide_selected_rows_based_on_column(self.left_clicked_cell_index.column())
+            self.hide_rows_based_on_selected_cells()
         elif key == Qt.Key_O:
-            self.show_selected_rows_only_based_on_column(self.left_clicked_cell_index.column())
+            self.show_rows_based_on_selected_cells()
         elif key == Qt.Key_N:
-            selected_indexes = [self.proxy_model.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
+            selected_indexes = self.get_selected_indexes()
             if(len(selected_indexes) == 1):
                 self.go_to_next_match(selected_indexes[0])        
         elif key == Qt.Key_P:
-            selected_indexes = [self.proxy_model.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
+            selected_indexes = self.get_selected_indexes()
             if(len(selected_indexes) == 1):
                 self.go_to_prev_match(selected_indexes[0])
+        elif key == Qt.Key_C:
+            if(int(q_key_event.modifiers()) == (Qt.ControlModifier)):
+                selected_indexes = self.get_selected_indexes()
+                self.prepare_clipboard_text()
+    
+    def prepare_clipboard_text(self):
+        selected_indexes = self.get_selected_indexes()
+        if(len(selected_indexes) == 0):
+            clipboard_text = ""
+        elif(len(selected_indexes) == 1):
+            clipboard_text = self.user_interface.tblLogData.currentIndex().data()
+        else:
+            unique_rows_set = set([index.row() for index in sorted(selected_indexes)])
+            row_text_list = [str(row) + "," + ",".join([self.proxy_model.index(row, column, QModelIndex()).data() for column in range(self.proxy_model.columnCount())]) for row in sorted(unique_rows_set)]
+            clipboard_text = "\n".join(row_text_list)
+        self.clipboard.setText(clipboard_text)
+
 
     def go_to_prev_match(self, selected_cell):
         """
@@ -387,58 +462,31 @@ siraj.  If not, see
         Clears all the current filter and return the table to its initial view.
         """
         self.proxy_model.setFilterFixedString("")
-        self.items_to_hide_per_column = [[] for column in range(len(self.table_data[0]))]
+        self.per_column_filter_out_set_list = [set() for column in range(len(self.table_data[0]))]
+        self.per_column_filter_in_set_list = [set() for column in range(len(self.table_data[0]))]
+        self.apply_filter(is_filtering_mode_out = True)
         
-    def context_menu_hide_selected_rows(self):
-        """
-        Handles the context menu clicked event to hide selected rows.
-        
-        The filtering works on one column only. That column is the one which
-        was right-clicked to show the context menu.
-        """
-        self.hide_selected_rows_based_on_column(self.right_clicked_cell_index.column())
-            
-    def context_menu_show_selected_rows_only(self):
-        """
-        Handles the context menu clicked event to show only selected rows. 
-                
-        The filtering works on one column only. That column is the one which
-        was right-clicked to show the context menu.
-        """
-        self.show_selected_rows_only_based_on_column(self.right_clicked_cell_index.column())
-    
-    def context_menu_unhide_selected_rows(self, filtered_out_string):
-        """
-        Unhides the selected string from the right clicked column
-        """
-        self.unhide_selected_rows_only_based_on_column(self.right_clicked_cell_index.column(), filtered_out_string)
-        
-    def hide_selected_rows_based_on_column(self, filter_column):
+    def hide_rows_based_on_selected_cells(self):
         """
         Hides the selected rows and any other rows with matching data.
-        
-        The filtering works on one column only.
         """
-        selected_indexes = [self.proxy_model.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
-        unique_items_to_hide_list = list(set([index.data() for index in selected_indexes if index.column() == filter_column]))
-        self.items_to_hide_per_column[filter_column].extend(unique_items_to_hide_list)
-        self.hide_filtered_out_entries(filter_column)    
+        selected_indexes = self.get_selected_indexes()
+        for index in selected_indexes:
+            column = index.column()
+            self.per_column_filter_out_set_list[column].add(index.data())
+        self.apply_filter(is_filtering_mode_out=True)    
         self.update_status_bar()   
             
-    def show_selected_rows_only_based_on_column(self, column):
+    def show_rows_based_on_selected_cells(self):
         """
         Shows the selected rows and any other rows with matching data only.
-        
-        The filtering works on one column only.
         """
-        selected_indexes = [self.proxy_model.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
-        filter_column = column
-        unique_items_to_show_list = list(set([index.data() for index in selected_indexes if index.column() == filter_column]))
-        logging.debug("Showing the following from column %s: %s", self.header[filter_column], unique_items_to_show_list)
-        regex_pattern_to_show = r"|".join([r"({})".format(re.escape(item)) for item in unique_items_to_show_list])    
-        logging.debug("Regex pattern to show: '%s'", regex_pattern_to_show)
-        self.proxy_model.setFilterKeyColumn(filter_column)
-        self.proxy_model.setFilterRegExp(regex_pattern_to_show)
+        selected_indexes = self.get_selected_indexes()
+        self.per_column_filter_in_set_list = [set() for column in range(len(self.table_data[0]))]
+        for index in selected_indexes:
+            column = index.column()
+            self.per_column_filter_in_set_list[column].add(index.data())
+        self.apply_filter(is_filtering_mode_out=False)    
         self.update_status_bar()   
 
     def unhide_selected_rows_only_based_on_column(self, filter_column, filtered_out_string):
@@ -447,26 +495,29 @@ siraj.  If not, see
         
         The filtering works on one column only.
         """
-        self.items_to_hide_per_column[filter_column].remove(filtered_out_string)
+        
+        if(self.is_filtering_mode_out):
+            self.per_column_filter_out_set_list[filter_column].remove(filtered_out_string)
+        else:
+            self.per_column_filter_in_set_list[filter_column].add(filtered_out_string)
+            
         logging.debug("Unhiding: %s", filtered_out_string)
-        self.hide_filtered_out_entries(filter_column)
+        self.apply_filter(self.is_filtering_mode_out)
         self.update_status_bar()   
         
-    def hide_filtered_out_entries(self, filter_column):    
+    def apply_filter(self, is_filtering_mode_out):    
         """
-        Hides the filtered out pattern from the given colum 
+        Applies the filter based on the given mode. 
         """
-        logging.debug("Hiding: %s", self.items_to_hide_per_column[filter_column])
-        if (len(self.items_to_hide_per_column[filter_column]) > 0):
-            regex_pattern_to_hide =  r"|".join([r"({})".format(re.escape(item)) for item in self.items_to_hide_per_column[filter_column]])    
-            regex_pattern_to_hide = r"^(?!{})".format(regex_pattern_to_hide)
-            logging.debug("Regex pattern to hide: %s", regex_pattern_to_hide)
+        self.is_filtering_mode_out = is_filtering_mode_out
+        if(is_filtering_mode_out):
+            self.proxy_model.setFilterOutList(self.per_column_filter_out_set_list)
         else:
-            regex_pattern_to_hide = ""
+            self.proxy_model.setFilterInList(self.per_column_filter_in_set_list)
         
-        self.proxy_model.setFilterKeyColumn(filter_column)
-        self.proxy_model.setFilterRegExp(regex_pattern_to_hide)    
-        
+        # This is just to trigger the proxy model to apply the filter    
+        self.proxy_model.setFilterKeyColumn(0)
+
 def main():
     logging.basicConfig(
         format='%(levelname)s||%(funcName)s||%(message)s||%(created)f||%(filename)s:%(lineno)s', 

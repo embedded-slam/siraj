@@ -30,10 +30,9 @@ class LogSParserConfigs(object):
     """
     
     config_items = {}
-    def __init__(self, config_file_path=""):
-        if(config_file_path != ""):
-            self.load_configs(config_file_path)
-            logging.info(config_file_path)
+    def __init__(self, config_file_path):
+        self.load_configs(config_file_path)
+        logging.info(config_file_path)
             
     def load_configs(self, config_file_path):
         """
