@@ -25,7 +25,7 @@ import sys
 from PyQt4.QtCore import (Qt, QModelIndex)
 from PyQt4.QtGui import (QMainWindow, QFileDialog, QApplication, 
 QSortFilterProxyModel, QTextCursor, QTextCharFormat, QBrush, QColor, QMenu, 
-QAction, QCursor, QMessageBox, QItemSelectionModel)
+QAction, QCursor, QMessageBox, QItemSelectionModel, QAbstractItemView)
 from subprocess import call
 from sj_configs import LogSParserConfigs
 from sj_table_model import MyTableModel
@@ -428,7 +428,26 @@ siraj.  If not, see
             clipboard_text = "\n".join(row_text_list)
         self.clipboard.setText(clipboard_text)
 
-
+            
+    def select_cell_by_row_and_column(self, row, column):
+        """
+        Select the cell identified by the given row and column and scroll the 
+        table view to make that cell in the middle of the visible part of the
+        table.
+        """
+        index = self.table_model.createIndex(row, column)
+        index = self.proxy_model.mapFromSource(index)
+        self.user_interface.tblLogData.setCurrentIndex(index)  
+        self.user_interface.tblLogData.scrollTo(index, hint = QAbstractItemView.PositionAtCenter);  
+        
+    def select_cell_by_index(self, index):        
+        """
+        Select a cell at the given index.
+        """
+        index = self.proxy_model.mapFromSource(index)
+        self.user_interface.tblLogData.setCurrentIndex(index)  
+        self.user_interface.tblLogData.scrollTo(index, hint = QAbstractItemView.PositionAtCenter);  
+        
     def go_to_prev_match(self, selected_cell):
         """
         Go to the prev cell that matches the currently selected cell in the 
@@ -438,10 +457,7 @@ siraj.  If not, see
         index = matches_list.index(selected_cell.row())
         if(index > 0):
             new_row = matches_list[index - 1]
-            new_index = self.table_model.createIndex(new_row, selected_cell.column())
-            new_index = self.proxy_model.mapFromSource(new_index)
-            self.user_interface.tblLogData.setCurrentIndex(new_index)
-
+            self.select_cell_by_row_and_column(new_row, selected_cell.column())
             
     def go_to_next_match(self, selected_cell):
         """
@@ -452,41 +468,81 @@ siraj.  If not, see
         index = matches_list.index(selected_cell.row())
         if(index < (len(matches_list) - 1)):
             new_row = matches_list[index + 1]
-            new_index = self.table_model.createIndex(new_row, selected_cell.column())
-            new_index = self.proxy_model.mapFromSource(new_index)
-            self.user_interface.tblLogData.setCurrentIndex(new_index)
-
+            self.select_cell_by_row_and_column(new_row, selected_cell.column())
+    
+    
+    def get_top_left_selected_row_index(self):
+        """
+        This function return the top-left selected index from the selected list.
+        It's used for example to anchor the table view around the top-left 
+        selected cell following any change in the visible cells due to filtering
+        """
+        top_left_index = None
         
+        selected_indexes = self.get_selected_indexes()
+        if(len(selected_indexes) > 0):
+            selected_indexes = self.get_selected_indexes()
+            
+            top_left_index  = selected_indexes[0]
+            row             = top_left_index.row()
+            column          = top_left_index.column()
+            for index in selected_indexes[1:]:
+                if((index.row() < row) and (index.column() < column)):
+                    row     = index.row()
+                    column  = index.column()
+                    top_left_index = index
+        return top_left_index            
+            
     def clear_all_filters(self):
         """
         Clears all the current filter and return the table to its initial view.
         """
-        self.proxy_model.setFilterFixedString("")
+        top_selected_index = self.get_top_left_selected_row_index()
+        
         self.per_column_filter_out_set_list = [set() for column in range(len(self.table_data[0]))]
         self.per_column_filter_in_set_list = [set() for column in range(len(self.table_data[0]))]
         self.apply_filter(is_filtering_mode_out = True)
+        
+        if(top_selected_index != None):
+            self.select_cell_by_index(top_selected_index)
+      
+        self.update_status_bar()   
+
         
     def hide_rows_based_on_selected_cells(self):
         """
         Hides the selected rows and any other rows with matching data.
         """
+#         top_selected_index = self.get_top_left_selected_row_index()
+
         selected_indexes = self.get_selected_indexes()
         for index in selected_indexes:
             column = index.column()
             self.per_column_filter_out_set_list[column].add(index.data())
         self.apply_filter(is_filtering_mode_out=True)    
+        
+#         if(top_selected_index != None):
+#             self.select_cell_by_row_and_column(max(0, top_selected_index.row() - 1), top_selected_index.column())
+
         self.update_status_bar()   
             
     def show_rows_based_on_selected_cells(self):
         """
         Shows the selected rows and any other rows with matching data only.
         """
+        
+#         top_selected_index = self.get_top_left_selected_row_index()
+
         selected_indexes = self.get_selected_indexes()
         self.per_column_filter_in_set_list = [set() for column in range(len(self.table_data[0]))]
         for index in selected_indexes:
             column = index.column()
             self.per_column_filter_in_set_list[column].add(index.data())
-        self.apply_filter(is_filtering_mode_out=False)    
+        self.apply_filter(is_filtering_mode_out=False)   
+        
+#         if(top_selected_index != None):
+#             self.select_cell_by_index(top_selected_index) 
+            
         self.update_status_bar()   
 
     def unhide_selected_rows_only_based_on_column(self, filter_column, filtered_out_string):
@@ -495,7 +551,8 @@ siraj.  If not, see
         
         The filtering works on one column only.
         """
-        
+        top_selected_index = self.get_top_left_selected_row_index()
+
         if(self.is_filtering_mode_out):
             self.per_column_filter_out_set_list[filter_column].remove(filtered_out_string)
         else:
@@ -503,6 +560,10 @@ siraj.  If not, see
             
         logging.debug("Unhiding: %s", filtered_out_string)
         self.apply_filter(self.is_filtering_mode_out)
+        
+        if(top_selected_index != None):
+            self.select_cell_by_index(top_selected_index)
+        
         self.update_status_bar()   
         
     def apply_filter(self, is_filtering_mode_out):    
