@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'siraj.ui'
 #
-# Created: Fri Apr 17 06:56:18 2015
+# Created: Wed Apr 22 08:53:41 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -45,6 +45,7 @@ class Ui_Siraj(object):
         self.tblLogData.setProperty("showDropIndicator", False)
         self.tblLogData.setDragDropOverwriteMode(False)
         self.tblLogData.setSelectionBehavior(QtGui.QAbstractItemView.SelectItems)
+        self.tblLogData.setShowGrid(False)
         self.tblLogData.setObjectName(_fromUtf8("tblLogData"))
         self.tblLogData.horizontalHeader().setCascadingSectionResizes(False)
         self.tblLogData.horizontalHeader().setStretchLastSection(True)
