@@ -38,5 +38,6 @@
 				"background" : "darkCyan"
 			}			
 		}
-	}
+	},
+	"pygments_syntax_highlighting_style":"vs"
 }

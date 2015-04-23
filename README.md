@@ -107,7 +107,8 @@ Since JSON doesn't allow inline comments, the different configuration items are 
 					"background" : "darkCyan"
 				}			
 			}
-		}
+		},
+		"pygments_syntax_highlighting_style":"vs"
 	}
 ------------------------------------------------------------
 
@@ -150,6 +151,12 @@ This column can have formatting rules that overrides the default rule applied on
 A dictionary for the special formatting of cells falling under the `special_formatting_key_column`. The key is the text to match, and the value is a dictionary for the foreground and background colors to use with matching cells.
 
 Example for this can be seen in the _FUNCTION_  column in the screenshot above.
+
+`pygments_syntax_highlighting_style`  
+This is the pygment syntax highlighting style to use when (if) showing the source code corresponding to the selected log in the source view. At the time of writing this document, Pygments support the following styles:
+
+['paraiso-light', 'xcode', 'fruity', 'paraiso-dark', 'manni', 'colorful', 'perldoc', 'borland', 'friendly', 'murphy', 'vim', 'autumn', 'trac', 'default', 'rrt', 'pastie', 'monokai', 'igor', 'bw', 'emacs', 'tango', 'native', 'vs']
+
 
 ## Functions
 

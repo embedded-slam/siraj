@@ -103,6 +103,7 @@ class LogSParserMain(QMainWindow):
         self.root_prefix = self.config.get_config_item("root_source_path_prefix")
         self.time_stamp_column = self.config.get_config_item("time_stamp_column_number_zero_based")
         self.table_conditional_formatting_config = self.config.get_config_item("table_conditional_formatting_config")
+        self.syntax_highlighting_style = self.config.get_config_item("pygments_syntax_highlighting_style")
         self.load_log_file(self.log_file_full_path)
         
     def setup_context_menu(self):
@@ -284,7 +285,7 @@ siraj.  If not, see
         formatter = HtmlFormatter(
                                   linenos = True,
                                   full = True,
-                                  style = "vs",
+                                  style = self.syntax_highlighting_style,
                                   hl_lines = [line])
         result = highlight(code, lexer, formatter)
         self.user_interface.txtSourceFile.setHtml(result)
