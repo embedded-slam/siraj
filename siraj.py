@@ -41,7 +41,7 @@ from pygments import highlight
 from pygments.lexers import PythonLexer
 from pygments.formatters import HtmlFormatter
 from pip.util import file_contents
-from pygments.lexers import get_lexer_by_name
+from pygments.lexers import (get_lexer_by_name, get_lexer_for_filename)
 
 class LogSParserMain(QMainWindow):
     """
@@ -280,7 +280,7 @@ siraj.  If not, see
         
     def load_source_file(self, file, line):    
         code = open(file).read()
-        lexer = get_lexer_by_name("python", stripall=True)
+        lexer = get_lexer_for_filename(file)
         formatter = HtmlFormatter(
                                   linenos = True,
                                   full = True,
