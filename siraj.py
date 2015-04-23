@@ -61,7 +61,7 @@ class LogSParserMain(QMainWindow):
         self.user_interface = Ui_Siraj()  
         self.user_interface.setupUi(self) 
         
-        self.user_interface.tbrActionToggleSourceView = QAction('<>', self)
+        self.user_interface.tbrActionToggleSourceView = QAction('C/C++', self)
         self.user_interface.tbrActionToggleSourceView.triggered.connect(self.toggle_source_view)
         self.user_interface.tbrActionToggleSourceView.setToolTip("Toggle source code view")
         self.user_interface.tbrActionToggleSourceView.setCheckable(True)
@@ -423,8 +423,41 @@ siraj.  If not, see
             if(int(q_key_event.modifiers()) == (Qt.ControlModifier)):
                 selected_indexes = self.get_selected_indexes()
                 self.prepare_clipboard_text()
-    
+        elif key == Qt.Key_Up:
+            selected_indexes = self.get_selected_indexes()
+            if((len(selected_indexes) == 1)):
+                row     = selected_indexes[0].row()
+                column  = selected_indexes[0].column()
+                visible_row_list = self.proxy_model.getVisibleRowList()
+                index_of_current_row_in_visible_list = visible_row_list.index(row)
+                
+                if(index_of_current_row_in_visible_list > 0):
+                    self.select_cell_by_row_and_column(visible_row_list[index_of_current_row_in_visible_list - 1], column)
+        elif key == Qt.Key_Right:
+            selected_indexes = self.get_selected_indexes()
+            if((len(selected_indexes) == 1) and (selected_indexes[0].column() < (self.proxy_model.columnCount() - 1))):
+                self.select_cell_by_row_and_column(selected_indexes[0].row(), selected_indexes[0].column() + 1)
+        elif key == Qt.Key_Left:
+            selected_indexes = self.get_selected_indexes()
+            if((len(selected_indexes) == 1) and (selected_indexes[0].column() > 0)):
+                self.select_cell_by_row_and_column(selected_indexes[0].row(), selected_indexes[0].column() - 1)
+        elif key == Qt.Key_Down:
+            selected_indexes = self.get_selected_indexes()
+            if((len(selected_indexes) == 1)):
+                row     = selected_indexes[0].row()
+                column  = selected_indexes[0].column()
+                visible_row_list = self.proxy_model.getVisibleRowList()
+                index_of_current_row_in_visible_list = visible_row_list.index(row)
+                
+                if(index_of_current_row_in_visible_list < (len(visible_row_list) - 1)):
+                    self.select_cell_by_row_and_column(visible_row_list[index_of_current_row_in_visible_list + 1], column)
+#         elif key == Qt.Key_X:
+#             self.proxy_model.getVisibleRowList()
     def prepare_clipboard_text(self):
+        """
+        Copy the cell content to the clipboard if a single cell is selected. Or
+        Copy the whole rows if cells from multiple rows are selected.
+        """
         selected_indexes = self.get_selected_indexes()
         if(len(selected_indexes) == 0):
             clipboard_text = ""
@@ -436,17 +469,25 @@ siraj.  If not, see
             clipboard_text = "\n".join(row_text_list)
         self.clipboard.setText(clipboard_text)
 
-            
+    
+    def get_index_by_row_and_column(self, row, column):
+        """
+        Get the table index value by the given row and column
+        """
+        index = self.table_model.createIndex(row, column)
+        index = self.proxy_model.mapFromSource(index)         
+        return index
+           
     def select_cell_by_row_and_column(self, row, column):
         """
         Select the cell identified by the given row and column and scroll the 
         table view to make that cell in the middle of the visible part of the
         table.
         """
-        index = self.table_model.createIndex(row, column)
-        index = self.proxy_model.mapFromSource(index)
+        index = self.get_index_by_row_and_column(row, column)
         self.user_interface.tblLogData.setCurrentIndex(index)  
-        self.user_interface.tblLogData.scrollTo(index, hint = QAbstractItemView.PositionAtCenter);  
+        self.user_interface.tblLogData.scrollTo(index, hint = QAbstractItemView.PositionAtCenter)
+        self.update_status_bar()
         
     def select_cell_by_index(self, index):        
         """
@@ -454,7 +495,8 @@ siraj.  If not, see
         """
         index = self.proxy_model.mapFromSource(index)
         self.user_interface.tblLogData.setCurrentIndex(index)  
-        self.user_interface.tblLogData.scrollTo(index, hint = QAbstractItemView.PositionAtCenter);  
+        self.user_interface.tblLogData.scrollTo(index, hint = QAbstractItemView.PositionAtCenter)
+        self.update_status_bar()
         
     def go_to_prev_match(self, selected_cell):
         """
