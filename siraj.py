@@ -61,7 +61,7 @@ class LogSParserMain(QMainWindow):
         self.user_interface = Ui_Siraj()  
         self.user_interface.setupUi(self) 
         
-        self.user_interface.tbrActionToggleSourceView = QAction('<>', self)
+        self.user_interface.tbrActionToggleSourceView = QAction('C/C++', self)
         self.user_interface.tbrActionToggleSourceView.triggered.connect(self.toggle_source_view)
         self.user_interface.tbrActionToggleSourceView.setToolTip("Toggle source code view")
         self.user_interface.tbrActionToggleSourceView.setCheckable(True)
@@ -425,15 +425,14 @@ siraj.  If not, see
                 self.prepare_clipboard_text()
         elif key == Qt.Key_Up:
             selected_indexes = self.get_selected_indexes()
-            if((len(selected_indexes) == 1) and (selected_indexes[0].row() > 0)):
-                row     = selected_indexes[0].row() - 1 
+            if((len(selected_indexes) == 1)):
+                row     = selected_indexes[0].row()
                 column  = selected_indexes[0].column()
-                new_index = self.get_index_by_row_and_column(row, column)
-                while(self.user_interface.tblLogData.isIndexHidden(new_index) and (row > 0)):
-                    row -= 1
-                    new_index = self.get_index_by_row_and_column(row, column)
-
-                self.select_cell_by_index(new_index)
+                visible_row_list = self.proxy_model.getVisibleRowList()
+                index_of_current_row_in_visible_list = visible_row_list.index(row)
+                
+                if(index_of_current_row_in_visible_list > 0):
+                    self.select_cell_by_row_and_column(visible_row_list[index_of_current_row_in_visible_list - 1], column)
         elif key == Qt.Key_Right:
             selected_indexes = self.get_selected_indexes()
             if((len(selected_indexes) == 1) and (selected_indexes[0].column() < (self.proxy_model.columnCount() - 1))):
@@ -444,9 +443,16 @@ siraj.  If not, see
                 self.select_cell_by_row_and_column(selected_indexes[0].row(), selected_indexes[0].column() - 1)
         elif key == Qt.Key_Down:
             selected_indexes = self.get_selected_indexes()
-            if((len(selected_indexes) == 1) and (selected_indexes[0].row() < (self.proxy_model.rowCount() - 1))):
-                self.select_cell_by_row_and_column(selected_indexes[0].row() + 1, selected_indexes[0].column())
-                    
+            if((len(selected_indexes) == 1)):
+                row     = selected_indexes[0].row()
+                column  = selected_indexes[0].column()
+                visible_row_list = self.proxy_model.getVisibleRowList()
+                index_of_current_row_in_visible_list = visible_row_list.index(row)
+                
+                if(index_of_current_row_in_visible_list < (len(visible_row_list) - 1)):
+                    self.select_cell_by_row_and_column(visible_row_list[index_of_current_row_in_visible_list + 1], column)
+#         elif key == Qt.Key_X:
+#             self.proxy_model.getVisibleRowList()
     def prepare_clipboard_text(self):
         """
         Copy the cell content to the clipboard if a single cell is selected. Or
@@ -469,7 +475,7 @@ siraj.  If not, see
         Get the table index value by the given row and column
         """
         index = self.table_model.createIndex(row, column)
-        index = self.proxy_model.mapFromSource(index) 
+        index = self.proxy_model.mapFromSource(index)         
         return index
            
     def select_cell_by_row_and_column(self, row, column):

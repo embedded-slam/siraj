@@ -63,3 +63,7 @@ class MySortFilterProxyModel(QSortFilterProxyModel):
         self.filter_in_list = filter_in_list
         self.is_filter_out = False
         
+    def getVisibleRowList(self):
+        visible_row_list = [self.mapToSource(self.index(row, 0)).row() for row in range(self.rowCount())]
+        return visible_row_list
+    
