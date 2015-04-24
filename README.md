@@ -161,13 +161,13 @@ This is the pygment syntax highlighting style to use when (if) showing the sourc
 ## Functions
 
 
-`H`  
+`Ctrl+H`  
 Hides all the rows with fields that matches the selected cells(s).  
 
-`O`  
+`Ctrl+O`  
 Shows Only selected. Hides everything except rows with fields that matches the selected cell(s).  
 
-`Del`  
+`Ctrl+Del`  
 Clears all current filter.  
 
 The three options are also accessible via context menu. To unhide a previously hidden row, you can select the unhide option from the context menu for a list of hidden value of the current column, then select the value to unhide.  
@@ -176,10 +176,10 @@ When multiple cells are selected which belong to one or more column(s) and the h
 
 When multiple cells are selected which belong to one or more column(s) and the show-only option is triggered, then a row will be shown only if all of its fields(columns) matches the corresponding filtered-in column.
 
-`P`  
+`Ctrl+P`  
 Jumps to the previous matching cell (if one exists) from the same column. Works only when a single cell is selected.  
 
-`N`  
+`Ctrl+N`  
 Jumps to the next matching cell (if one exists) from the same column. Works only when a single cell is selected.  
 
 `Ctrl+C`  
