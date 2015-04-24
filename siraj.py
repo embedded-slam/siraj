@@ -25,7 +25,7 @@ import sys
 from PyQt4.QtCore import (Qt, QModelIndex)
 from PyQt4.QtGui import (QMainWindow, QFileDialog, QApplication, 
 QSortFilterProxyModel, QTextCursor, QTextCharFormat, QBrush, QColor, QMenu, 
-QAction, QCursor, QMessageBox, QItemSelectionModel, QAbstractItemView, QLineEdit)
+QAction, QCursor, QMessageBox, QItemSelectionModel, QAbstractItemView, QTableView, QLineEdit)
 from subprocess import call
 from sj_configs import LogSParserConfigs
 from sj_table_model import MyTableModel
@@ -161,9 +161,9 @@ class LogSParserMain(QMainWindow):
         self.menuFilter.addSeparator()
         self.menuFilter.addAction(self.copy_selection_action)
 
-        self.hide_action.setShortcut('H')
-        self.show_only_action.setShortcut('O')
-        self.clear_all_filters_action.setShortcut('Del')
+        self.hide_action.setShortcut('Ctrl+H')
+        self.show_only_action.setShortcut('Ctrl+O')
+        self.clear_all_filters_action.setShortcut('Ctrl+Del')
         self.copy_selection_action.setShortcut("Ctrl+C")
         
     def toggle_source_view(self):
@@ -329,24 +329,6 @@ siraj.  If not, see
         self.user_interface.txtSourceFile.setTextCursor(text_cursor)
         self.user_interface.txtSourceFile.ensureCursorVisible()
 
-        
-#                 file_contents = "\n".join(["{0:4d}: {1:s}".format(i + 1, line) for(i, line) in enumerate(open(file).read().splitlines())])
-
-#         self.user_interface.txtSourceFile.setHtml(formatted_code)
-#         self.user_interface.txtSourceFile.setPlainText(file_contents)
-#         line_number = int(line) - 1
-#         logging.debug("file:line is %s:%s", file, line)
-#         text_block = self.user_interface.txtSourceFile.document().findBlockByLineNumber(line_number)
-#         text_cursor = self.user_interface.txtSourceFile.textCursor()
-#         text_cursor.setPosition(text_block.position())
-#         self.user_interface.txtSourceFile.setFocus()
-#         text_format = QTextCharFormat()
-#         text_format.setBackground(QBrush(QColor("yellow")))
-#         text_cursor.movePosition(QTextCursor.EndOfLine, 1)
-#         text_cursor.mergeCharFormat(text_format)
-#         self.user_interface.txtSourceFile.setTextCursor(text_cursor)
-#         self.user_interface.dckSource.setWindowTitle(full_path)
-    
     def get_selected_indexes(self):
         """
         Returns a list of the currently selected indexes mapped to the source numbering.
@@ -438,58 +420,28 @@ siraj.  If not, see
         key = q_key_event.key()
         logging.info("Key = {}".format(key))
 
-        if key == Qt.Key_Delete:
-            logging.info("Delete key pressed while in the table. Clear all filters")
-            self.clear_all_filters()
-        elif key == Qt.Key_H:
-            self.hide_rows_based_on_selected_cells()
-        elif key == Qt.Key_O:
-            self.show_rows_based_on_selected_cells()
-        elif key == Qt.Key_N:
-            selected_indexes = self.get_selected_indexes()
-            if(len(selected_indexes) == 1):
-                self.go_to_next_match(selected_indexes[0])        
-        elif key == Qt.Key_P:
-            selected_indexes = self.get_selected_indexes()
-            if(len(selected_indexes) == 1):
-                self.go_to_prev_match(selected_indexes[0])
-        elif key == Qt.Key_C:
-            if(int(q_key_event.modifiers()) == (Qt.ControlModifier)):
+        if(int(q_key_event.modifiers()) == (Qt.ControlModifier)):
+            if key == Qt.Key_Delete:
+                logging.info("Delete key pressed while in the table. Clear all filters")
+                self.clear_all_filters()
+            elif key == Qt.Key_H:
+                self.hide_rows_based_on_selected_cells()
+            elif key == Qt.Key_O:
+                self.show_rows_based_on_selected_cells()
+            elif key == Qt.Key_N:
                 selected_indexes = self.get_selected_indexes()
-                self.prepare_clipboard_text()
-#         elif key == Qt.Key_Up:
-#             selected_indexes = self.get_selected_indexes()
-#             if((len(selected_indexes) == 1)):
-#                 row     = selected_indexes[0].row()
-#                 column  = selected_indexes[0].column()
-#                 visible_row_list = self.proxy_model.getVisibleRowList()
-#                 index_of_current_row_in_visible_list = visible_row_list.index(row)
-#                 
-#                 if(index_of_current_row_in_visible_list > 0):
-#                     self.select_cell_by_row_and_column(visible_row_list[index_of_current_row_in_visible_list - 1], column)
-#         elif key == Qt.Key_Right:
-#             selected_indexes = self.get_selected_indexes()
-#             if((len(selected_indexes) == 1) and (selected_indexes[0].column() < (self.proxy_model.columnCount() - 1))):
-#                 self.select_cell_by_row_and_column(selected_indexes[0].row(), selected_indexes[0].column() + 1)
-#         elif key == Qt.Key_Left:
-#             selected_indexes = self.get_selected_indexes()
-#             if((len(selected_indexes) == 1) and (selected_indexes[0].column() > 0)):
-#                 self.select_cell_by_row_and_column(selected_indexes[0].row(), selected_indexes[0].column() - 1)
-#         elif key == Qt.Key_Down:
-#             selected_indexes = self.get_selected_indexes()
-#             if((len(selected_indexes) == 1)):
-#                 row     = selected_indexes[0].row()
-#                 column  = selected_indexes[0].column()
-#                 visible_row_list = self.proxy_model.getVisibleRowList()
-#                 index_of_current_row_in_visible_list = visible_row_list.index(row)
-#                 
-#                 if(index_of_current_row_in_visible_list < (len(visible_row_list) - 1)):
-#                     self.select_cell_by_row_and_column(visible_row_list[index_of_current_row_in_visible_list + 1], column)
-
-
-
-#         elif key == Qt.Key_X:
-#             self.proxy_model.getVisibleRowList()
+                if(len(selected_indexes) == 1):
+                    self.go_to_next_match(selected_indexes[0])        
+            elif key == Qt.Key_P:
+                selected_indexes = self.get_selected_indexes()
+                if(len(selected_indexes) == 1):
+                    self.go_to_prev_match(selected_indexes[0])
+            elif key == Qt.Key_C:
+                    selected_indexes = self.get_selected_indexes()
+                    self.prepare_clipboard_text()
+        else:
+            QTableView.keyPressEvent(self.user_interface.tblLogData, q_key_event)
+            
     def prepare_clipboard_text(self):
         """
         Copy the cell content to the clipboard if a single cell is selected. Or
@@ -544,6 +496,7 @@ siraj.  If not, see
         index = matches_list.index(selected_cell.row())
         if(index > 0):
             new_row = matches_list[index - 1]
+            self.user_interface.tblLogData.clearSelection()
             self.select_cell_by_row_and_column(new_row, selected_cell.column())
             
     def go_to_next_match(self, selected_cell):
@@ -555,6 +508,7 @@ siraj.  If not, see
         index = matches_list.index(selected_cell.row())
         if(index < (len(matches_list) - 1)):
             new_row = matches_list[index + 1]
+            self.user_interface.tblLogData.clearSelection()
             self.select_cell_by_row_and_column(new_row, selected_cell.column())
     
     
