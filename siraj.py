@@ -66,8 +66,6 @@ class LogSParserMain(QMainWindow):
         self.user_interface.tbrActionToggleSourceView.setToolTip("Toggle source code view")
         self.user_interface.tbrActionToggleSourceView.setCheckable(True)
         self.user_interface.tbrActionToggleSourceView.setChecked(True)
-        self.user_interface.toolbar = self.addToolBar('Toolbar')
-        self.user_interface.toolbar.addAction(self.user_interface.tbrActionToggleSourceView)
         
         self.user_interface.mnuActionOpen.triggered.connect(self.menu_open_file)
         self.user_interface.mnuActionLoadConfigs.triggered.connect(self.menu_load_configs)
@@ -91,10 +89,16 @@ class LogSParserMain(QMainWindow):
         self.user_interface.tblLogData.resizeRowsToContents() 
         
         self.setup_context_menu()
+        self.setup_toolbar()
         
         self.clipboard = QApplication.clipboard()
         self.is_filtering_mode_out = True
 
+    def setup_toolbar(self):
+        self.user_interface.toolbar = self.addToolBar('Toolbar')
+        self.user_interface.toolbar.addAction(self.user_interface.tbrActionToggleSourceView)
+        self.user_interface.toolbar.setAllowedAreas(Qt.TopToolBarArea | Qt.BottomToolBarArea)
+        
     def load_configuration_file(self, config_file_path="siraj_configs.json"):
         self.config = LogSParserConfigs(config_file_path)
         self.log_trace_regex_pattern = self.config.get_config_item("log_row_pattern")
@@ -424,34 +428,37 @@ siraj.  If not, see
             if(int(q_key_event.modifiers()) == (Qt.ControlModifier)):
                 selected_indexes = self.get_selected_indexes()
                 self.prepare_clipboard_text()
-        elif key == Qt.Key_Up:
-            selected_indexes = self.get_selected_indexes()
-            if((len(selected_indexes) == 1)):
-                row     = selected_indexes[0].row()
-                column  = selected_indexes[0].column()
-                visible_row_list = self.proxy_model.getVisibleRowList()
-                index_of_current_row_in_visible_list = visible_row_list.index(row)
-                
-                if(index_of_current_row_in_visible_list > 0):
-                    self.select_cell_by_row_and_column(visible_row_list[index_of_current_row_in_visible_list - 1], column)
-        elif key == Qt.Key_Right:
-            selected_indexes = self.get_selected_indexes()
-            if((len(selected_indexes) == 1) and (selected_indexes[0].column() < (self.proxy_model.columnCount() - 1))):
-                self.select_cell_by_row_and_column(selected_indexes[0].row(), selected_indexes[0].column() + 1)
-        elif key == Qt.Key_Left:
-            selected_indexes = self.get_selected_indexes()
-            if((len(selected_indexes) == 1) and (selected_indexes[0].column() > 0)):
-                self.select_cell_by_row_and_column(selected_indexes[0].row(), selected_indexes[0].column() - 1)
-        elif key == Qt.Key_Down:
-            selected_indexes = self.get_selected_indexes()
-            if((len(selected_indexes) == 1)):
-                row     = selected_indexes[0].row()
-                column  = selected_indexes[0].column()
-                visible_row_list = self.proxy_model.getVisibleRowList()
-                index_of_current_row_in_visible_list = visible_row_list.index(row)
-                
-                if(index_of_current_row_in_visible_list < (len(visible_row_list) - 1)):
-                    self.select_cell_by_row_and_column(visible_row_list[index_of_current_row_in_visible_list + 1], column)
+#         elif key == Qt.Key_Up:
+#             selected_indexes = self.get_selected_indexes()
+#             if((len(selected_indexes) == 1)):
+#                 row     = selected_indexes[0].row()
+#                 column  = selected_indexes[0].column()
+#                 visible_row_list = self.proxy_model.getVisibleRowList()
+#                 index_of_current_row_in_visible_list = visible_row_list.index(row)
+#                 
+#                 if(index_of_current_row_in_visible_list > 0):
+#                     self.select_cell_by_row_and_column(visible_row_list[index_of_current_row_in_visible_list - 1], column)
+#         elif key == Qt.Key_Right:
+#             selected_indexes = self.get_selected_indexes()
+#             if((len(selected_indexes) == 1) and (selected_indexes[0].column() < (self.proxy_model.columnCount() - 1))):
+#                 self.select_cell_by_row_and_column(selected_indexes[0].row(), selected_indexes[0].column() + 1)
+#         elif key == Qt.Key_Left:
+#             selected_indexes = self.get_selected_indexes()
+#             if((len(selected_indexes) == 1) and (selected_indexes[0].column() > 0)):
+#                 self.select_cell_by_row_and_column(selected_indexes[0].row(), selected_indexes[0].column() - 1)
+#         elif key == Qt.Key_Down:
+#             selected_indexes = self.get_selected_indexes()
+#             if((len(selected_indexes) == 1)):
+#                 row     = selected_indexes[0].row()
+#                 column  = selected_indexes[0].column()
+#                 visible_row_list = self.proxy_model.getVisibleRowList()
+#                 index_of_current_row_in_visible_list = visible_row_list.index(row)
+#                 
+#                 if(index_of_current_row_in_visible_list < (len(visible_row_list) - 1)):
+#                     self.select_cell_by_row_and_column(visible_row_list[index_of_current_row_in_visible_list + 1], column)
+
+
+
 #         elif key == Qt.Key_X:
 #             self.proxy_model.getVisibleRowList()
     def prepare_clipboard_text(self):
