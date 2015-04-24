@@ -160,6 +160,8 @@ This is the pygment syntax highlighting style to use when (if) showing the sourc
 
 ## Functions
 
+`Search`  
+You can select any cell and start typing your search criteria, the selection will jump to the first cell that matches the letter(s) you wrote. More advanced search should be coming when fixing Issue #19.
 
 `Ctrl+H`  
 Hides all the rows with fields that matches the selected cells(s).  
