@@ -103,28 +103,30 @@ class LogSParserMain(QMainWindow):
         
         search_toolbar = self.addToolBar("SearchToolbar")
         search_toolbar.setAllowedAreas(Qt.TopToolBarArea | Qt.BottomToolBarArea)
-        ledSearchBox = QLineEdit()
-        search_toolbar.addWidget(ledSearchBox)
+        self.ledSearchBox = QLineEdit()
+        search_toolbar.addWidget(self.ledSearchBox)
         
                                                                                          
 
         tbrActionPrevSearchMatch = QAction('<<', self)                               
-        tbrActionPrevSearchMatch.triggered.connect(self.select_prev_search_match)             
+        tbrActionPrevSearchMatch.triggered.connect(functools.partial(self.select_prev_search_match, self.ledSearchBox.text))
         tbrActionPrevSearchMatch.setToolTip("Go to previous search match")                  
 
         tbrActionNextSearchMatch = QAction('>>', self)                               
-        tbrActionNextSearchMatch.triggered.connect(self.select_next_search_match)             
+        tbrActionNextSearchMatch.triggered.connect(functools.partial(self.select_next_search_match, self.ledSearchBox.text))             
         tbrActionNextSearchMatch.setToolTip("Go to next search match")                  
                                        
         search_toolbar.addAction(tbrActionPrevSearchMatch)
         search_toolbar.addAction(tbrActionNextSearchMatch)
 
 
-    def select_next_search_match(self):
-        print("Next")
+    def select_next_search_match(self, get_search_criteria_callback):
+        print(get_search_criteria_callback())
+        self.user_interface.tblLogData.keyboardSearch(get_search_criteria_callback())
 
-    def select_prev_search_match(self):
-        print("Prev")
+    def select_prev_search_match(self, get_search_criteria_callback):
+        print(get_search_criteria_callback())
+        self.user_interface.tblLogData.keyboardSearch(get_search_criteria_callback())
 
     def load_configuration_file(self, config_file_path="siraj_configs.json"):
         self.config = LogSParserConfigs(config_file_path)
