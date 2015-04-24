@@ -25,7 +25,7 @@ import sys
 from PyQt4.QtCore import (Qt, QModelIndex)
 from PyQt4.QtGui import (QMainWindow, QFileDialog, QApplication, 
 QSortFilterProxyModel, QTextCursor, QTextCharFormat, QBrush, QColor, QMenu, 
-QAction, QCursor, QMessageBox, QItemSelectionModel, QAbstractItemView)
+QAction, QCursor, QMessageBox, QItemSelectionModel, QAbstractItemView, QLineEdit)
 from subprocess import call
 from sj_configs import LogSParserConfigs
 from sj_table_model import MyTableModel
@@ -61,12 +61,6 @@ class LogSParserMain(QMainWindow):
         self.user_interface = Ui_Siraj()  
         self.user_interface.setupUi(self) 
         
-        self.user_interface.tbrActionToggleSourceView = QAction('C/C++', self)
-        self.user_interface.tbrActionToggleSourceView.triggered.connect(self.toggle_source_view)
-        self.user_interface.tbrActionToggleSourceView.setToolTip("Toggle source code view")
-        self.user_interface.tbrActionToggleSourceView.setCheckable(True)
-        self.user_interface.tbrActionToggleSourceView.setChecked(True)
-        
         self.user_interface.mnuActionOpen.triggered.connect(self.menu_open_file)
         self.user_interface.mnuActionLoadConfigs.triggered.connect(self.menu_load_configs)
         self.user_interface.mnuActionExit.triggered.connect(self.menu_exit)
@@ -95,10 +89,43 @@ class LogSParserMain(QMainWindow):
         self.is_filtering_mode_out = True
 
     def setup_toolbar(self):
-        self.user_interface.toolbar = self.addToolBar('Toolbar')
-        self.user_interface.toolbar.addAction(self.user_interface.tbrActionToggleSourceView)
-        self.user_interface.toolbar.setAllowedAreas(Qt.TopToolBarArea | Qt.BottomToolBarArea)
+        source_toolbar = self.addToolBar('SourceToolbar')
         
+        tbrActionToggleSourceView = QAction('C/C++', self)
+        tbrActionToggleSourceView.triggered.connect(self.toggle_source_view)
+        tbrActionToggleSourceView.setToolTip("Toggle source code view")
+        tbrActionToggleSourceView.setCheckable(True)
+        tbrActionToggleSourceView.setChecked(True)
+        
+        source_toolbar.addAction(tbrActionToggleSourceView)
+        
+        
+        
+        search_toolbar = self.addToolBar("SearchToolbar")
+        search_toolbar.setAllowedAreas(Qt.TopToolBarArea | Qt.BottomToolBarArea)
+        ledSearchBox = QLineEdit()
+        search_toolbar.addWidget(ledSearchBox)
+        
+                                                                                         
+
+        tbrActionPrevSearchMatch = QAction('<<', self)                               
+        tbrActionPrevSearchMatch.triggered.connect(self.select_prev_search_match)             
+        tbrActionPrevSearchMatch.setToolTip("Go to previous search match")                  
+
+        tbrActionNextSearchMatch = QAction('>>', self)                               
+        tbrActionNextSearchMatch.triggered.connect(self.select_next_search_match)             
+        tbrActionNextSearchMatch.setToolTip("Go to next search match")                  
+                                       
+        search_toolbar.addAction(tbrActionPrevSearchMatch)
+        search_toolbar.addAction(tbrActionNextSearchMatch)
+
+
+    def select_next_search_match(self):
+        print("Next")
+
+    def select_prev_search_match(self):
+        print("Prev")
+
     def load_configuration_file(self, config_file_path="siraj_configs.json"):
         self.config = LogSParserConfigs(config_file_path)
         self.log_trace_regex_pattern = self.config.get_config_item("log_row_pattern")
