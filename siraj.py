@@ -93,6 +93,7 @@ class LogSParserMain(QMainWindow):
         
         self.case_sensitive_search_type = Qt.CaseInsensitive
         self.is_wrap_search = True  
+        self.is_match_whole_word = True
 
     def setup_toolbars(self):
         source_toolbar = self.addToolBar('SourceToolbar')
@@ -131,10 +132,17 @@ class LogSParserMain(QMainWindow):
         tbrActionWrapSearch.setChecked(True)
         tbrActionWrapSearch.triggered.connect(self.set_search_wrap, tbrActionWrapSearch.isChecked())             
         tbrActionWrapSearch.setToolTip("Wrap Search") 
+        
+        tbrActionMatchWholeWord = QAction('Match Whole Word', self)                               
+        tbrActionMatchWholeWord.setCheckable(True)
+        tbrActionMatchWholeWord.setChecked(True)
+        tbrActionMatchWholeWord.triggered.connect(self.set_match_whole_word, tbrActionMatchWholeWord.isChecked())             
+        tbrActionMatchWholeWord.setToolTip("Match Whole Word") 
                                                
         search_toolbar.addAction(tbrActionPrevSearchMatch)
         search_toolbar.addAction(tbrActionNextSearchMatch)
         search_toolbar.addAction(tbrActionIgnoreCase)
+        search_toolbar.addAction(tbrActionMatchWholeWord)
         search_toolbar.addAction(tbrActionWrapSearch)
 
     def set_search_case_sensitivity(self, ignore_case):
@@ -147,6 +155,10 @@ class LogSParserMain(QMainWindow):
     def set_search_wrap(self, wrap_search):
         self.invalidate_search_criteria()
         self.is_wrap_search = wrap_search
+        
+    def set_match_whole_word(self, match_whole_word):
+        self.invalidate_search_criteria()
+        self.is_match_whole_word = match_whole_word
   
     def invalidate_search_criteria(self):
         self.search_criteria_updated = True;
@@ -156,6 +168,9 @@ class LogSParserMain(QMainWindow):
         search_proxy.setSourceModel(self.user_interface.tblLogData.model())
         search_proxy.setFilterCaseSensitivity(case_sensitivity)
         search_proxy.setFilterKeyColumn(key_column)
+        if(self.is_match_whole_word):
+            search_criteria = r"\\b{}\\b".format(search_criteria)
+            
         search_proxy.setFilterRegExp(search_criteria)
         matched_row_list = []
         for proxy_row in range(search_proxy.rowCount()):
