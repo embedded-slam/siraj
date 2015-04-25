@@ -84,7 +84,7 @@ class LogSParserMain(QMainWindow):
         self.user_interface.tblLogData.resizeRowsToContents() 
         
         self.setup_context_menu()
-        self.setup_toolbar()
+        self.setup_toolbars()
         
         self.clipboard = QApplication.clipboard()
         self.is_filtering_mode_out = True
@@ -92,7 +92,7 @@ class LogSParserMain(QMainWindow):
         self.matched_row_list = None
         self.search_criteria_updated = True
 
-    def setup_toolbar(self):
+    def setup_toolbars(self):
         source_toolbar = self.addToolBar('SourceToolbar')
         
         tbrActionToggleSourceView = QAction('C/C++', self)
