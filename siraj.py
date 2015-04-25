@@ -90,7 +90,7 @@ class LogSParserMain(QMainWindow):
         self.is_filtering_mode_out = True
         
         self.matched_row_list = None
-        self.search_criteria = None
+        self.search_criteria_updated = True
 
     def setup_toolbar(self):
         source_toolbar = self.addToolBar('SourceToolbar')
@@ -106,6 +106,8 @@ class LogSParserMain(QMainWindow):
         search_toolbar = self.addToolBar("SearchToolbar")
         search_toolbar.setAllowedAreas(Qt.TopToolBarArea | Qt.BottomToolBarArea)
         self.ledSearchBox = QLineEdit()
+        self.ledSearchBox.textChanged.connect(self.invalidate_search_criteria)
+        self.user_interface.mnuActionOpen.triggered.connect(self.menu_open_file)
         search_toolbar.addWidget(self.ledSearchBox)
         
         tbrActionPrevSearchMatch = QAction('<<', self)                               
@@ -119,6 +121,9 @@ class LogSParserMain(QMainWindow):
         search_toolbar.addAction(tbrActionPrevSearchMatch)
         search_toolbar.addAction(tbrActionNextSearchMatch)
 
+    def invalidate_search_criteria(self):
+        self.search_criteria_updated = True;
+        
     def get_matched_row_list(self, key_column, search_criteria):
         search_proxy = QSortFilterProxyModel()
         search_proxy.setSourceModel(self.user_interface.tblLogData.model())
@@ -134,9 +139,9 @@ class LogSParserMain(QMainWindow):
         index = self.get_selected_indexes()[0]
         row = index.row()
         column = index.column()
-        if(self.matched_row_list is None):
-            self.search_criteria = get_search_criteria_callback()
-            self.matched_row_list = self.get_matched_row_list(column, self.search_criteria)
+        if(self.search_criteria_updated):
+            self.matched_row_list = self.get_matched_row_list(column, get_search_criteria_callback())
+            self.search_criteria_updated = False
             
         if(is_forward):
             matched_row_index = bisect_left(self.matched_row_list, row)
