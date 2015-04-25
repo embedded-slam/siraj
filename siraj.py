@@ -42,6 +42,7 @@ from pygments.lexers import PythonLexer
 from pygments.formatters import HtmlFormatter
 from pip.util import file_contents
 from pygments.lexers import (get_lexer_by_name, get_lexer_for_filename)
+from bisect import (bisect_left, bisect_right)
 
 class LogSParserMain(QMainWindow):
     """
@@ -87,6 +88,9 @@ class LogSParserMain(QMainWindow):
         
         self.clipboard = QApplication.clipboard()
         self.is_filtering_mode_out = True
+        
+        self.matched_row_list = None
+        self.search_criteria = None
 
     def setup_toolbar(self):
         source_toolbar = self.addToolBar('SourceToolbar')
@@ -99,35 +103,54 @@ class LogSParserMain(QMainWindow):
         
         source_toolbar.addAction(tbrActionToggleSourceView)
         
-        
-        
         search_toolbar = self.addToolBar("SearchToolbar")
         search_toolbar.setAllowedAreas(Qt.TopToolBarArea | Qt.BottomToolBarArea)
         self.ledSearchBox = QLineEdit()
         search_toolbar.addWidget(self.ledSearchBox)
         
-                                                                                         
-
         tbrActionPrevSearchMatch = QAction('<<', self)                               
-        tbrActionPrevSearchMatch.triggered.connect(functools.partial(self.select_prev_search_match, self.ledSearchBox.text))
+        tbrActionPrevSearchMatch.triggered.connect(functools.partial(self.select_search_match, self.ledSearchBox.text, False))
         tbrActionPrevSearchMatch.setToolTip("Go to previous search match")                  
 
         tbrActionNextSearchMatch = QAction('>>', self)                               
-        tbrActionNextSearchMatch.triggered.connect(functools.partial(self.select_next_search_match, self.ledSearchBox.text))             
+        tbrActionNextSearchMatch.triggered.connect(functools.partial(self.select_search_match, self.ledSearchBox.text, True))             
         tbrActionNextSearchMatch.setToolTip("Go to next search match")                  
                                        
         search_toolbar.addAction(tbrActionPrevSearchMatch)
         search_toolbar.addAction(tbrActionNextSearchMatch)
 
+    def get_matched_row_list(self, key_column, search_criteria):
+        search_proxy = QSortFilterProxyModel()
+        search_proxy.setSourceModel(self.user_interface.tblLogData.model())
+        search_proxy.setFilterKeyColumn(key_column)
+        search_proxy.setFilterFixedString(search_criteria)
+        matched_row_list = []
+        for proxy_row in range(search_proxy.rowCount()):
+            match_index = search_proxy.mapToSource(search_proxy.index(proxy_row, key_column))
+            matched_row_list.append(match_index.row())
+        return matched_row_list
 
-    def select_next_search_match(self, get_search_criteria_callback):
-        print(get_search_criteria_callback())
-        self.user_interface.tblLogData.keyboardSearch(get_search_criteria_callback())
-
-    def select_prev_search_match(self, get_search_criteria_callback):
-        print(get_search_criteria_callback())
-        self.user_interface.tblLogData.keyboardSearch(get_search_criteria_callback())
-
+    def select_search_match(self, get_search_criteria_callback, is_forward):
+        index = self.get_selected_indexes()[0]
+        row = index.row()
+        column = index.column()
+        if(self.matched_row_list is None):
+            self.search_criteria = get_search_criteria_callback()
+            self.matched_row_list = self.get_matched_row_list(column, self.search_criteria)
+            
+        if(is_forward):
+            matched_row_index = bisect_left(self.matched_row_list, row)
+            if((self.matched_row_list[matched_row_index] == row) and (matched_row_index < len(self.matched_row_list) - 1)):
+                matched_row_index += 1
+        else:
+            matched_row_index = bisect_right(self.matched_row_list, row)
+            if(matched_row_index > 0):
+                matched_row_index -= 1
+            if((self.matched_row_list[matched_row_index] == row) and (matched_row_index > 0)):
+                matched_row_index -= 1
+                    
+        self.select_cell_by_row_and_column(self.matched_row_list[matched_row_index], column)
+        
     def load_configuration_file(self, config_file_path="siraj_configs.json"):
         self.config = LogSParserConfigs(config_file_path)
         self.log_trace_regex_pattern = self.config.get_config_item("log_row_pattern")
