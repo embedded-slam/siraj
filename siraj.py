@@ -282,12 +282,7 @@ siraj.  If not, see
 <a href="http://www.gnu.org/licenses">http://www.gnu.org/licenses</a>.
         
 """        
-        message_box = QMessageBox(self);
-        message_box.setWindowTitle("About");
-        message_box.setTextFormat(Qt.RichText);   
-        message_box.setText(about_text)
-        message_box.setIcon(QMessageBox.Information)
-        message_box.exec_()
+        self.display_message_box("About", about_text, QMessageBox.Information)
     
     def menu_exit(self):
         """
