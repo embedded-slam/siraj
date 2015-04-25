@@ -92,7 +92,7 @@ class LogSParserMain(QMainWindow):
         self.search_criteria_updated = True
         
         self.case_sensitive_search_type = Qt.CaseInsensitive
-        self.wrap_search = False  
+        self.is_wrap_search = True  
 
     def setup_toolbars(self):
         source_toolbar = self.addToolBar('SourceToolbar')
@@ -129,7 +129,7 @@ class LogSParserMain(QMainWindow):
         tbrActionWrapSearch = QAction('Wrap Search', self)                               
         tbrActionWrapSearch.setCheckable(True)
         tbrActionWrapSearch.setChecked(True)
-        tbrActionWrapSearch.triggered.connect(functools.partial(self.set_search_wrap, tbrActionWrapSearch.isChecked()))             
+        tbrActionWrapSearch.triggered.connect(self.set_search_wrap, tbrActionWrapSearch.isChecked())             
         tbrActionWrapSearch.setToolTip("Wrap Search") 
                                                
         search_toolbar.addAction(tbrActionPrevSearchMatch)
@@ -145,21 +145,23 @@ class LogSParserMain(QMainWindow):
             self.case_sensitive_search_type = Qt.CaseSensitive
 
     def set_search_wrap(self, wrap_search):
-        self.wrap_search = wrap_search
+        self.invalidate_search_criteria()
+        self.is_wrap_search = wrap_search
   
     def invalidate_search_criteria(self):
         self.search_criteria_updated = True;
         
-    def get_matched_row_list(self, key_column, search_criteria):
+    def get_matched_row_list(self, key_column, search_criteria, case_sensitivity):
         search_proxy = QSortFilterProxyModel()
         search_proxy.setSourceModel(self.user_interface.tblLogData.model())
-        search_proxy.setFilterCaseSensitivity(self.case_sensitive_search_type)
+        search_proxy.setFilterCaseSensitivity(case_sensitivity)
         search_proxy.setFilterKeyColumn(key_column)
         search_proxy.setFilterRegExp(search_criteria)
         matched_row_list = []
         for proxy_row in range(search_proxy.rowCount()):
             match_index = search_proxy.mapToSource(search_proxy.index(proxy_row, key_column))
             matched_row_list.append(match_index.row())
+        self.search_criteria_updated = False    
         return matched_row_list
 
     def select_search_match(self, get_search_criteria_callback, is_forward):
@@ -176,8 +178,7 @@ class LogSParserMain(QMainWindow):
             column = index.column()
             search_criteria = get_search_criteria_callback()
             if(self.search_criteria_updated):
-                self.matched_row_list = self.get_matched_row_list(column, search_criteria)
-                self.search_criteria_updated = False
+                self.matched_row_list = self.get_matched_row_list(column, search_criteria, self.case_sensitive_search_type)
             if(len(self.matched_row_list) > 0):    
                 is_match_found = False
                 if(is_forward):
@@ -186,6 +187,9 @@ class LogSParserMain(QMainWindow):
                         if(self.matched_row_list[matched_row_index] == row):
                             matched_row_index += 1
                         is_match_found = True
+                    elif(self.is_wrap_search):
+                        matched_row_index = 0
+                        is_match_found = True
                 else:
                     matched_row_index = bisect_right(self.matched_row_list, row)
                     if(matched_row_index > 0):
@@ -193,6 +197,9 @@ class LogSParserMain(QMainWindow):
                     if((matched_row_index > 0)):
                         if((self.matched_row_list[matched_row_index] == row)):
                             matched_row_index -= 1
+                        is_match_found = True
+                    elif(self.is_wrap_search):
+                        matched_row_index = len(self.matched_row_list) - 1
                         is_match_found = True
                 if(is_match_found):
                     self.select_cell_by_row_and_column(self.matched_row_list[matched_row_index], column)
