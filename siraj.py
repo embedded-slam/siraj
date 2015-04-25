@@ -25,23 +25,23 @@ import sys
 from PyQt4.QtCore import (Qt, QModelIndex)
 from PyQt4.QtGui import (QMainWindow, QFileDialog, QApplication, 
 QSortFilterProxyModel, QTextCursor, QTextCharFormat, QBrush, QColor, QMenu, 
-QAction, QCursor, QMessageBox, QItemSelectionModel, QAbstractItemView, QTableView)
+QAction, QCursor, QMessageBox, QItemSelectionModel, QAbstractItemView, QTableView, QLineEdit)
 from subprocess import call
 from sj_configs import LogSParserConfigs
 from sj_table_model import MyTableModel
 from sj_filter_proxy import MySortFilterProxyModel
-from ui_siraj import Ui_Siraj  # import generated interface
+from ui_siraj import Ui_Siraj
 import logging
 from logging import CRITICAL
 from functools import partial
 import functools
 import json
-# from sj_syntax_highlight import PythonHighlighter
 from pygments import highlight
 from pygments.lexers import PythonLexer
 from pygments.formatters import HtmlFormatter
 from pip.util import file_contents
 from pygments.lexers import (get_lexer_by_name, get_lexer_for_filename)
+from bisect import (bisect_left, bisect_right)
 
 class LogSParserMain(QMainWindow):
     """
@@ -60,14 +60,6 @@ class LogSParserMain(QMainWindow):
         self.table_data = None
         self.user_interface = Ui_Siraj()  
         self.user_interface.setupUi(self) 
-        
-        self.user_interface.tbrActionToggleSourceView = QAction('C/C++', self)
-        self.user_interface.tbrActionToggleSourceView.triggered.connect(self.toggle_source_view)
-        self.user_interface.tbrActionToggleSourceView.setToolTip("Toggle source code view")
-        self.user_interface.tbrActionToggleSourceView.setCheckable(True)
-        self.user_interface.tbrActionToggleSourceView.setChecked(True)
-        self.user_interface.toolbar = self.addToolBar('Toolbar')
-        self.user_interface.toolbar.addAction(self.user_interface.tbrActionToggleSourceView)
         
         self.user_interface.mnuActionOpen.triggered.connect(self.menu_open_file)
         self.user_interface.mnuActionLoadConfigs.triggered.connect(self.menu_load_configs)
@@ -91,9 +83,131 @@ class LogSParserMain(QMainWindow):
         self.user_interface.tblLogData.resizeRowsToContents() 
         
         self.setup_context_menu()
+        self.setup_toolbars()
         
         self.clipboard = QApplication.clipboard()
         self.is_filtering_mode_out = True
+        
+        self.matched_row_list = None
+        self.search_criteria_updated = True
+        
+        self.case_sensitive_search_type = Qt.CaseInsensitive
+        self.is_wrap_search = True  
+
+    def setup_toolbars(self):
+        source_toolbar = self.addToolBar('SourceToolbar')
+        
+        tbrActionToggleSourceView = QAction('C/C++', self)
+        tbrActionToggleSourceView.triggered.connect(self.toggle_source_view)
+        tbrActionToggleSourceView.setToolTip("Toggle source code view")
+        tbrActionToggleSourceView.setCheckable(True)
+        tbrActionToggleSourceView.setChecked(True)
+        
+        source_toolbar.addAction(tbrActionToggleSourceView)
+        
+        search_toolbar = self.addToolBar("SearchToolbar")
+        search_toolbar.setAllowedAreas(Qt.TopToolBarArea | Qt.BottomToolBarArea)
+        self.ledSearchBox = QLineEdit()
+        self.ledSearchBox.textChanged.connect(self.invalidate_search_criteria)
+        self.user_interface.mnuActionOpen.triggered.connect(self.menu_open_file)
+        search_toolbar.addWidget(self.ledSearchBox)
+        
+        tbrActionPrevSearchMatch = QAction('<<', self)                               
+        tbrActionPrevSearchMatch.triggered.connect(functools.partial(self.select_search_match, self.ledSearchBox.text, False))
+        tbrActionPrevSearchMatch.setToolTip("Go to previous search match")                  
+
+        tbrActionNextSearchMatch = QAction('>>', self)                               
+        tbrActionNextSearchMatch.triggered.connect(functools.partial(self.select_search_match, self.ledSearchBox.text, True))             
+        tbrActionNextSearchMatch.setToolTip("Go to next search match")                  
+
+        tbrActionIgnoreCase = QAction('Ignore Case', self)                               
+        tbrActionIgnoreCase.setCheckable(True)
+        tbrActionIgnoreCase.setChecked(True)
+        tbrActionIgnoreCase.triggered.connect(self.set_search_case_sensitivity, tbrActionIgnoreCase.isChecked())            
+        tbrActionIgnoreCase.setToolTip("Ignore case") 
+        
+        tbrActionWrapSearch = QAction('Wrap Search', self)                               
+        tbrActionWrapSearch.setCheckable(True)
+        tbrActionWrapSearch.setChecked(True)
+        tbrActionWrapSearch.triggered.connect(self.set_search_wrap, tbrActionWrapSearch.isChecked())             
+        tbrActionWrapSearch.setToolTip("Wrap Search") 
+                                               
+        search_toolbar.addAction(tbrActionPrevSearchMatch)
+        search_toolbar.addAction(tbrActionNextSearchMatch)
+        search_toolbar.addAction(tbrActionIgnoreCase)
+        search_toolbar.addAction(tbrActionWrapSearch)
+
+    def set_search_case_sensitivity(self, ignore_case):
+        self.invalidate_search_criteria()
+        if(ignore_case):
+            self.case_sensitive_search_type = Qt.CaseInsensitive
+        else:
+            self.case_sensitive_search_type = Qt.CaseSensitive
+
+    def set_search_wrap(self, wrap_search):
+        self.invalidate_search_criteria()
+        self.is_wrap_search = wrap_search
+  
+    def invalidate_search_criteria(self):
+        self.search_criteria_updated = True;
+        
+    def get_matched_row_list(self, key_column, search_criteria, case_sensitivity):
+        search_proxy = QSortFilterProxyModel()
+        search_proxy.setSourceModel(self.user_interface.tblLogData.model())
+        search_proxy.setFilterCaseSensitivity(case_sensitivity)
+        search_proxy.setFilterKeyColumn(key_column)
+        search_proxy.setFilterRegExp(search_criteria)
+        matched_row_list = []
+        for proxy_row in range(search_proxy.rowCount()):
+            match_index = search_proxy.mapToSource(search_proxy.index(proxy_row, key_column))
+            matched_row_list.append(match_index.row())
+        self.search_criteria_updated = False    
+        return matched_row_list
+
+    def select_search_match(self, get_search_criteria_callback, is_forward):
+        selected_indexes = self.get_selected_indexes()
+        
+        if(len(selected_indexes) == 0):
+            self.display_message_box(
+                "No selection", 
+                "Please select a cell from the column you want to search", 
+                QMessageBox.Warning)
+        else:
+            index = self.get_selected_indexes()[0]
+            row = index.row()
+            column = index.column()
+            search_criteria = get_search_criteria_callback()
+            if(self.search_criteria_updated):
+                self.matched_row_list = self.get_matched_row_list(column, search_criteria, self.case_sensitive_search_type)
+            if(len(self.matched_row_list) > 0):    
+                is_match_found = False
+                if(is_forward):
+                    matched_row_index = bisect_left(self.matched_row_list, row)
+                    if((matched_row_index < len(self.matched_row_list) - 1)):
+                        if(self.matched_row_list[matched_row_index] == row):
+                            matched_row_index += 1
+                        is_match_found = True
+                    elif(self.is_wrap_search):
+                        matched_row_index = 0
+                        is_match_found = True
+                else:
+                    matched_row_index = bisect_right(self.matched_row_list, row)
+                    if(matched_row_index > 0):
+                        matched_row_index -= 1
+                    if((matched_row_index > 0)):
+                        if((self.matched_row_list[matched_row_index] == row)):
+                            matched_row_index -= 1
+                        is_match_found = True
+                    elif(self.is_wrap_search):
+                        matched_row_index = len(self.matched_row_list) - 1
+                        is_match_found = True
+                if(is_match_found):
+                    self.select_cell_by_row_and_column(self.matched_row_list[matched_row_index], column)
+            else:
+                self.display_message_box(
+                     "No match found", 
+                     'Search pattern "{}" was not found in column "{}"'.format(search_criteria, self.header[column]), 
+                     QMessageBox.Warning)
 
     def load_configuration_file(self, config_file_path="siraj_configs.json"):
         self.config = LogSParserConfigs(config_file_path)
@@ -138,6 +252,17 @@ class LogSParserMain(QMainWindow):
         self.user_interface.dckSource.setVisible(self.is_source_visible)
         logging.info("Source view is now {}".format("Visible" if self.is_source_visible else "Invisible"))
 
+    def display_message_box(self, title, message, icon):
+        """
+        Show the about box.
+        """   
+        message_box = QMessageBox(self);
+        message_box.setWindowTitle(title);
+        message_box.setTextFormat(Qt.RichText);   
+        message_box.setText(message)
+        message_box.setIcon(icon)
+        message_box.exec_()
+                
     def menu_about(self):
         """
         Show the about box.
@@ -163,12 +288,7 @@ siraj.  If not, see
 <a href="http://www.gnu.org/licenses">http://www.gnu.org/licenses</a>.
         
 """        
-        message_box = QMessageBox(self);
-        message_box.setWindowTitle("About");
-        message_box.setTextFormat(Qt.RichText);   
-        message_box.setText(about_text)
-        message_box.setIcon(QMessageBox.Information)
-        message_box.exec_()
+        self.display_message_box("About", about_text, QMessageBox.Information)
     
     def menu_exit(self):
         """
