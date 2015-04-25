@@ -30,13 +30,12 @@ from subprocess import call
 from sj_configs import LogSParserConfigs
 from sj_table_model import MyTableModel
 from sj_filter_proxy import MySortFilterProxyModel
-from ui_siraj import Ui_Siraj  # import generated interface
+from ui_siraj import Ui_Siraj
 import logging
 from logging import CRITICAL
 from functools import partial
 import functools
 import json
-# from sj_syntax_highlight import PythonHighlighter
 from pygments import highlight
 from pygments.lexers import PythonLexer
 from pygments.formatters import HtmlFormatter
