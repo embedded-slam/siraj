@@ -136,26 +136,45 @@ class LogSParserMain(QMainWindow):
         return matched_row_list
 
     def select_search_match(self, get_search_criteria_callback, is_forward):
-        index = self.get_selected_indexes()[0]
-        row = index.row()
-        column = index.column()
-        if(self.search_criteria_updated):
-            self.matched_row_list = self.get_matched_row_list(column, get_search_criteria_callback())
-            self.search_criteria_updated = False
-            
-        if(is_forward):
-            matched_row_index = bisect_left(self.matched_row_list, row)
-            if((self.matched_row_list[matched_row_index] == row) and (matched_row_index < len(self.matched_row_list) - 1)):
-                matched_row_index += 1
-        else:
-            matched_row_index = bisect_right(self.matched_row_list, row)
-            if(matched_row_index > 0):
-                matched_row_index -= 1
-            if((self.matched_row_list[matched_row_index] == row) and (matched_row_index > 0)):
-                matched_row_index -= 1
-                    
-        self.select_cell_by_row_and_column(self.matched_row_list[matched_row_index], column)
+        selected_indexes = self.get_selected_indexes()
         
+        if(len(selected_indexes) == 0):
+            self.display_message_box(
+                "No selection", 
+                "Please select a cell from the column you want to search", 
+                QMessageBox.Warning)
+        else:
+            index = self.get_selected_indexes()[0]
+            row = index.row()
+            column = index.column()
+            search_criteria = get_search_criteria_callback()
+            if(self.search_criteria_updated):
+                self.matched_row_list = self.get_matched_row_list(column, search_criteria)
+                self.search_criteria_updated = False
+            if(len(self.matched_row_list) > 0):    
+                is_match_found = False
+                if(is_forward):
+                    matched_row_index = bisect_left(self.matched_row_list, row)
+                    if((matched_row_index < len(self.matched_row_list) - 1)):
+                        if(self.matched_row_list[matched_row_index] == row):
+                            matched_row_index += 1
+                        is_match_found = True
+                else:
+                    matched_row_index = bisect_right(self.matched_row_list, row)
+                    if(matched_row_index > 0):
+                        matched_row_index -= 1
+                    if((matched_row_index > 0)):
+                        if((self.matched_row_list[matched_row_index] == row)):
+                            matched_row_index -= 1
+                        is_match_found = True
+                if(is_match_found):
+                    self.select_cell_by_row_and_column(self.matched_row_list[matched_row_index], column)
+            else:
+                self.display_message_box(
+                     "No match found", 
+                     'Search pattern "{}" was not found in column "{}"'.format(search_criteria, self.header[column]), 
+                     QMessageBox.Warning)
+
     def load_configuration_file(self, config_file_path="siraj_configs.json"):
         self.config = LogSParserConfigs(config_file_path)
         self.log_trace_regex_pattern = self.config.get_config_item("log_row_pattern")
@@ -199,6 +218,17 @@ class LogSParserMain(QMainWindow):
         self.user_interface.dckSource.setVisible(self.is_source_visible)
         logging.info("Source view is now {}".format("Visible" if self.is_source_visible else "Invisible"))
 
+    def display_message_box(self, title, message, icon):
+        """
+        Show the about box.
+        """   
+        message_box = QMessageBox(self);
+        message_box.setWindowTitle(title);
+        message_box.setTextFormat(Qt.RichText);   
+        message_box.setText(message)
+        message_box.setIcon(icon)
+        message_box.exec_()
+                
     def menu_about(self):
         """
         Show the about box.
