@@ -42,6 +42,8 @@
         <p><em>Siraj</em> is a cross-platform textual log parser that was built using Python3 and Qt<br>
 <img src="https://raw.githubusercontent.com/embedded-slam/siraj/master/siraj_screenshot.png" alt="Siraj UI"></p>
 
+<hr>
+
 <h1>
 <a id="problem" class="anchor" href="#problem" aria-hidden="true"><span class="octicon octicon-link"></span></a>Problem</h1>
 
@@ -170,7 +172,8 @@ Linux and Windows binaries were created using <a href="http://cx-freeze.sourcefo
                 "background" : "darkCyan"
             }           
         }
-    }
+    },
+    "pygments_syntax_highlighting_style":"vs"
 }
 </code></pre>
 
@@ -218,16 +221,24 @@ A dictionary for the special formatting of cells falling under the <code>special
 
 <p>Example for this can be seen in the <em>FUNCTION</em>  column in the screenshot above.</p>
 
+<p><code>pygments_syntax_highlighting_style</code><br>
+This is the pygment syntax highlighting style to use when (if) showing the source code corresponding to the selected log in the source view. At the time of writing this document, Pygments support the following styles:</p>
+
+<p>['paraiso-light', 'xcode', 'fruity', 'paraiso-dark', 'manni', 'colorful', 'perldoc', 'borland', 'friendly', 'murphy', 'vim', 'autumn', 'trac', 'default', 'rrt', 'pastie', 'monokai', 'igor', 'bw', 'emacs', 'tango', 'native', 'vs']</p>
+
 <h2>
 <a id="functions" class="anchor" href="#functions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Functions</h2>
 
-<p><code>H</code><br>
+<p><code>Search</code><br>
+You can select any cell and start typing your search criteria, the selection will jump to the first cell that matches the letter(s) you wrote. More advanced search should be coming when fixing Issue #19.</p>
+
+<p><code>Ctrl+H</code><br>
 Hides all the rows with fields that matches the selected cells(s).  </p>
 
-<p><code>O</code><br>
+<p><code>Ctrl+O</code><br>
 Shows Only selected. Hides everything except rows with fields that matches the selected cell(s).  </p>
 
-<p><code>Del</code><br>
+<p><code>Ctrl+Del</code><br>
 Clears all current filter.  </p>
 
 <p>The three options are also accessible via context menu. To unhide a previously hidden row, you can select the unhide option from the context menu for a list of hidden value of the current column, then select the value to unhide.  </p>
@@ -236,10 +247,10 @@ Clears all current filter.  </p>
 
 <p>When multiple cells are selected which belong to one or more column(s) and the show-only option is triggered, then a row will be shown only if all of its fields(columns) matches the corresponding filtered-in column.</p>
 
-<p><code>P</code><br>
+<p><code>Ctrl+P</code><br>
 Jumps to the previous matching cell (if one exists) from the same column. Works only when a single cell is selected.  </p>
 
-<p><code>N</code><br>
+<p><code>Ctrl+N</code><br>
 Jumps to the next matching cell (if one exists) from the same column. Works only when a single cell is selected.  </p>
 
 <p><code>Ctrl+C</code><br>
@@ -252,7 +263,7 @@ will show the elapsed time between the two logs. This is only applicable if the 
 This will display the code that generated the current log in the <code>TextView</code> at the bottom.  </p>
 
 <p><code>Double-clicking a cell from the file/line column</code><br>
-This will open the file that generated the current log and highlight the current line in an external text editor for more appealing code view (eg. syntax highlighting). Currently this text editor is hard-coded to gedit which only works on Linux AFAIK. <a href="https://github.com/embedded-slam/siraj/issues/15" title="Issue #15">Issue #15</a> is there to fix that.  </p>
+This will open the file that generated the current log and highlight the current line in an external text editor for more additional facilities (eg. source code cross-reference). Currently this text editor is hard-coded to gedit which only works on Linux AFAIK.</p>
       </section>
       <footer>
         <p>Project maintained by <a href="https://github.com/embedded-slam">embedded-slam</a></p>
