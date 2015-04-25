@@ -123,7 +123,7 @@ class LogSParserMain(QMainWindow):
         search_proxy = QSortFilterProxyModel()
         search_proxy.setSourceModel(self.user_interface.tblLogData.model())
         search_proxy.setFilterKeyColumn(key_column)
-        search_proxy.setFilterFixedString(search_criteria)
+        search_proxy.setFilterRegExp(search_criteria)
         matched_row_list = []
         for proxy_row in range(search_proxy.rowCount()):
             match_index = search_proxy.mapToSource(search_proxy.index(proxy_row, key_column))
