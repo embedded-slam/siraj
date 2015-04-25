@@ -203,6 +203,7 @@ class LogSParserMain(QMainWindow):
                         is_match_found = True
                 if(is_match_found):
                     self.select_cell_by_row_and_column(self.matched_row_list[matched_row_index], column)
+                    self.user_interface.tblLogData.setFocus()
             else:
                 self.display_message_box(
                      "No match found", 
