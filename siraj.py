@@ -91,6 +91,9 @@ class LogSParserMain(QMainWindow):
         
         self.matched_row_list = None
         self.search_criteria_updated = True
+        
+        self.case_sensitive_search_type = Qt.CaseInsensitive
+        self.wrap_search = False  
 
     def setup_toolbars(self):
         source_toolbar = self.addToolBar('SourceToolbar')
@@ -117,16 +120,41 @@ class LogSParserMain(QMainWindow):
         tbrActionNextSearchMatch = QAction('>>', self)                               
         tbrActionNextSearchMatch.triggered.connect(functools.partial(self.select_search_match, self.ledSearchBox.text, True))             
         tbrActionNextSearchMatch.setToolTip("Go to next search match")                  
-                                       
+
+        tbrActionIgnoreCase = QAction('Ignore Case', self)                               
+        tbrActionIgnoreCase.setCheckable(True)
+        tbrActionIgnoreCase.setChecked(True)
+        tbrActionIgnoreCase.triggered.connect(self.set_search_case_sensitivity, tbrActionIgnoreCase.isChecked())            
+        tbrActionIgnoreCase.setToolTip("Ignore case") 
+        
+        tbrActionWrapSearch = QAction('Wrap Search', self)                               
+        tbrActionWrapSearch.setCheckable(True)
+        tbrActionWrapSearch.setChecked(True)
+        tbrActionWrapSearch.triggered.connect(functools.partial(self.set_search_wrap, tbrActionWrapSearch.isChecked()))             
+        tbrActionWrapSearch.setToolTip("Wrap Search") 
+                                               
         search_toolbar.addAction(tbrActionPrevSearchMatch)
         search_toolbar.addAction(tbrActionNextSearchMatch)
+        search_toolbar.addAction(tbrActionIgnoreCase)
+        search_toolbar.addAction(tbrActionWrapSearch)
 
+    def set_search_case_sensitivity(self, ignore_case):
+        self.invalidate_search_criteria()
+        if(ignore_case):
+            self.case_sensitive_search_type = Qt.CaseInsensitive
+        else:
+            self.case_sensitive_search_type = Qt.CaseSensitive
+
+    def set_search_wrap(self, wrap_search):
+        self.wrap_search = wrap_search
+  
     def invalidate_search_criteria(self):
         self.search_criteria_updated = True;
         
     def get_matched_row_list(self, key_column, search_criteria):
         search_proxy = QSortFilterProxyModel()
         search_proxy.setSourceModel(self.user_interface.tblLogData.model())
+        search_proxy.setFilterCaseSensitivity(self.case_sensitive_search_type)
         search_proxy.setFilterKeyColumn(key_column)
         search_proxy.setFilterRegExp(search_criteria)
         matched_row_list = []
