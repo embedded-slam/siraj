@@ -196,4 +196,6 @@ This will display the code that generated the current log in the `TextView` at t
 `Double-clicking a cell from the file/line column`  
 This will open the file that generated the current log and highlight the current line in an external text editor for more additional facilities (eg. source code cross-reference). Currently this text editor is hard-coded to gedit which only works on Linux AFAIK.
 
+`Drag and Drop`  
+Drag log file from your file explorer and drop them into the table to load them. The log file shall follow the same format as that defined in the currently loaded configuration file. It currently support dropping a single log file at a time, when dropping more than one file, the first one is loaded and the rest are ignored.
 

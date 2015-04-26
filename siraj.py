@@ -55,6 +55,7 @@ class LogSParserMain(QMainWindow):
     table_conditional_formatting_config = None
     def __init__(self):
         QMainWindow.__init__(self)
+        
         self.menuFilter = None
         self.proxy_model = None
         self.table_data = None
@@ -95,6 +96,9 @@ class LogSParserMain(QMainWindow):
         self.is_wrap_search = True  
         self.is_match_whole_word = True
 
+        self.user_interface.tblLogData.setAcceptDrops(False)
+        self.setAcceptDrops(True)
+        
     def setup_toolbars(self):
         source_toolbar = self.addToolBar('SourceToolbar')
         
@@ -344,7 +348,6 @@ siraj.  If not, see
             log_file_content_lines = log_file_handle.read().splitlines()
         
         pattern = re.compile(self.log_trace_regex_pattern)        
-#         self.table_data = [list(re.match(self.log_trace_regex_pattern, line).groups()) for line in log_file_content_lines if(pattern.match(line) is not None)]
         
         self.table_data = []
         for line in log_file_content_lines:
@@ -403,12 +406,10 @@ siraj.  If not, see
         """
         index = self.proxy_model.mapToSource(index)
         if(self.is_source_visible):
-#             self.user_interface.txtSourceFile.setTextCursor(QTextCursor())
             logging.info("cell[%d][%d] = %s", index.row(), index.column(), index.data())
             self.left_clicked_cell_index = index
     
             if(index.column() == self.file_line_column):
-#                 highlight = PythonHighlighter(self.user_interface.txtSourceFile.document())
                 [file, line] = index.data().split(":")
                 full_path = "{}{}".format(self.root_prefix, file.strip())
                 self.load_source_file(full_path, line)
@@ -657,17 +658,11 @@ siraj.  If not, see
         """
         Hides the selected rows and any other rows with matching data.
         """
-#         top_selected_index = self.get_top_left_selected_row_index()
-
         selected_indexes = self.get_selected_indexes()
         for index in selected_indexes:
             column = index.column()
             self.per_column_filter_out_set_list[column].add(index.data())
         self.apply_filter(is_filtering_mode_out=True)    
-        
-#         if(top_selected_index != None):
-#             self.select_cell_by_row_and_column(max(0, top_selected_index.row() - 1), top_selected_index.column())
-
         self.update_status_bar()   
             
     def show_rows_based_on_selected_cells(self):
@@ -675,18 +670,12 @@ siraj.  If not, see
         Shows the selected rows and any other rows with matching data only.
         """
         
-#         top_selected_index = self.get_top_left_selected_row_index()
-
         selected_indexes = self.get_selected_indexes()
         self.per_column_filter_in_set_list = [set() for column in range(len(self.table_data[0]))]
         for index in selected_indexes:
             column = index.column()
             self.per_column_filter_in_set_list[column].add(index.data())
         self.apply_filter(is_filtering_mode_out=False)   
-        
-#         if(top_selected_index != None):
-#             self.select_cell_by_index(top_selected_index) 
-            
         self.update_status_bar()   
 
     def unhide_selected_rows_only_based_on_column(self, filter_column, filtered_out_string):
@@ -722,7 +711,19 @@ siraj.  If not, see
         
         # This is just to trigger the proxy model to apply the filter    
         self.proxy_model.setFilterKeyColumn(0)
-
+    
+    def dragEnterEvent(self, q_drag_enter_event):
+        if(q_drag_enter_event.mimeData().hasFormat("text/uri-list")):
+            q_drag_enter_event.acceptProposedAction();
+    
+    def dropEvent(self, q_drop_event):
+        url_list = q_drop_event.mimeData().urls()
+        if(len(url_list) == 0):
+            return
+        log_file_list = [url.toLocalFile() for url in url_list]
+        self.log_file_full_path = log_file_list[0]
+        self.load_log_file(self.log_file_full_path)
+            
 def main():
     logging.basicConfig(
         format='%(levelname)s||%(funcName)s||%(message)s||%(created)f||%(filename)s:%(lineno)s', 
