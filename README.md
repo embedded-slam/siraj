@@ -1,5 +1,5 @@
 *Siraj* is a cross-platform textual log parser that was built using Python3 and Qt  
-![](https://raw.githubusercontent.com/embedded-slam/siraj/master/siraj_screenshot.png)
+![Siraj UI](https://raw.githubusercontent.com/embedded-slam/siraj/master/siraj_screenshot.png)
 
 
 # Problem
@@ -70,11 +70,18 @@ Since JSON doesn't allow inline comments, the different configuration items are 
 ------------------------------------------------------------
 	{
 		"log_file_full_path": "sample.log", 
-		"file_line_column_number_zero_based": 4,
-		"log_row_pattern" : "^(?P<LEVEL>[^|]+)\\|(?P<FUNCTION>[^|]+)\\|(?P<MESSAGE>[^|]+)\\|(?P<TIME>[^|]+)\\|(?P<FILE_AND_LINE>[^|]+)$",
-		"root_source_path_prefix" : "",
+		"log_row_pattern" : "^(?P<LEVEL>.+)\\|\\|(?P<FUNCTION>.+)\\|\\|(?P<MESSAGE>.+)\\|\\|(?P<TIME>.+)\\|\\|(?P<FILE_AND_LINE>[^:]+:\\d+)\\s*$",
 		"time_stamp_column_number_zero_based": 3,
-		"table_conditional_formatting_config" : 
+		"source_cross_reference_configs" :
+		{
+			"root_source_path_prefix" : "",
+			"pygments_syntax_highlighting_style":"vs",
+			"file_column_number_zero_based": 4,
+			"file_column_pattern" : "(?P<FILE>[^:]+):",
+			"line_column_number_zero_based": 4,
+			"line_column_pattern" : ":(?P<LINE>\\d+)"
+		},
+		"table_conditional_formatting_configs" : 
 		{
 			"foreground_key_column" : 0,
 			"foreground_color_dict" : 
@@ -86,7 +93,8 @@ Since JSON doesn't allow inline comments, the different configuration items are 
 			"background_key_column" : 0,
 			"background_color_dict" : 
 			{
-			    "WARNING" 	: "red"
+			    "WARNING" 	: "orange"
+			
 			},		
 			"special_formatting_key_column" : 1,
 			"special_formatting_color_dict":
@@ -107,19 +115,12 @@ Since JSON doesn't allow inline comments, the different configuration items are 
 					"background" : "darkCyan"
 				}			
 			}
-		},
-		"pygments_syntax_highlighting_style":"vs"
+		}
 	}
 ------------------------------------------------------------
 
 `log_file_full_path`  
 The log file to load initially on startup. Other log files can be opened from the GUI through File > Open menu. Currently the configuration file name is hard-coded. Later it can be loaded from the GUI.
-
-`file_line_column_number_zero_based`  
-The column number that contains the file and line information, assumption here that
-file and line will be separated by a colon (file:line). This also can be changed in the future to make it more flexible.
-
-This is the column based on the log___row___pattern regex criteria. First column is index 0.
 
 `log_row_pattern`  
 This is the most important configuration. This tells Siraj how to identify fields in the log lines. Matched log line is placed in the table. This uses RegEx named group to achieve two goals:
@@ -127,14 +128,33 @@ This is the most important configuration. This tells Siraj how to identify field
 1.	Extract the different fields from each log line.
 2.	Name the columns after the group names (compare the configuration to the screenshot).
 
-`root_source_path_prefix`  
-For logs that contains file:line information. This field contains the path prefix that if appended to the file mentioned in the log it produce the full file path. This is used to load the corresponding file if the file:line field was clicked.
-
 `time_stamp_column_number_zero_based`  
 Determines the column index that contains the timing information (if any). This is mainly used to calculate the elapsed time between any two selected logs.
 
+`root_source_path_prefix`  
+For logs that contains file:line information. This field contains the path prefix that if appended to the file mentioned in the log it produce the full file path. This is used to load the corresponding file if the file:line field was clicked.
+
+`pygments_syntax_highlighting_style`  
+This is the pygment syntax highlighting style to use when (if) showing the source code corresponding to the selected log in the source view. At the time of writing this document, Pygments support the following styles:
+
+['paraiso-light', 'xcode', 'fruity', 'paraiso-dark', 'manni', 'colorful', 'perldoc', 'borland', 'friendly', 'murphy', 'vim', 'autumn', 'trac', 'default', 'rrt', 'pastie', 'monokai', 'igor', 'bw', 'emacs', 'tango', 'native', 'vs']
+
+`file_column_number_zero_based`  
+The column number that contains the source file information.
+
+`file_column_pattern`  
+The Regex pattern to extract the file name from the `file_column_number_zero_based` column at the selected row.
+
+`line_column_number_zero_based`  
+The column number that contains the line number information.
+
+`line_column_pattern`  
+The Regex pattern to extract the line number from the `line_column_number_zero_based` column at the selected row.
+
 `table_conditional_formatting_config`  
-Contains the conditional formatting dictionary for foreground and background colors
+Contains the conditional formatting dictionary for foreground and background colors. Color supported currently are the [Qt predefined colors] (http://pyqt.sourceforge.net/Docs/PyQt4/qcolor.html#predefined-colors)
+
+![Qt Predefined Colors](https://raw.githubusercontent.com/embedded-slam/siraj/master/qt_predefined_colors.png)
 
 `foreground_key_column and background_key_column`  
 Determines which columns will be used to determine the foreground and background colors of each rows based on the row contents intersecting with that column.
@@ -151,11 +171,6 @@ This column can have formatting rules that overrides the default rule applied on
 A dictionary for the special formatting of cells falling under the `special_formatting_key_column`. The key is the text to match, and the value is a dictionary for the foreground and background colors to use with matching cells.
 
 Example for this can be seen in the _FUNCTION_  column in the screenshot above.
-
-`pygments_syntax_highlighting_style`  
-This is the pygment syntax highlighting style to use when (if) showing the source code corresponding to the selected log in the source view. At the time of writing this document, Pygments support the following styles:
-
-['paraiso-light', 'xcode', 'fruity', 'paraiso-dark', 'manni', 'colorful', 'perldoc', 'borland', 'friendly', 'murphy', 'vim', 'autumn', 'trac', 'default', 'rrt', 'pastie', 'monokai', 'igor', 'bw', 'emacs', 'tango', 'native', 'vs']
 
 
 ## Functions
@@ -190,11 +205,11 @@ Copies the selected cell text into the clipboard. If a single cell is selected w
 `Selecting two cells from different columns`  
 will show the elapsed time between the two logs. This is only applicable if the log fields contains a time field and it is specified in the configuration via `time_stamp_column_number_zero_based`.  
 
-`Selecting a cell from the file/line column`  
-This will display the code that generated the current log in the `TextView` at the bottom.  
+`Selecting a cell with source view open`  
+This will display the code that generated the current log in the `SourceView` at the bottom. Assuming `file_column_number_zero_based`, `file_column_pattern`, `line_column_number_zero_based`, and `line_column_pattern` are set properly.   
 
-`Double-clicking a cell from the file/line column`  
-This will open the file that generated the current log and highlight the current line in an external text editor for more additional facilities (eg. source code cross-reference). Currently this text editor is hard-coded to gedit which only works on Linux AFAIK.
+`Double-clicking a cell`  
+This will open the file that generated the current log in an external text editor and highlight the current line. It can be useful if the user want more facilities (eg. source code cross-reference). Currently this text editor is hard-coded to gedit which only works on Linux AFAIK.
 
 `Drag and Drop`  
 Drag log file from your file explorer and drop them into the table to load them. The log file shall follow the same format as that defined in the currently loaded configuration file. It currently support dropping a single log file at a time, when dropping more than one file, the first one is loaded and the rest are ignored.

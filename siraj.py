@@ -23,7 +23,7 @@ import re
 import os
 import sys
 from PyQt4.QtCore import (Qt, QModelIndex)
-from PyQt4.QtGui import (QMainWindow, QFileDialog, QApplication, 
+from PyQt4.QtGui import (qApp, QMainWindow, QFileDialog, QApplication, 
 QSortFilterProxyModel, QTextCursor, QTextCharFormat, QBrush, QColor, QMenu, 
 QAction, QCursor, QMessageBox, QItemSelectionModel, QAbstractItemView, QTableView, QLineEdit)
 from subprocess import call
@@ -231,13 +231,21 @@ class LogSParserMain(QMainWindow):
 
     def load_configuration_file(self, config_file_path="siraj_configs.json"):
         self.config = LogSParserConfigs(config_file_path)
-        self.log_trace_regex_pattern = self.config.get_config_item("log_row_pattern")
         self.log_file_full_path = self.config.get_config_item("log_file_full_path")
-        self.file_line_column = self.config.get_config_item("file_line_column_number_zero_based")
-        self.root_prefix = self.config.get_config_item("root_source_path_prefix")
+        self.log_trace_regex_pattern = self.config.get_config_item("log_row_pattern")
         self.time_stamp_column = self.config.get_config_item("time_stamp_column_number_zero_based")
-        self.table_conditional_formatting_config = self.config.get_config_item("table_conditional_formatting_config")
-        self.syntax_highlighting_style = self.config.get_config_item("pygments_syntax_highlighting_style")
+
+        cross_reference_configs = self.config.get_config_item("source_cross_reference_configs")
+        
+        self.file_column = cross_reference_configs["file_column_number_zero_based"]
+        self.file_column_pattern = cross_reference_configs["file_column_pattern"]
+        self.line_column = cross_reference_configs["line_column_number_zero_based"]
+        self.line_column_pattern = cross_reference_configs["line_column_pattern"]
+
+        self.root_source_path_prefix = cross_reference_configs["root_source_path_prefix"]
+        self.syntax_highlighting_style = cross_reference_configs["pygments_syntax_highlighting_style"]
+        
+        self.table_conditional_formatting_config = self.config.get_config_item("table_conditional_formatting_configs")
         self.load_log_file(self.log_file_full_path)
         
     def setup_context_menu(self):
@@ -405,13 +413,18 @@ siraj.  If not, see
         This is only done if the source view is visible.
         """
         index = self.proxy_model.mapToSource(index)
+
         if(self.is_source_visible):
             logging.info("cell[%d][%d] = %s", index.row(), index.column(), index.data())
-            self.left_clicked_cell_index = index
-    
-            if(index.column() == self.file_line_column):
-                [file, line] = index.data().split(":")
-                full_path = "{}{}".format(self.root_prefix, file.strip())
+            row = index.row()
+            
+            file_matcher = re.search(self.file_column_pattern, self.table_data[row][self.file_column])
+            line_matcher = re.search(self.line_column_pattern, self.table_data[row][self.line_column])
+            
+            if((file_matcher is not None) and (line_matcher is not None)):
+                file = file_matcher.group(1)
+                line = line_matcher.group(1)
+                full_path = "{}{}".format(self.root_source_path_prefix, file.strip())
                 self.load_source_file(full_path, line)
                 self.user_interface.tblLogData.setFocus() 
         self.update_status_bar()
@@ -507,14 +520,27 @@ siraj.  If not, see
         triggers external text editor (currently this is gedit on Linux) and make 
         it point on the corresponding line.
         """
-        if(index.column() == self.file_line_column):
-            [file, line] = index.data().split(":")
+        
+        index = self.proxy_model.mapToSource(index)
+
+        logging.info("cell[%d][%d] = %s", index.row(), index.column(), index.data())
+        row = index.row()
+        
+        file_matcher = re.search(self.file_column_pattern, self.table_data[row][self.file_column])
+        line_matcher = re.search(self.line_column_pattern, self.table_data[row][self.line_column])
+        
+        if((file_matcher is not None) and (line_matcher is not None)):
+            file = file_matcher.group(1)
+            line = line_matcher.group(1)
+            full_path = "{}{}".format(self.root_source_path_prefix, file.strip())
             logging.info("Using external editor (gedit) to open %s at line %s", file, line)
             call("gedit +{} {}{}".format(
                 line,
-                self.root_prefix,
+                self.root_source_path_prefix,
                 file.strip()),
                 shell=True)
+            self.user_interface.tblLogData.setFocus() 
+        self.update_status_bar()
 
     def cell_key_pressed(self, q_key_event):
         """
