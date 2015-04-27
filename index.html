@@ -42,8 +42,6 @@
         <p><em>Siraj</em> is a cross-platform textual log parser that was built using Python3 and Qt<br>
 <img src="https://raw.githubusercontent.com/embedded-slam/siraj/master/siraj_screenshot.png" alt="Siraj UI"></p>
 
-<hr>
-
 <h1>
 <a id="problem" class="anchor" href="#problem" aria-hidden="true"><span class="octicon octicon-link"></span></a>Problem</h1>
 
@@ -72,7 +70,7 @@ that generated it to give context while analyzing the log.</p>
 <li> <strong>Cross-referencing the source code</strong> file/line that generated the log if applicable.</li>
 <li> Calculating the <strong>time difference</strong> between any two rows in the table if applicable.</li>
 <li> <strong>Cross-platform</strong>, Works on Linux, Windows, and Mac (not tested on Mac yet but it should work).</li>
-<li> <strong>Light-weight</strong>, It relies on the Qt (written in C++) to do the heavy-lifting.</li>
+<li> <strong>Light-weight</strong>, It relies on the Qt (which is written in C++) to do the heavy-lifting.</li>
 </ol>
 
 <hr>
@@ -135,11 +133,23 @@ Linux and Windows binaries were created using <a href="http://cx-freeze.sourcefo
 
 <pre><code>{
     "log_file_full_path": "sample.log", 
-    "file_line_column_number_zero_based": 4,
-    "log_row_pattern" : "^(?P&lt;LEVEL&gt;[^|]+)\\|(?P&lt;FUNCTION&gt;[^|]+)\\|(?P&lt;MESSAGE&gt;[^|]+)\\|(?P&lt;TIME&gt;[^|]+)\\|(?P&lt;FILE_AND_LINE&gt;[^|]+)$",
-    "root_source_path_prefix" : "",
+    "log_row_pattern" : "^(?P&lt;LEVEL&gt;.+)\\|\\|(?P&lt;FUNCTION&gt;.+)\\|\\|(?P&lt;MESSAGE&gt;.+)\\|\\|(?P&lt;TIME&gt;.+)\\|\\|(?P&lt;FILE_AND_LINE&gt;[^:]+:\\d+)\\s*$",
     "time_stamp_column_number_zero_based": 3,
-    "table_conditional_formatting_config" : 
+    "source_cross_reference_configs" :
+    {
+        "root_source_path_prefix" : "",
+        "pygments_syntax_highlighting_style":"vs",
+        "file_column_number_zero_based": 4,
+        "file_column_pattern" : "(?P&lt;FILE&gt;[^:]+):",
+        "line_column_number_zero_based": 4,
+        "line_column_pattern" : ":(?P&lt;LINE&gt;\\d+)"
+    },
+    "external_editor_configs" :
+    {
+        "editor" : "gedit",
+        "editor_command_format" : "{editor_executable} +{line_number} {file_name}"
+    },
+    "table_conditional_formatting_configs" : 
     {
         "foreground_key_column" : 0,
         "foreground_color_dict" : 
@@ -151,7 +161,8 @@ Linux and Windows binaries were created using <a href="http://cx-freeze.sourcefo
         "background_key_column" : 0,
         "background_color_dict" : 
         {
-            "WARNING"   : "red"
+            "WARNING"   : "orange"
+
         },      
         "special_formatting_key_column" : 1,
         "special_formatting_color_dict":
@@ -172,8 +183,7 @@ Linux and Windows binaries were created using <a href="http://cx-freeze.sourcefo
                 "background" : "darkCyan"
             }           
         }
-    },
-    "pygments_syntax_highlighting_style":"vs"
+    }
 }
 </code></pre>
 
@@ -181,12 +191,6 @@ Linux and Windows binaries were created using <a href="http://cx-freeze.sourcefo
 
 <p><code>log_file_full_path</code><br>
 The log file to load initially on startup. Other log files can be opened from the GUI through File &gt; Open menu. Currently the configuration file name is hard-coded. Later it can be loaded from the GUI.</p>
-
-<p><code>file_line_column_number_zero_based</code><br>
-The column number that contains the file and line information, assumption here that
-file and line will be separated by a colon (file:line). This also can be changed in the future to make it more flexible.</p>
-
-<p>This is the column based on the log___row___pattern regex criteria. First column is index 0.</p>
 
 <p><code>log_row_pattern</code><br>
 This is the most important configuration. This tells Siraj how to identify fields in the log lines. Matched log line is placed in the table. This uses RegEx named group to achieve two goals:</p>
@@ -196,14 +200,49 @@ This is the most important configuration. This tells Siraj how to identify field
 <li> Name the columns after the group names (compare the configuration to the screenshot).</li>
 </ol>
 
-<p><code>root_source_path_prefix</code><br>
-For logs that contains file:line information. This field contains the path prefix that if appended to the file mentioned in the log it produce the full file path. This is used to load the corresponding file if the file:line field was clicked.</p>
-
 <p><code>time_stamp_column_number_zero_based</code><br>
 Determines the column index that contains the timing information (if any). This is mainly used to calculate the elapsed time between any two selected logs.</p>
 
-<p><code>table_conditional_formatting_config</code><br>
-Contains the conditional formatting dictionary for foreground and background colors</p>
+<p><code>source_cross_reference_configs</code><br>
+Holds configurations related to source code cross-referencing. This is used when selecting a table cell to display the corresponding source code that generated the currently selected row (if applicable).</p>
+
+<p><code>root_source_path_prefix</code><br>
+For logs that contains file:line information. This field contains the path prefix that if appended to the file mentioned in the log it produce the full file path. This is used to load the corresponding file if the file:line field was clicked.</p>
+
+<p><code>pygments_syntax_highlighting_style</code><br>
+This is the pygment syntax highlighting style to use when (if) showing the source code corresponding to the selected log in the source view. At the time of writing this document, Pygments support the following styles:</p>
+
+<p>['paraiso-light', 'xcode', 'fruity', 'paraiso-dark', 'manni', 'colorful', 'perldoc', 'borland', 'friendly', 'murphy', 'vim', 'autumn', 'trac', 'default', 'rrt', 'pastie', 'monokai', 'igor', 'bw', 'emacs', 'tango', 'native', 'vs']</p>
+
+<p><code>file_column_number_zero_based</code><br>
+The column number that contains the source file information.</p>
+
+<p><code>file_column_pattern</code><br>
+The Regex pattern to extract the file name from the <code>file_column_number_zero_based</code> column at the selected row.</p>
+
+<p><code>line_column_number_zero_based</code><br>
+The column number that contains the line number information.</p>
+
+<p><code>line_column_pattern</code><br>
+The Regex pattern to extract the line number from the <code>line_column_number_zero_based</code> column at the selected row.</p>
+
+<p><code>external_editor_configs</code><br>
+This determine which external editor to use when double clicking a cell to open the corresponding source code in an external text editor.</p>
+
+<p><code>editor</code><br>
+This is the name of the external editor executable file (ex. gedit, kate, notepad++).</p>
+
+<p><code>editor_command_format</code><br>
+This is the command format to use when invoking the external editor. For example:</p>
+
+<p><code>gedit +30 my_file.c</code></p>
+
+<p>This command open my_file.c and highlight line number 30.</p>
+
+<p><code>table_conditional_formatting_configs</code><br>
+Contains the conditional formatting dictionary for foreground and background colors. Color supported currently are the <a href="http://pyqt.sourceforge.net/Docs/PyQt4/qcolor.html#predefined-colors">Qt predefined colors</a></p>
+
+<p><img src="https://raw.githubusercontent.com/embedded-slam/siraj/master/qt_predefined_colors.png" alt="Qt Predefined Colors"></p>
 
 <p><code>foreground_key_column and background_key_column</code><br>
 Determines which columns will be used to determine the foreground and background colors of each rows based on the row contents intersecting with that column.</p>
@@ -220,11 +259,6 @@ This column can have formatting rules that overrides the default rule applied on
 A dictionary for the special formatting of cells falling under the <code>special_formatting_key_column</code>. The key is the text to match, and the value is a dictionary for the foreground and background colors to use with matching cells.</p>
 
 <p>Example for this can be seen in the <em>FUNCTION</em>  column in the screenshot above.</p>
-
-<p><code>pygments_syntax_highlighting_style</code><br>
-This is the pygment syntax highlighting style to use when (if) showing the source code corresponding to the selected log in the source view. At the time of writing this document, Pygments support the following styles:</p>
-
-<p>['paraiso-light', 'xcode', 'fruity', 'paraiso-dark', 'manni', 'colorful', 'perldoc', 'borland', 'friendly', 'murphy', 'vim', 'autumn', 'trac', 'default', 'rrt', 'pastie', 'monokai', 'igor', 'bw', 'emacs', 'tango', 'native', 'vs']</p>
 
 <h2>
 <a id="functions" class="anchor" href="#functions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Functions</h2>
@@ -259,11 +293,14 @@ Copies the selected cell text into the clipboard. If a single cell is selected w
 <p><code>Selecting two cells from different columns</code><br>
 will show the elapsed time between the two logs. This is only applicable if the log fields contains a time field and it is specified in the configuration via <code>time_stamp_column_number_zero_based</code>.  </p>
 
-<p><code>Selecting a cell from the file/line column</code><br>
-This will display the code that generated the current log in the <code>TextView</code> at the bottom.  </p>
+<p><code>Selecting a cell with source view open</code><br>
+This will display the code that generated the current log in the <code>SourceView</code> at the bottom. Assuming <code>file_column_number_zero_based</code>, <code>file_column_pattern</code>, <code>line_column_number_zero_based</code>, and <code>line_column_pattern</code> are set properly.   </p>
 
-<p><code>Double-clicking a cell from the file/line column</code><br>
-This will open the file that generated the current log and highlight the current line in an external text editor for more additional facilities (eg. source code cross-reference). Currently this text editor is hard-coded to gedit which only works on Linux AFAIK.</p>
+<p><code>Double-clicking a cell</code><br>
+This will open the file that generated the current log in an external text editor and highlight the current line. It can be useful if the user want more facilities (eg. source code cross-reference). </p>
+
+<p><code>Drag and Drop</code><br>
+Drag log file from your file explorer and drop them into the table to load them. The log file shall follow the same format as that defined in the currently loaded configuration file. It currently support dropping a single log file at a time, when dropping more than one file, the first one is loaded and the rest are ignored.</p>
       </section>
       <footer>
         <p>Project maintained by <a href="https://github.com/embedded-slam">embedded-slam</a></p>
