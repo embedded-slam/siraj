@@ -235,6 +235,8 @@ class LogSParserMain(QMainWindow):
         self.log_trace_regex_pattern = self.config.get_config_item("log_row_pattern")
         self.time_stamp_column = self.config.get_config_item("time_stamp_column_number_zero_based")
 
+        self.external_editor_configs = self.config.get_config_item("external_editor_configs")
+        
         cross_reference_configs = self.config.get_config_item("source_cross_reference_configs")
         
         self.file_column = cross_reference_configs["file_column_number_zero_based"]
@@ -534,10 +536,16 @@ siraj.  If not, see
             line = line_matcher.group(1)
             full_path = "{}{}".format(self.root_source_path_prefix, file.strip())
             logging.info("Using external editor (gedit) to open %s at line %s", file, line)
-            call("gedit +{} {}{}".format(
-                line,
-                self.root_source_path_prefix,
-                file.strip()),
+            
+            editor = self.external_editor_configs["editor"]
+            editor_command_format = self.external_editor_configs["editor_command_format"]
+            
+            editor_command = editor_command_format.format(
+                editor_executable=editor,
+                line_number=line,
+                file_name=full_path)
+            
+            call(editor_command,
                 shell=True)
             self.user_interface.tblLogData.setFocus() 
         self.update_status_bar()

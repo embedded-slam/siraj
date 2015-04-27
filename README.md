@@ -23,7 +23,7 @@ that generated it to give context while analyzing the log.
 6.  **Cross-referencing the source code** file/line that generated the log if applicable.
 7.	Calculating the **time difference** between any two rows in the table if applicable.
 8.  **Cross-platform**, Works on Linux, Windows, and Mac (not tested on Mac yet but it should work).
-9.  **Light-weight**, It relies on the Qt (written in C++) to do the heavy-lifting.
+9.  **Light-weight**, It relies on the Qt (which is written in C++) to do the heavy-lifting.
 
 
 ------------------------------------------------------------
@@ -81,6 +81,11 @@ Since JSON doesn't allow inline comments, the different configuration items are 
 			"line_column_number_zero_based": 4,
 			"line_column_pattern" : ":(?P<LINE>\\d+)"
 		},
+		"external_editor_configs" :
+		{
+			"editor" : "gedit",
+			"editor_command_format" : "{editor_executable} +{line_number} {file_name}"
+		},
 		"table_conditional_formatting_configs" : 
 		{
 			"foreground_key_column" : 0,
@@ -131,6 +136,9 @@ This is the most important configuration. This tells Siraj how to identify field
 `time_stamp_column_number_zero_based`  
 Determines the column index that contains the timing information (if any). This is mainly used to calculate the elapsed time between any two selected logs.
 
+`source_cross_reference_configs`  
+Holds configurations related to source code cross-referencing. This is used when selecting a table cell to display the corresponding source code that generated the currently selected row (if applicable).
+
 `root_source_path_prefix`  
 For logs that contains file:line information. This field contains the path prefix that if appended to the file mentioned in the log it produce the full file path. This is used to load the corresponding file if the file:line field was clicked.
 
@@ -151,7 +159,20 @@ The column number that contains the line number information.
 `line_column_pattern`  
 The Regex pattern to extract the line number from the `line_column_number_zero_based` column at the selected row.
 
-`table_conditional_formatting_config`  
+`external_editor_configs`  
+This determine which external editor to use when double clicking a cell to open the corresponding source code in an external text editor.
+
+`editor`  
+This is the name of the external editor executable file (ex. gedit, kate, notepad++).
+
+`editor_command_format`  
+This is the command format to use when invoking the external editor. For example:
+
+`gedit +30 my_file.c`
+
+This command open my_file.c and highlight line number 30.
+
+`table_conditional_formatting_configs`  
 Contains the conditional formatting dictionary for foreground and background colors. Color supported currently are the [Qt predefined colors] (http://pyqt.sourceforge.net/Docs/PyQt4/qcolor.html#predefined-colors)
 
 ![Qt Predefined Colors](https://raw.githubusercontent.com/embedded-slam/siraj/master/qt_predefined_colors.png)
@@ -209,7 +230,7 @@ will show the elapsed time between the two logs. This is only applicable if the 
 This will display the code that generated the current log in the `SourceView` at the bottom. Assuming `file_column_number_zero_based`, `file_column_pattern`, `line_column_number_zero_based`, and `line_column_pattern` are set properly.   
 
 `Double-clicking a cell`  
-This will open the file that generated the current log in an external text editor and highlight the current line. It can be useful if the user want more facilities (eg. source code cross-reference). Currently this text editor is hard-coded to gedit which only works on Linux AFAIK.
+This will open the file that generated the current log in an external text editor and highlight the current line. It can be useful if the user want more facilities (eg. source code cross-reference). 
 
 `Drag and Drop`  
 Drag log file from your file explorer and drop them into the table to load them. The log file shall follow the same format as that defined in the currently loaded configuration file. It currently support dropping a single log file at a time, when dropping more than one file, the first one is loaded and the rest are ignored.

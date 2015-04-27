@@ -11,6 +11,11 @@
 		"line_column_number_zero_based": 4,
 		"line_column_pattern" : ":(?P<LINE>\\d+)"
 	},
+	"external_editor_configs" :
+	{
+		"editor" : "gedit",
+		"editor_command_format" : "{editor_executable} +{line_number} {file_name}"
+	},
 	"table_conditional_formatting_configs" : 
 	{
 		"foreground_key_column" : 0,
