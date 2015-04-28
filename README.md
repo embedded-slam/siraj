@@ -232,7 +232,13 @@ Jumps to the next matching cell (if one exists) from the same column. Works only
 Copies the selected cell text into the clipboard. If a single cell is selected when the copy is performed, the text of that cell is copied into clipboard. If multiple cells are selected at the time of copy, then the whole rows representing the selected cells are copied into the clipboard.
 
 `Ctrl+B` 
-Toggles the bookmark state of the current row. 
+Toggles the _bookmarked_ state of the current row. 
+
+`Ctrl+Shif+P`  
+Jumps to the previous bookmark (if any).
+
+`Ctrl+Shif+N`  
+Jumps to the next bookmark (if any).
 
 `Selecting two cells from different columns`  
 will show the elapsed time between the two logs. This is only applicable if the log fields contains a time field and it is specified in the configuration via `time_stamp_column_number_zero_based`.  

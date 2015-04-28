@@ -21,6 +21,7 @@
 from PyQt4.QtCore import QAbstractTableModel, Qt
 from PyQt4.QtGui import QColor, QBrush, QFont
 import logging
+from bisect import (bisect_left, bisect_right)
 
 class MyTableModel(QAbstractTableModel):
     """
@@ -40,7 +41,8 @@ class MyTableModel(QAbstractTableModel):
         self.bookmark_color_dict            = conditional_formatting_config_dict["bookmark_color_dict"]
         self.row_count                      = len(self.arraydata)
         self.column_count                   = len(self.arraydata[0])
-        self.bookmarked_row_set = set()
+        self.bookmarked_rows_set            = set()
+        self.bookmarked_rows_sorted_list    = []
 
 
     def rowCount(self, parent):
@@ -65,7 +67,7 @@ class MyTableModel(QAbstractTableModel):
             if(role == Qt.DisplayRole):
                 return self.arraydata[index.row()][index.column()]
             elif(role == Qt.ForegroundRole):
-                if(index.row() in self.bookmarked_row_set):
+                if(index.row() in self.bookmarked_rows_set):
                     return QColor(self.bookmark_color_dict["foreground"])
                 else:
                     if((index.column() == self.special_formatting_column) and (index.data() in self.special_formatting_color_dict)):
@@ -77,7 +79,7 @@ class MyTableModel(QAbstractTableModel):
                             self.foreground_color_dict,
                             self.foreground_key_column)
             elif(role == Qt.BackgroundRole):
-                if(index.row() in self.bookmarked_row_set):
+                if(index.row() in self.bookmarked_rows_set):
                     return QBrush(QColor(self.bookmark_color_dict["background"]))
                 else:
                     if((index.column() == self.special_formatting_column) and (index.data() in self.special_formatting_color_dict)):
@@ -88,7 +90,7 @@ class MyTableModel(QAbstractTableModel):
                             self.background_color_dict,
                             self.background_key_column))
 #             elif(role == Qt.FontRole):
-#                 if(index.row() in self.bookmarked_row_set):
+#                 if(index.row() in self.bookmarked_rows_set):
 #                     font = QFont()
 #                     font.setBold(True)
 #                     font.setUnderline(True)
@@ -117,7 +119,33 @@ class MyTableModel(QAbstractTableModel):
             return QColor(color_dict[cell_value])
         
     def toggleBookmarks(self, table_indexes_to_toggle_list):
+        self.layoutAboutToBeChanged.emit()
+        table_indexes_to_toggle_list.sort()
         toggle_bookmark_list = [index.row() for index in table_indexes_to_toggle_list]
-        self.bookmarked_row_set ^= set(toggle_bookmark_list)
-        print(self.bookmarked_row_set)
-        self.layoutChanged.emit()
+        self.bookmarked_rows_set  ^= set(toggle_bookmark_list)
+        self.bookmarked_rows_sorted_list = sorted(list(self.bookmarked_rows_set))
+#         self.changePersistentIndex()
+        self.layoutChanged.emit()     
+           
+    def get_prev_bookmark_index(self, index):
+        new_index = None
+        if(len(self.bookmarked_rows_sorted_list) > 0):
+            row = index.row()
+            column = index.column()
+            if(row > self.bookmarked_rows_sorted_list[0]):
+                new_row = bisect_left(self.bookmarked_rows_sorted_list, row)
+                new_row -=1
+                if(new_row < len(self.bookmarked_rows_sorted_list)):
+                    new_index = self.index(self.bookmarked_rows_sorted_list[new_row], column)
+        return new_index
+
+    def get_next_bookmark_index(self, index):
+        new_index = None
+        if(len(self.bookmarked_rows_sorted_list) > 0):        
+            row = index.row()
+            column = index.column()
+            if(row < self.bookmarked_rows_sorted_list[-1]):
+                new_row = bisect_right(self.bookmarked_rows_sorted_list, row) 
+                if(new_row < len(self.bookmarked_rows_sorted_list)):
+                    new_index = self.index(self.bookmarked_rows_sorted_list[new_row], column)
+        return new_index

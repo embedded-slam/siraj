@@ -558,7 +558,7 @@ siraj.  If not, see
         key = q_key_event.key()
         logging.info("Key = {}".format(key))
 
-        if(int(q_key_event.modifiers()) == (Qt.ControlModifier)):
+        if(Qt.ControlModifier == (int(q_key_event.modifiers()) & (Qt.ControlModifier))):
             if key == Qt.Key_Delete:
                 logging.info("Delete key pressed while in the table. Clear all filters")
                 self.clear_all_filters()
@@ -569,11 +569,22 @@ siraj.  If not, see
             elif key == Qt.Key_N:
                 selected_indexes = self.get_selected_indexes()
                 if(len(selected_indexes) == 1):
-                    self.go_to_next_match(selected_indexes[0])        
+                    if(Qt.ShiftModifier == (int(q_key_event.modifiers()) & (Qt.ShiftModifier))):
+                        next_bookmark_index = self.table_model.get_next_bookmark_index(selected_indexes[0])
+                        if(next_bookmark_index is not None):
+                            self.select_cell_by_index(next_bookmark_index)
+
+                    else:
+                        self.go_to_next_match(selected_indexes[0])           
             elif key == Qt.Key_P:
                 selected_indexes = self.get_selected_indexes()
                 if(len(selected_indexes) == 1):
-                    self.go_to_prev_match(selected_indexes[0])
+                    if(Qt.ShiftModifier == (int(q_key_event.modifiers()) & (Qt.ShiftModifier))):
+                        prev_bookmark_index = self.table_model.get_prev_bookmark_index(selected_indexes[0])
+                        if(prev_bookmark_index is not None):
+                            self.select_cell_by_index(prev_bookmark_index)
+                    else:
+                        self.go_to_prev_match(selected_indexes[0])
             elif key == Qt.Key_C:
                 selected_indexes = self.get_selected_indexes()
                 self.prepare_clipboard_text()
@@ -605,7 +616,7 @@ siraj.  If not, see
         Get the table index value by the given row and column
         """
         index = self.table_model.createIndex(row, column)
-        index = self.proxy_model.mapFromSource(index)         
+        index = self.proxy_model.mapFromSource(index)
         return index
            
     def select_cell_by_row_and_column(self, row, column):
