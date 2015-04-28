@@ -49,6 +49,11 @@
 				"foreground" : "white",
 				"background" : "darkCyan"
 			}			
+		},
+		"bookmark_color_dict":
+		{
+			"foreground" : "black",		
+			"background" : "yellow"
 		}
 	}
 }

@@ -22,8 +22,9 @@ that generated it to give context while analyzing the log.
 5.	**Showing** only specific rows and hiding everything else.
 6.  **Cross-referencing the source code** file/line that generated the log if applicable.
 7.	Calculating the **time difference** between any two rows in the table if applicable.
-8.  **Cross-platform**, Works on Linux, Windows, and Mac (not tested on Mac yet but it should work).
-9.  **Light-weight**, It relies on the Qt (which is written in C++) to do the heavy-lifting.
+8.	Adding/removing **bookmarks** on desired log traces (i.e. table rows).
+9.  **Cross-platform**, Works on Linux, Windows, and Mac (not tested on Mac yet but it should work).
+10.  **Light-weight**, It relies on the Qt (which is written in C++) to do the heavy-lifting.
 
 
 ------------------------------------------------------------
@@ -119,6 +120,11 @@ Since JSON doesn't allow inline comments, the different configuration items are 
 					"foreground" : "white",
 					"background" : "darkCyan"
 				}			
+			},
+			"bookmark_color_dict":
+			{
+				"foreground" : "black",		
+				"background" : "yellow"
 			}
 		}
 	}
@@ -193,6 +199,8 @@ A dictionary for the special formatting of cells falling under the `special_form
 
 Example for this can be seen in the _FUNCTION_  column in the screenshot above.
 
+`bookmark_color_dict`  
+Holds the background/foreground colors to use with bookmakrs.
 
 ## Functions
 
@@ -222,6 +230,9 @@ Jumps to the next matching cell (if one exists) from the same column. Works only
 
 `Ctrl+C`  
 Copies the selected cell text into the clipboard. If a single cell is selected when the copy is performed, the text of that cell is copied into clipboard. If multiple cells are selected at the time of copy, then the whole rows representing the selected cells are copied into the clipboard.
+
+`Ctrl+B` 
+Toggles the bookmark state of the current row. 
 
 `Selecting two cells from different columns`  
 will show the elapsed time between the two logs. This is only applicable if the log fields contains a time field and it is specified in the configuration via `time_stamp_column_number_zero_based`.  

@@ -19,7 +19,7 @@
 # 
 ################################################################################
 from PyQt4.QtCore import QAbstractTableModel, Qt
-from PyQt4.QtGui import QColor, QBrush
+from PyQt4.QtGui import QColor, QBrush, QFont
 import logging
 
 class MyTableModel(QAbstractTableModel):
@@ -37,8 +37,11 @@ class MyTableModel(QAbstractTableModel):
         self.background_color_dict          = conditional_formatting_config_dict["background_color_dict"]
         self.special_formatting_column      = conditional_formatting_config_dict["special_formatting_key_column"]
         self.special_formatting_color_dict  = conditional_formatting_config_dict["special_formatting_color_dict"]
+        self.bookmark_color_dict            = conditional_formatting_config_dict["bookmark_color_dict"]
         self.row_count                      = len(self.arraydata)
         self.column_count                   = len(self.arraydata[0])
+        self.bookmarked_row_set = set()
+
 
     def rowCount(self, parent):
         """
@@ -62,22 +65,34 @@ class MyTableModel(QAbstractTableModel):
             if(role == Qt.DisplayRole):
                 return self.arraydata[index.row()][index.column()]
             elif(role == Qt.ForegroundRole):
-                if((index.column() == self.special_formatting_column) and (index.data() in self.special_formatting_color_dict)):
-                    return QColor(self.special_formatting_color_dict[index.data()]["foreground"])
-
+                if(index.row() in self.bookmarked_row_set):
+                    return QColor(self.bookmark_color_dict["foreground"])
                 else:
-                    return self.getConditionalFormattingColor(
-                        index.row(),
-                        self.foreground_color_dict,
-                        self.foreground_key_column)
+                    if((index.column() == self.special_formatting_column) and (index.data() in self.special_formatting_color_dict)):
+                        return QColor(self.special_formatting_color_dict[index.data()]["foreground"])
+        
+                    else:
+                        return self.getConditionalFormattingColor(
+                            index.row(),
+                            self.foreground_color_dict,
+                            self.foreground_key_column)
             elif(role == Qt.BackgroundRole):
-                if((index.column() == self.special_formatting_column) and (index.data() in self.special_formatting_color_dict)):
-                    return QBrush(QColor(self.special_formatting_color_dict[index.data()]["background"]))
+                if(index.row() in self.bookmarked_row_set):
+                    return QBrush(QColor(self.bookmark_color_dict["background"]))
                 else:
-                    return QBrush(self.getConditionalFormattingColor(
-                        index.row(),
-                        self.background_color_dict,
-                        self.background_key_column))
+                    if((index.column() == self.special_formatting_column) and (index.data() in self.special_formatting_color_dict)):
+                        return QBrush(QColor(self.special_formatting_color_dict[index.data()]["background"]))
+                    else:
+                        return QBrush(self.getConditionalFormattingColor(
+                            index.row(),
+                            self.background_color_dict,
+                            self.background_key_column))
+#             elif(role == Qt.FontRole):
+#                 if(index.row() in self.bookmarked_row_set):
+#                     font = QFont()
+#                     font.setBold(True)
+#                     font.setUnderline(True)
+#                     return font
             else:
                 return None
 
@@ -100,4 +115,9 @@ class MyTableModel(QAbstractTableModel):
         cell_value = self.arraydata[row][key_column]
         if(cell_value in color_dict):
             return QColor(color_dict[cell_value])
-
+        
+    def toggleBookmarks(self, table_indexes_to_toggle_list):
+        toggle_bookmark_list = [index.row() for index in table_indexes_to_toggle_list]
+        self.bookmarked_row_set ^= set(toggle_bookmark_list)
+        print(self.bookmarked_row_set)
+        self.layoutChanged.emit()

@@ -575,8 +575,11 @@ siraj.  If not, see
                 if(len(selected_indexes) == 1):
                     self.go_to_prev_match(selected_indexes[0])
             elif key == Qt.Key_C:
-                    selected_indexes = self.get_selected_indexes()
-                    self.prepare_clipboard_text()
+                selected_indexes = self.get_selected_indexes()
+                self.prepare_clipboard_text()
+            elif key == Qt.Key_B:
+                selected_indexes = self.get_selected_indexes()
+                self.table_model.toggleBookmarks(selected_indexes)
         else:
             QTableView.keyPressEvent(self.user_interface.tblLogData, q_key_event)
             
