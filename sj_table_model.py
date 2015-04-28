@@ -126,8 +126,15 @@ class MyTableModel(QAbstractTableModel):
         self.bookmarked_rows_sorted_list = sorted(list(self.bookmarked_rows_set))
 #         self.changePersistentIndex()
         self.layoutChanged.emit()     
-           
-    def get_prev_bookmark_index(self, index):
+    
+    def clearAllBookmarks(self):
+        self.layoutAboutToBeChanged.emit()
+        self.bookmarked_rows_set.clear()
+        self.bookmarked_rows_sorted_list.clear()
+        #         self.changePersistentIndex()
+        self.layoutChanged.emit()     
+        
+    def getPrevBookmarkIndex(self, index):
         new_index = None
         if(len(self.bookmarked_rows_sorted_list) > 0):
             row = index.row()
@@ -139,7 +146,7 @@ class MyTableModel(QAbstractTableModel):
                     new_index = self.index(self.bookmarked_rows_sorted_list[new_row], column)
         return new_index
 
-    def get_next_bookmark_index(self, index):
+    def getNextBookmarkIndex(self, index):
         new_index = None
         if(len(self.bookmarked_rows_sorted_list) > 0):        
             row = index.row()

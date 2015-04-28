@@ -570,7 +570,7 @@ siraj.  If not, see
                 selected_indexes = self.get_selected_indexes()
                 if(len(selected_indexes) == 1):
                     if(Qt.ShiftModifier == (int(q_key_event.modifiers()) & (Qt.ShiftModifier))):
-                        next_bookmark_index = self.table_model.get_next_bookmark_index(selected_indexes[0])
+                        next_bookmark_index = self.table_model.getNextBookmarkIndex(selected_indexes[0])
                         if(next_bookmark_index is not None):
                             self.select_cell_by_index(next_bookmark_index)
 
@@ -580,7 +580,7 @@ siraj.  If not, see
                 selected_indexes = self.get_selected_indexes()
                 if(len(selected_indexes) == 1):
                     if(Qt.ShiftModifier == (int(q_key_event.modifiers()) & (Qt.ShiftModifier))):
-                        prev_bookmark_index = self.table_model.get_prev_bookmark_index(selected_indexes[0])
+                        prev_bookmark_index = self.table_model.getPrevBookmarkIndex(selected_indexes[0])
                         if(prev_bookmark_index is not None):
                             self.select_cell_by_index(prev_bookmark_index)
                     else:
@@ -589,8 +589,11 @@ siraj.  If not, see
                 selected_indexes = self.get_selected_indexes()
                 self.prepare_clipboard_text()
             elif key == Qt.Key_B:
-                selected_indexes = self.get_selected_indexes()
-                self.table_model.toggleBookmarks(selected_indexes)
+                if(Qt.ShiftModifier == (int(q_key_event.modifiers()) & (Qt.ShiftModifier))):
+                    self.table_model.clearAllBookmarks()
+                else:
+                    selected_indexes = self.get_selected_indexes()
+                    self.table_model.toggleBookmarks(selected_indexes)
         else:
             QTableView.keyPressEvent(self.user_interface.tblLogData, q_key_event)
             

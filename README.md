@@ -240,6 +240,9 @@ Jumps to the previous bookmark (if any).
 `Ctrl+Shif+N`  
 Jumps to the next bookmark (if any).
 
+`Ctrl+Shift+B`  
+Clears all bookmarks.
+
 `Selecting two cells from different columns`  
 will show the elapsed time between the two logs. This is only applicable if the log fields contains a time field and it is specified in the configuration via `time_stamp_column_number_zero_based`.  
 
