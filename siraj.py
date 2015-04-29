@@ -37,10 +37,9 @@ from functools import partial
 import functools
 import json
 from pygments import highlight
-from pygments.lexers import PythonLexer
 from pygments.formatters import HtmlFormatter
 from pip.util import file_contents
-from pygments.lexers import (get_lexer_by_name, get_lexer_for_filename)
+from pygments.lexers import (get_lexer_for_filename)
 from bisect import (bisect_left, bisect_right)
 
 class LogSParserMain(QMainWindow):
