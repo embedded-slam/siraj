@@ -23,25 +23,25 @@ import re
 import os
 import sys
 from PyQt4.QtCore import (Qt, QModelIndex)
-from PyQt4.QtGui import (QMainWindow, QFileDialog, QApplication, 
+from PyQt4.QtGui import (qApp, QMainWindow, QFileDialog, QApplication, 
 QSortFilterProxyModel, QTextCursor, QTextCharFormat, QBrush, QColor, QMenu, 
-QAction, QCursor, QMessageBox, QItemSelectionModel)
+QAction, QCursor, QMessageBox, QItemSelectionModel, QAbstractItemView, QTableView, QLineEdit)
 from subprocess import call
 from sj_configs import LogSParserConfigs
 from sj_table_model import MyTableModel
 from sj_filter_proxy import MySortFilterProxyModel
-from ui_siraj import Ui_Siraj  # import generated interface
+from ui_siraj import Ui_Siraj
 import logging
 from logging import CRITICAL
 from functools import partial
 import functools
 import json
-# from sj_syntax_highlight import PythonHighlighter
 from pygments import highlight
 from pygments.lexers import PythonLexer
 from pygments.formatters import HtmlFormatter
 from pip.util import file_contents
-from pygments.lexers import get_lexer_by_name
+from pygments.lexers import (get_lexer_by_name, get_lexer_for_filename)
+from bisect import (bisect_left, bisect_right)
 
 class LogSParserMain(QMainWindow):
     """
@@ -55,19 +55,12 @@ class LogSParserMain(QMainWindow):
     table_conditional_formatting_config = None
     def __init__(self):
         QMainWindow.__init__(self)
+        
         self.menuFilter = None
         self.proxy_model = None
         self.table_data = None
         self.user_interface = Ui_Siraj()  
         self.user_interface.setupUi(self) 
-        
-        self.user_interface.tbrActionToggleSourceView = QAction('<>', self)
-        self.user_interface.tbrActionToggleSourceView.triggered.connect(self.toggle_source_view)
-        self.user_interface.tbrActionToggleSourceView.setToolTip("Toggle source code view")
-        self.user_interface.tbrActionToggleSourceView.setCheckable(True)
-        self.user_interface.tbrActionToggleSourceView.setChecked(True)
-        self.user_interface.toolbar = self.addToolBar('Toolbar')
-        self.user_interface.toolbar.addAction(self.user_interface.tbrActionToggleSourceView)
         
         self.user_interface.mnuActionOpen.triggered.connect(self.menu_open_file)
         self.user_interface.mnuActionLoadConfigs.triggered.connect(self.menu_load_configs)
@@ -91,18 +84,170 @@ class LogSParserMain(QMainWindow):
         self.user_interface.tblLogData.resizeRowsToContents() 
         
         self.setup_context_menu()
+        self.setup_toolbars()
         
         self.clipboard = QApplication.clipboard()
         self.is_filtering_mode_out = True
+        
+        self.matched_row_list = None
+        self.search_criteria_updated = True
+        
+        self.case_sensitive_search_type = Qt.CaseInsensitive
+        self.is_wrap_search = True  
+        self.is_match_whole_word = True
+
+        self.user_interface.tblLogData.setAcceptDrops(False)
+        self.setAcceptDrops(True)
+        
+    def setup_toolbars(self):
+        source_toolbar = self.addToolBar('SourceToolbar')
+        
+        tbrActionToggleSourceView = QAction('C/C++', self)
+        tbrActionToggleSourceView.triggered.connect(self.toggle_source_view)
+        tbrActionToggleSourceView.setToolTip("Toggle source code view")
+        tbrActionToggleSourceView.setCheckable(True)
+        tbrActionToggleSourceView.setChecked(True)
+        
+        source_toolbar.addAction(tbrActionToggleSourceView)
+        
+        search_toolbar = self.addToolBar("SearchToolbar")
+        search_toolbar.setAllowedAreas(Qt.TopToolBarArea | Qt.BottomToolBarArea)
+        self.ledSearchBox = QLineEdit()
+        self.ledSearchBox.textChanged.connect(self.invalidate_search_criteria)
+        self.user_interface.mnuActionOpen.triggered.connect(self.menu_open_file)
+        search_toolbar.addWidget(self.ledSearchBox)
+        
+        tbrActionPrevSearchMatch = QAction('<<', self)                               
+        tbrActionPrevSearchMatch.triggered.connect(functools.partial(self.select_search_match, self.ledSearchBox.text, False))
+        tbrActionPrevSearchMatch.setToolTip("Go to previous search match")                  
+
+        tbrActionNextSearchMatch = QAction('>>', self)                               
+        tbrActionNextSearchMatch.triggered.connect(functools.partial(self.select_search_match, self.ledSearchBox.text, True))             
+        tbrActionNextSearchMatch.setToolTip("Go to next search match")                  
+
+        tbrActionIgnoreCase = QAction('Ignore Case', self)                               
+        tbrActionIgnoreCase.setCheckable(True)
+        tbrActionIgnoreCase.setChecked(True)
+        tbrActionIgnoreCase.triggered.connect(self.set_search_case_sensitivity, tbrActionIgnoreCase.isChecked())            
+        tbrActionIgnoreCase.setToolTip("Ignore case") 
+        
+        tbrActionWrapSearch = QAction('Wrap Search', self)                               
+        tbrActionWrapSearch.setCheckable(True)
+        tbrActionWrapSearch.setChecked(True)
+        tbrActionWrapSearch.triggered.connect(self.set_search_wrap, tbrActionWrapSearch.isChecked())             
+        tbrActionWrapSearch.setToolTip("Wrap Search") 
+        
+        tbrActionMatchWholeWord = QAction('Match Whole Word', self)                               
+        tbrActionMatchWholeWord.setCheckable(True)
+        tbrActionMatchWholeWord.setChecked(True)
+        tbrActionMatchWholeWord.triggered.connect(self.set_match_whole_word, tbrActionMatchWholeWord.isChecked())             
+        tbrActionMatchWholeWord.setToolTip("Match Whole Word") 
+                                               
+        search_toolbar.addAction(tbrActionPrevSearchMatch)
+        search_toolbar.addAction(tbrActionNextSearchMatch)
+        search_toolbar.addAction(tbrActionIgnoreCase)
+        search_toolbar.addAction(tbrActionMatchWholeWord)
+        search_toolbar.addAction(tbrActionWrapSearch)
+
+    def set_search_case_sensitivity(self, ignore_case):
+        self.invalidate_search_criteria()
+        if(ignore_case):
+            self.case_sensitive_search_type = Qt.CaseInsensitive
+        else:
+            self.case_sensitive_search_type = Qt.CaseSensitive
+
+    def set_search_wrap(self, wrap_search):
+        self.invalidate_search_criteria()
+        self.is_wrap_search = wrap_search
+        
+    def set_match_whole_word(self, match_whole_word):
+        self.invalidate_search_criteria()
+        self.is_match_whole_word = match_whole_word
+  
+    def invalidate_search_criteria(self):
+        self.search_criteria_updated = True;
+        
+    def get_matched_row_list(self, key_column, search_criteria, case_sensitivity):
+        search_proxy = QSortFilterProxyModel()
+        search_proxy.setSourceModel(self.user_interface.tblLogData.model())
+        search_proxy.setFilterCaseSensitivity(case_sensitivity)
+        search_proxy.setFilterKeyColumn(key_column)
+        if(self.is_match_whole_word):
+            search_criteria = r"\\b{}\\b".format(search_criteria)
+            
+        search_proxy.setFilterRegExp(search_criteria)
+        matched_row_list = []
+        for proxy_row in range(search_proxy.rowCount()):
+            match_index = search_proxy.mapToSource(search_proxy.index(proxy_row, key_column))
+            matched_row_list.append(match_index.row())
+        self.search_criteria_updated = False    
+        return matched_row_list
+
+    def select_search_match(self, get_search_criteria_callback, is_forward):
+        selected_indexes = self.get_selected_indexes()
+        
+        if(len(selected_indexes) == 0):
+            self.display_message_box(
+                "No selection", 
+                "Please select a cell from the column you want to search", 
+                QMessageBox.Warning)
+        else:
+            index = self.get_selected_indexes()[0]
+            row = index.row()
+            column = index.column()
+            search_criteria = get_search_criteria_callback()
+            if(self.search_criteria_updated):
+                self.matched_row_list = self.get_matched_row_list(column, search_criteria, self.case_sensitive_search_type)
+            if(len(self.matched_row_list) > 0):    
+                is_match_found = False
+                if(is_forward):
+                    matched_row_index = bisect_left(self.matched_row_list, row)
+                    if((matched_row_index < len(self.matched_row_list) - 1)):
+                        if(self.matched_row_list[matched_row_index] == row):
+                            matched_row_index += 1
+                        is_match_found = True
+                    elif(self.is_wrap_search):
+                        matched_row_index = 0
+                        is_match_found = True
+                else:
+                    matched_row_index = bisect_right(self.matched_row_list, row)
+                    if(matched_row_index > 0):
+                        matched_row_index -= 1
+                    if((matched_row_index > 0)):
+                        if((self.matched_row_list[matched_row_index] == row)):
+                            matched_row_index -= 1
+                        is_match_found = True
+                    elif(self.is_wrap_search):
+                        matched_row_index = len(self.matched_row_list) - 1
+                        is_match_found = True
+                if(is_match_found):
+                    self.select_cell_by_row_and_column(self.matched_row_list[matched_row_index], column)
+                    self.user_interface.tblLogData.setFocus()
+            else:
+                self.display_message_box(
+                     "No match found", 
+                     'Search pattern "{}" was not found in column "{}"'.format(search_criteria, self.header[column]), 
+                     QMessageBox.Warning)
 
     def load_configuration_file(self, config_file_path="siraj_configs.json"):
         self.config = LogSParserConfigs(config_file_path)
-        self.log_trace_regex_pattern = self.config.get_config_item("log_row_pattern")
         self.log_file_full_path = self.config.get_config_item("log_file_full_path")
-        self.file_line_column = self.config.get_config_item("file_line_column_number_zero_based")
-        self.root_prefix = self.config.get_config_item("root_source_path_prefix")
+        self.log_trace_regex_pattern = self.config.get_config_item("log_row_pattern")
         self.time_stamp_column = self.config.get_config_item("time_stamp_column_number_zero_based")
-        self.table_conditional_formatting_config = self.config.get_config_item("table_conditional_formatting_config")
+
+        self.external_editor_configs = self.config.get_config_item("external_editor_configs")
+        
+        cross_reference_configs = self.config.get_config_item("source_cross_reference_configs")
+        
+        self.file_column = cross_reference_configs["file_column_number_zero_based"]
+        self.file_column_pattern = cross_reference_configs["file_column_pattern"]
+        self.line_column = cross_reference_configs["line_column_number_zero_based"]
+        self.line_column_pattern = cross_reference_configs["line_column_pattern"]
+
+        self.root_source_path_prefix = cross_reference_configs["root_source_path_prefix"]
+        self.syntax_highlighting_style = cross_reference_configs["pygments_syntax_highlighting_style"]
+        
+        self.table_conditional_formatting_config = self.config.get_config_item("table_conditional_formatting_configs")
         self.load_log_file(self.log_file_full_path)
         
     def setup_context_menu(self):
@@ -127,9 +272,9 @@ class LogSParserMain(QMainWindow):
         self.menuFilter.addSeparator()
         self.menuFilter.addAction(self.copy_selection_action)
 
-        self.hide_action.setShortcut('H')
-        self.show_only_action.setShortcut('O')
-        self.clear_all_filters_action.setShortcut('Del')
+        self.hide_action.setShortcut('Ctrl+H')
+        self.show_only_action.setShortcut('Ctrl+O')
+        self.clear_all_filters_action.setShortcut('Ctrl+Del')
         self.copy_selection_action.setShortcut("Ctrl+C")
         
     def toggle_source_view(self):
@@ -137,6 +282,17 @@ class LogSParserMain(QMainWindow):
         self.user_interface.dckSource.setVisible(self.is_source_visible)
         logging.info("Source view is now {}".format("Visible" if self.is_source_visible else "Invisible"))
 
+    def display_message_box(self, title, message, icon):
+        """
+        Show the about box.
+        """   
+        message_box = QMessageBox(self);
+        message_box.setWindowTitle(title);
+        message_box.setTextFormat(Qt.RichText);   
+        message_box.setText(message)
+        message_box.setIcon(icon)
+        message_box.exec_()
+                
     def menu_about(self):
         """
         Show the about box.
@@ -162,12 +318,7 @@ siraj.  If not, see
 <a href="http://www.gnu.org/licenses">http://www.gnu.org/licenses</a>.
         
 """        
-        message_box = QMessageBox(self);
-        message_box.setWindowTitle("About");
-        message_box.setTextFormat(Qt.RichText);   
-        message_box.setText(about_text)
-        message_box.setIcon(QMessageBox.Information)
-        message_box.exec_()
+        self.display_message_box("About", about_text, QMessageBox.Information)
     
     def menu_exit(self):
         """
@@ -205,8 +356,15 @@ siraj.  If not, see
 
         with open(log_file_full_path, "r") as log_file_handle:
             log_file_content_lines = log_file_handle.read().splitlines()
-                
-        self.table_data = [list(re.match(self.log_trace_regex_pattern, line).groups()) for line in log_file_content_lines if(re.match(self.log_trace_regex_pattern, line) is not None)]
+        
+        pattern = re.compile(self.log_trace_regex_pattern)        
+        
+        self.table_data = []
+        for line in log_file_content_lines:
+            m = pattern.match(line)
+            if(m is not None):
+                self.table_data.append([group.strip() for group in m.groups()])
+        
         m = re.match(self.log_trace_regex_pattern, log_file_content_lines[1])
         self.header = [group_name for group_name in sorted(m.groupdict().keys(), key=lambda k: m.start(k))]
         self.table_model = MyTableModel(self.table_data, self.header, self.table_conditional_formatting_config, self)
@@ -257,26 +415,29 @@ siraj.  If not, see
         This is only done if the source view is visible.
         """
         index = self.proxy_model.mapToSource(index)
+
         if(self.is_source_visible):
-#             self.user_interface.txtSourceFile.setTextCursor(QTextCursor())
             logging.info("cell[%d][%d] = %s", index.row(), index.column(), index.data())
-            self.left_clicked_cell_index = index
-    
-            if(index.column() == self.file_line_column):
-#                 highlight = PythonHighlighter(self.user_interface.txtSourceFile.document())
-                [file, line] = index.data().split(":")
-                full_path = "{}{}".format(self.root_prefix, file.strip())
+            row = index.row()
+            
+            file_matcher = re.search(self.file_column_pattern, self.table_data[row][self.file_column])
+            line_matcher = re.search(self.line_column_pattern, self.table_data[row][self.line_column])
+            
+            if((file_matcher is not None) and (line_matcher is not None)):
+                file = file_matcher.group(1)
+                line = line_matcher.group(1)
+                full_path = "{}{}".format(self.root_source_path_prefix, file.strip())
                 self.load_source_file(full_path, line)
                 self.user_interface.tblLogData.setFocus() 
         self.update_status_bar()
         
     def load_source_file(self, file, line):    
         code = open(file).read()
-        lexer = get_lexer_by_name("python", stripall=True)
+        lexer = get_lexer_for_filename(file)
         formatter = HtmlFormatter(
                                   linenos = True,
                                   full = True,
-                                  style = "vs",
+                                  style = self.syntax_highlighting_style,
                                   hl_lines = [line])
         result = highlight(code, lexer, formatter)
         self.user_interface.txtSourceFile.setHtml(result)
@@ -287,24 +448,6 @@ siraj.  If not, see
         self.user_interface.txtSourceFile.setTextCursor(text_cursor)
         self.user_interface.txtSourceFile.ensureCursorVisible()
 
-        
-#                 file_contents = "\n".join(["{0:4d}: {1:s}".format(i + 1, line) for(i, line) in enumerate(open(file).read().splitlines())])
-
-#         self.user_interface.txtSourceFile.setHtml(formatted_code)
-#         self.user_interface.txtSourceFile.setPlainText(file_contents)
-#         line_number = int(line) - 1
-#         logging.debug("file:line is %s:%s", file, line)
-#         text_block = self.user_interface.txtSourceFile.document().findBlockByLineNumber(line_number)
-#         text_cursor = self.user_interface.txtSourceFile.textCursor()
-#         text_cursor.setPosition(text_block.position())
-#         self.user_interface.txtSourceFile.setFocus()
-#         text_format = QTextCharFormat()
-#         text_format.setBackground(QBrush(QColor("yellow")))
-#         text_cursor.movePosition(QTextCursor.EndOfLine, 1)
-#         text_cursor.mergeCharFormat(text_format)
-#         self.user_interface.txtSourceFile.setTextCursor(text_cursor)
-#         self.user_interface.dckSource.setWindowTitle(full_path)
-    
     def get_selected_indexes(self):
         """
         Returns a list of the currently selected indexes mapped to the source numbering.
@@ -379,14 +522,33 @@ siraj.  If not, see
         triggers external text editor (currently this is gedit on Linux) and make 
         it point on the corresponding line.
         """
-        if(index.column() == self.file_line_column):
-            [file, line] = index.data().split(":")
+        
+        index = self.proxy_model.mapToSource(index)
+
+        logging.info("cell[%d][%d] = %s", index.row(), index.column(), index.data())
+        row = index.row()
+        
+        file_matcher = re.search(self.file_column_pattern, self.table_data[row][self.file_column])
+        line_matcher = re.search(self.line_column_pattern, self.table_data[row][self.line_column])
+        
+        if((file_matcher is not None) and (line_matcher is not None)):
+            file = file_matcher.group(1)
+            line = line_matcher.group(1)
+            full_path = "{}{}".format(self.root_source_path_prefix, file.strip())
             logging.info("Using external editor (gedit) to open %s at line %s", file, line)
-            call("gedit +{} {}{}".format(
-                line,
-                self.root_prefix,
-                file.strip()),
+            
+            editor = self.external_editor_configs["editor"]
+            editor_command_format = self.external_editor_configs["editor_command_format"]
+            
+            editor_command = editor_command_format.format(
+                editor_executable=editor,
+                line_number=line,
+                file_name=full_path)
+            
+            call(editor_command,
                 shell=True)
+            self.user_interface.tblLogData.setFocus() 
+        self.update_status_bar()
 
     def cell_key_pressed(self, q_key_event):
         """
@@ -396,27 +558,50 @@ siraj.  If not, see
         key = q_key_event.key()
         logging.info("Key = {}".format(key))
 
-        if key == Qt.Key_Delete:
-            logging.info("Delete key pressed while in the table. Clear all filters")
-            self.clear_all_filters()
-        elif key == Qt.Key_H:
-            self.hide_rows_based_on_selected_cells()
-        elif key == Qt.Key_O:
-            self.show_rows_based_on_selected_cells()
-        elif key == Qt.Key_N:
-            selected_indexes = self.get_selected_indexes()
-            if(len(selected_indexes) == 1):
-                self.go_to_next_match(selected_indexes[0])        
-        elif key == Qt.Key_P:
-            selected_indexes = self.get_selected_indexes()
-            if(len(selected_indexes) == 1):
-                self.go_to_prev_match(selected_indexes[0])
-        elif key == Qt.Key_C:
-            if(int(q_key_event.modifiers()) == (Qt.ControlModifier)):
+        if(Qt.ControlModifier == (int(q_key_event.modifiers()) & (Qt.ControlModifier))):
+            if key == Qt.Key_Delete:
+                logging.info("Delete key pressed while in the table. Clear all filters")
+                self.clear_all_filters()
+            elif key == Qt.Key_H:
+                self.hide_rows_based_on_selected_cells()
+            elif key == Qt.Key_O:
+                self.show_rows_based_on_selected_cells()
+            elif key == Qt.Key_N:
+                selected_indexes = self.get_selected_indexes()
+                if(len(selected_indexes) == 1):
+                    if(Qt.ShiftModifier == (int(q_key_event.modifiers()) & (Qt.ShiftModifier))):
+                        next_bookmark_index = self.table_model.getNextBookmarkIndex(selected_indexes[0])
+                        if(next_bookmark_index is not None):
+                            self.select_cell_by_index(next_bookmark_index)
+
+                    else:
+                        self.go_to_next_match(selected_indexes[0])           
+            elif key == Qt.Key_P:
+                selected_indexes = self.get_selected_indexes()
+                if(len(selected_indexes) == 1):
+                    if(Qt.ShiftModifier == (int(q_key_event.modifiers()) & (Qt.ShiftModifier))):
+                        prev_bookmark_index = self.table_model.getPrevBookmarkIndex(selected_indexes[0])
+                        if(prev_bookmark_index is not None):
+                            self.select_cell_by_index(prev_bookmark_index)
+                    else:
+                        self.go_to_prev_match(selected_indexes[0])
+            elif key == Qt.Key_C:
                 selected_indexes = self.get_selected_indexes()
                 self.prepare_clipboard_text()
-    
+            elif key == Qt.Key_B:
+                if(Qt.ShiftModifier == (int(q_key_event.modifiers()) & (Qt.ShiftModifier))):
+                    self.table_model.clearAllBookmarks()
+                else:
+                    selected_indexes = self.get_selected_indexes()
+                    self.table_model.toggleBookmarks(selected_indexes)
+        else:
+            QTableView.keyPressEvent(self.user_interface.tblLogData, q_key_event)
+            
     def prepare_clipboard_text(self):
+        """
+        Copy the cell content to the clipboard if a single cell is selected. Or
+        Copy the whole rows if cells from multiple rows are selected.
+        """
         selected_indexes = self.get_selected_indexes()
         if(len(selected_indexes) == 0):
             clipboard_text = ""
@@ -428,7 +613,35 @@ siraj.  If not, see
             clipboard_text = "\n".join(row_text_list)
         self.clipboard.setText(clipboard_text)
 
-
+    
+    def get_index_by_row_and_column(self, row, column):
+        """
+        Get the table index value by the given row and column
+        """
+        index = self.table_model.createIndex(row, column)
+        index = self.proxy_model.mapFromSource(index)
+        return index
+           
+    def select_cell_by_row_and_column(self, row, column):
+        """
+        Select the cell identified by the given row and column and scroll the 
+        table view to make that cell in the middle of the visible part of the
+        table.
+        """
+        index = self.get_index_by_row_and_column(row, column)
+        self.user_interface.tblLogData.setCurrentIndex(index)  
+        self.user_interface.tblLogData.scrollTo(index, hint = QAbstractItemView.PositionAtCenter)
+        self.update_status_bar()
+        
+    def select_cell_by_index(self, index):        
+        """
+        Select a cell at the given index.
+        """
+        index = self.proxy_model.mapFromSource(index)
+        self.user_interface.tblLogData.setCurrentIndex(index)  
+        self.user_interface.tblLogData.scrollTo(index, hint = QAbstractItemView.PositionAtCenter)
+        self.update_status_bar()
+        
     def go_to_prev_match(self, selected_cell):
         """
         Go to the prev cell that matches the currently selected cell in the 
@@ -438,10 +651,8 @@ siraj.  If not, see
         index = matches_list.index(selected_cell.row())
         if(index > 0):
             new_row = matches_list[index - 1]
-            new_index = self.table_model.createIndex(new_row, selected_cell.column())
-            new_index = self.proxy_model.mapFromSource(new_index)
-            self.user_interface.tblLogData.setCurrentIndex(new_index)
-
+            self.user_interface.tblLogData.clearSelection()
+            self.select_cell_by_row_and_column(new_row, selected_cell.column())
             
     def go_to_next_match(self, selected_cell):
         """
@@ -452,19 +663,47 @@ siraj.  If not, see
         index = matches_list.index(selected_cell.row())
         if(index < (len(matches_list) - 1)):
             new_row = matches_list[index + 1]
-            new_index = self.table_model.createIndex(new_row, selected_cell.column())
-            new_index = self.proxy_model.mapFromSource(new_index)
-            self.user_interface.tblLogData.setCurrentIndex(new_index)
-
+            self.user_interface.tblLogData.clearSelection()
+            self.select_cell_by_row_and_column(new_row, selected_cell.column())
+    
+    
+    def get_top_left_selected_row_index(self):
+        """
+        This function return the top-left selected index from the selected list.
+        It's used for example to anchor the table view around the top-left 
+        selected cell following any change in the visible cells due to filtering
+        """
+        top_left_index = None
         
+        selected_indexes = self.get_selected_indexes()
+        if(len(selected_indexes) > 0):
+            selected_indexes = self.get_selected_indexes()
+            
+            top_left_index  = selected_indexes[0]
+            row             = top_left_index.row()
+            column          = top_left_index.column()
+            for index in selected_indexes[1:]:
+                if((index.row() < row) and (index.column() < column)):
+                    row     = index.row()
+                    column  = index.column()
+                    top_left_index = index
+        return top_left_index            
+            
     def clear_all_filters(self):
         """
         Clears all the current filter and return the table to its initial view.
         """
-        self.proxy_model.setFilterFixedString("")
+        top_selected_index = self.get_top_left_selected_row_index()
+        
         self.per_column_filter_out_set_list = [set() for column in range(len(self.table_data[0]))]
         self.per_column_filter_in_set_list = [set() for column in range(len(self.table_data[0]))]
         self.apply_filter(is_filtering_mode_out = True)
+        
+        if(top_selected_index != None):
+            self.select_cell_by_index(top_selected_index)
+      
+        self.update_status_bar()   
+
         
     def hide_rows_based_on_selected_cells(self):
         """
@@ -481,12 +720,13 @@ siraj.  If not, see
         """
         Shows the selected rows and any other rows with matching data only.
         """
+        
         selected_indexes = self.get_selected_indexes()
         self.per_column_filter_in_set_list = [set() for column in range(len(self.table_data[0]))]
         for index in selected_indexes:
             column = index.column()
             self.per_column_filter_in_set_list[column].add(index.data())
-        self.apply_filter(is_filtering_mode_out=False)    
+        self.apply_filter(is_filtering_mode_out=False)   
         self.update_status_bar()   
 
     def unhide_selected_rows_only_based_on_column(self, filter_column, filtered_out_string):
@@ -495,7 +735,8 @@ siraj.  If not, see
         
         The filtering works on one column only.
         """
-        
+        top_selected_index = self.get_top_left_selected_row_index()
+
         if(self.is_filtering_mode_out):
             self.per_column_filter_out_set_list[filter_column].remove(filtered_out_string)
         else:
@@ -503,6 +744,10 @@ siraj.  If not, see
             
         logging.debug("Unhiding: %s", filtered_out_string)
         self.apply_filter(self.is_filtering_mode_out)
+        
+        if(top_selected_index != None):
+            self.select_cell_by_index(top_selected_index)
+        
         self.update_status_bar()   
         
     def apply_filter(self, is_filtering_mode_out):    
@@ -517,7 +762,19 @@ siraj.  If not, see
         
         # This is just to trigger the proxy model to apply the filter    
         self.proxy_model.setFilterKeyColumn(0)
-
+    
+    def dragEnterEvent(self, q_drag_enter_event):
+        if(q_drag_enter_event.mimeData().hasFormat("text/uri-list")):
+            q_drag_enter_event.acceptProposedAction();
+    
+    def dropEvent(self, q_drop_event):
+        url_list = q_drop_event.mimeData().urls()
+        if(len(url_list) == 0):
+            return
+        log_file_list = [url.toLocalFile() for url in url_list]
+        self.log_file_full_path = log_file_list[0]
+        self.load_log_file(self.log_file_full_path)
+            
 def main():
     logging.basicConfig(
         format='%(levelname)s||%(funcName)s||%(message)s||%(created)f||%(filename)s:%(lineno)s', 

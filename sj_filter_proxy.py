@@ -32,6 +32,7 @@ class MySortFilterProxyModel(QSortFilterProxyModel):
         self.is_filter_out = True
         self.filter_in_list = list()
         self.filter_out_list = list()
+                
     def setSourceModel(self, model):
         QSortFilterProxyModel.setSourceModel(self, model)
         self.column_count = self.sourceModel().columnCount(None)
@@ -62,4 +63,3 @@ class MySortFilterProxyModel(QSortFilterProxyModel):
     def setFilterInList(self, filter_in_list):
         self.filter_in_list = filter_in_list
         self.is_filter_out = False
-        
