@@ -1,5 +1,5 @@
 *Siraj* is a cross-platform textual log parser that was built using Python3 and Qt  
-![Siraj UI](https://raw.githubusercontent.com/embedded-slam/siraj/master/siraj_screenshot.png)
+![Siraj UI](https://raw.githubusercontent.com/embedded-slam/siraj/release/siraj_screenshot.png)
 
 
 # Problem
