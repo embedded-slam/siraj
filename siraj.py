@@ -38,7 +38,6 @@ import functools
 import json
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
-from pip.util import file_contents
 from pygments.lexers import (get_lexer_for_filename)
 from bisect import (bisect_left, bisect_right)
 
