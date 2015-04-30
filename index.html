@@ -40,7 +40,7 @@
       </nav>
       <section>
         <p><em>Siraj</em> is a cross-platform textual log parser that was built using Python3 and Qt<br>
-<img src="https://raw.githubusercontent.com/embedded-slam/siraj/master/siraj_screenshot.png" alt="Siraj UI"></p>
+<img src="https://raw.githubusercontent.com/embedded-slam/siraj/release/siraj_screenshot.png" alt="Siraj UI"></p>
 
 <h1>
 <a id="problem" class="anchor" href="#problem" aria-hidden="true"><span class="octicon octicon-link"></span></a>Problem</h1>
@@ -69,6 +69,7 @@ that generated it to give context while analyzing the log.</p>
 <li> <strong>Showing</strong> only specific rows and hiding everything else.</li>
 <li> <strong>Cross-referencing the source code</strong> file/line that generated the log if applicable.</li>
 <li> Calculating the <strong>time difference</strong> between any two rows in the table if applicable.</li>
+<li> Adding/removing <strong>bookmarks</strong> on desired log traces (i.e. table rows).</li>
 <li> <strong>Cross-platform</strong>, Works on Linux, Windows, and Mac (not tested on Mac yet but it should work).</li>
 <li> <strong>Light-weight</strong>, It relies on the Qt (which is written in C++) to do the heavy-lifting.</li>
 </ol>
@@ -182,6 +183,11 @@ Linux and Windows binaries were created using <a href="http://cx-freeze.sourcefo
                 "foreground" : "white",
                 "background" : "darkCyan"
             }           
+        },
+        "bookmark_color_dict":
+        {
+            "foreground" : "black",     
+            "background" : "yellow"
         }
     }
 }
@@ -260,6 +266,9 @@ A dictionary for the special formatting of cells falling under the <code>special
 
 <p>Example for this can be seen in the <em>FUNCTION</em>  column in the screenshot above.</p>
 
+<p><code>bookmark_color_dict</code><br>
+Holds the background/foreground colors to use with bookmakrs.</p>
+
 <h2>
 <a id="functions" class="anchor" href="#functions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Functions</h2>
 
@@ -289,6 +298,18 @@ Jumps to the next matching cell (if one exists) from the same column. Works only
 
 <p><code>Ctrl+C</code><br>
 Copies the selected cell text into the clipboard. If a single cell is selected when the copy is performed, the text of that cell is copied into clipboard. If multiple cells are selected at the time of copy, then the whole rows representing the selected cells are copied into the clipboard.</p>
+
+<p><code>Ctrl+B</code> 
+Toggles the <em>bookmarked</em> state of the current row. </p>
+
+<p><code>Ctrl+Shif+P</code><br>
+Jumps to the previous bookmark (if any).</p>
+
+<p><code>Ctrl+Shif+N</code><br>
+Jumps to the next bookmark (if any).</p>
+
+<p><code>Ctrl+Shift+B</code><br>
+Clears all bookmarks.</p>
 
 <p><code>Selecting two cells from different columns</code><br>
 will show the elapsed time between the two logs. This is only applicable if the log fields contains a time field and it is specified in the configuration via <code>time_stamp_column_number_zero_based</code>.  </p>
