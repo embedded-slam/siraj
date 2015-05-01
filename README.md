@@ -3,7 +3,7 @@
 
 
 # Problem
-Textual logs can sometimes be huge. And going through them with standard text 
+Text-based logs can sometimes be huge. And going through them with standard text 
 editor without color coding or filtering can be really frustrating job.
 
 # Solution
