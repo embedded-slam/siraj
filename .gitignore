@@ -1,3 +1,4 @@
 *.pyc
 siraj.log
 siraj.pylint.log
+.DS_Store
