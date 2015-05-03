@@ -50,7 +50,7 @@ download one of the following archives based on your system.
                  
 1.	[Linux.]  	(https://github.com/embedded-slam/siraj/raw/release/release/linux/siraj_linux.tar.gz)
 2. 	[Windows.]	(https://github.com/embedded-slam/siraj/raw/release/release/windows/siraj_windows.zip) 
-3.	[Mac.]  (https://github.com/embedded-slam/siraj/raw/release/release/windows/siraj_mac.zip) 
+3.	[Mac.]      (https://github.com/embedded-slam/siraj/raw/release/release/mac/siraj_mac.zip) 
 
 Once downloaded, you'll need to extract it and run *sirag*. This will run with 
 the provided sample log `sample.log` and the provided sample configuration 
