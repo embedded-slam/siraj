@@ -117,11 +117,11 @@ class LogSParserMain(QMainWindow):
         search_toolbar.addWidget(self.ledSearchBox)
         
         tbrActionPrevSearchMatch = QAction('<<', self)                               
-        tbrActionPrevSearchMatch.triggered.connect(functools.partial(self.select_search_match, self.ledSearchBox.text, False))
+        tbrActionPrevSearchMatch.triggered.connect(functools.partial(self.select_search_match, False))
         tbrActionPrevSearchMatch.setToolTip("Go to previous search match")                  
 
         tbrActionNextSearchMatch = QAction('>>', self)                               
-        tbrActionNextSearchMatch.triggered.connect(functools.partial(self.select_search_match, self.ledSearchBox.text, True))             
+        tbrActionNextSearchMatch.triggered.connect(functools.partial(self.select_search_match, True))             
         tbrActionNextSearchMatch.setToolTip("Go to next search match")                  
 
         tbrActionIgnoreCase = QAction('Ignore Case', self)                               
@@ -182,7 +182,7 @@ class LogSParserMain(QMainWindow):
         self.search_criteria_updated = False    
         return matched_row_list
 
-    def select_search_match(self, get_search_criteria_callback, is_forward):
+    def select_search_match(self, is_forward):
         selected_indexes = self.get_selected_indexes()
         
         if(len(selected_indexes) == 0):
@@ -194,7 +194,7 @@ class LogSParserMain(QMainWindow):
             index = self.get_selected_indexes()[0]
             row = index.row()
             column = index.column()
-            search_criteria = get_search_criteria_callback()
+            search_criteria = self.ledSearchBox.text()
             if(self.search_criteria_updated):
                 self.matched_row_list = self.get_matched_row_list(column, search_criteria, self.case_sensitive_search_type)
             if(len(self.matched_row_list) > 0):    
