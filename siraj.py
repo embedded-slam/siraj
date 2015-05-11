@@ -172,7 +172,7 @@ class LogSParserMain(QMainWindow):
         search_proxy.setFilterCaseSensitivity(case_sensitivity)
         search_proxy.setFilterKeyColumn(key_column)
         if(self.is_match_whole_word):
-            search_criteria = r"\\b{}\\b".format(search_criteria)
+            search_criteria = r"\b{}\b".format(search_criteria)
             
         search_proxy.setFilterRegExp(search_criteria)
         matched_row_list = []
