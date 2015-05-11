@@ -592,6 +592,11 @@ siraj.  If not, see
                 else:
                     selected_indexes = self.get_selected_indexes()
                     self.table_model.toggleBookmarks(selected_indexes)
+            elif key == Qt.Key_Comma:
+                self.select_search_match(False)
+            elif key == Qt.Key_Period:
+                self.select_search_match(True)
+
         else:
             QTableView.keyPressEvent(self.user_interface.tblLogData, q_key_event)
             

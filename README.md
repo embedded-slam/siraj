@@ -240,6 +240,12 @@ Jumps to the previous bookmark (if any).
 `Ctrl+Shif+N`  
 Jumps to the next bookmark (if any).
 
+`Ctrl+<`  
+Jumps to the previous search match (if any).
+
+`Ctrl+>`  
+Jumps to the next search match (if any).
+
 `Ctrl+Shift+B`  
 Clears all bookmarks.
 
