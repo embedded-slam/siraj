@@ -221,7 +221,6 @@ class LogSParserMain(QMainWindow):
                         is_match_found = True
                 if(is_match_found):
                     self.select_cell_by_row_and_column(self.matched_row_list[matched_row_index], column)
-                    self.user_interface.tblLogData.setFocus()
             else:
                 self.display_message_box(
                      "No match found", 
@@ -627,18 +626,22 @@ siraj.  If not, see
         table view to make that cell in the middle of the visible part of the
         table.
         """
+        self.user_interface.tblLogData.clearSelection()
         index = self.get_index_by_row_and_column(row, column)
         self.user_interface.tblLogData.setCurrentIndex(index)  
         self.user_interface.tblLogData.scrollTo(index, hint = QAbstractItemView.PositionAtCenter)
+        self.user_interface.tblLogData.setFocus()
         self.update_status_bar()
         
     def select_cell_by_index(self, index):        
         """
         Select a cell at the given index.
         """
+        self.user_interface.tblLogData.clearSelection()
         index = self.proxy_model.mapFromSource(index)
         self.user_interface.tblLogData.setCurrentIndex(index)  
         self.user_interface.tblLogData.scrollTo(index, hint = QAbstractItemView.PositionAtCenter)
+        self.user_interface.tblLogData.setFocus()
         self.update_status_bar()
         
     def go_to_prev_match(self, selected_cell):
@@ -650,7 +653,6 @@ siraj.  If not, see
         index = matches_list.index(selected_cell.row())
         if(index > 0):
             new_row = matches_list[index - 1]
-            self.user_interface.tblLogData.clearSelection()
             self.select_cell_by_row_and_column(new_row, selected_cell.column())
             
     def go_to_next_match(self, selected_cell):
@@ -662,7 +664,6 @@ siraj.  If not, see
         index = matches_list.index(selected_cell.row())
         if(index < (len(matches_list) - 1)):
             new_row = matches_list[index + 1]
-            self.user_interface.tblLogData.clearSelection()
             self.select_cell_by_row_and_column(new_row, selected_cell.column())
     
     
