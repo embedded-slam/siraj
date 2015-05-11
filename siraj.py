@@ -113,6 +113,8 @@ class LogSParserMain(QMainWindow):
         search_toolbar.setAllowedAreas(Qt.TopToolBarArea | Qt.BottomToolBarArea)
         self.ledSearchBox = QLineEdit()
         self.ledSearchBox.textChanged.connect(self.invalidate_search_criteria)
+        self.ledSearchBox.keyPressEvent = self.search_box_key_pressed
+
         self.user_interface.mnuActionOpen.triggered.connect(self.menu_open_file)
         search_toolbar.addWidget(self.ledSearchBox)
         
@@ -547,6 +549,17 @@ siraj.  If not, see
                 shell=True)
             self.user_interface.tblLogData.setFocus() 
         self.update_status_bar()
+
+    def search_box_key_pressed(self, q_key_event):
+        key = q_key_event.key()
+        if (key in [Qt.Key_Enter, Qt.Key_Return]):
+            if(Qt.ShiftModifier == (int(q_key_event.modifiers()) & (Qt.ShiftModifier))):
+                self.select_search_match(False)
+            else:
+                self.select_search_match(True)
+        else:
+            QLineEdit.keyPressEvent(self.ledSearchBox, q_key_event)
+                                        
 
     def cell_key_pressed(self, q_key_event):
         """
