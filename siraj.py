@@ -41,6 +41,7 @@ from pygments.lexers import PythonLexer
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import (get_lexer_by_name, get_lexer_for_filename)
 from bisect import (bisect_left, bisect_right)
+import pyqtgraph as pg
 
 class LogSParserMain(QMainWindow):
     """
@@ -605,6 +606,9 @@ siraj.  If not, see
                 else:
                     selected_indexes = self.get_selected_indexes()
                     self.table_model.toggleBookmarks(selected_indexes)
+            elif key == Qt.Key_G:
+                data = [1,4,3,4,6,3,6,4,2,6,7,4,4,5,4,]
+                pg.plot(data)
             elif key == Qt.Key_Comma:
                 self.select_search_match(False)
             elif key == Qt.Key_Period:
