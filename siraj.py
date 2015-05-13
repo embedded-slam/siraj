@@ -98,6 +98,7 @@ class LogSParserMain(QMainWindow):
 
         self.user_interface.tblLogData.setAcceptDrops(False)
         self.setAcceptDrops(True)
+
         
     def setup_toolbars(self):
         source_toolbar = self.addToolBar('SourceToolbar')
@@ -244,13 +245,30 @@ class LogSParserMain(QMainWindow):
         self.file_column_pattern = cross_reference_configs["file_column_pattern"]
         self.line_column = cross_reference_configs["line_column_number_zero_based"]
         self.line_column_pattern = cross_reference_configs["line_column_pattern"]
+        
+        self.graph_configs = self.config.get_config_item("graph_configs")
 
         self.root_source_path_prefix = cross_reference_configs["root_source_path_prefix"]
         self.syntax_highlighting_style = cross_reference_configs["pygments_syntax_highlighting_style"]
         
         self.table_conditional_formatting_config = self.config.get_config_item("table_conditional_formatting_configs")
         self.load_log_file(self.log_file_full_path)
+        self.load_graphs(self.graph_configs, self.table_data)
         
+    def load_graphs(self, graph_configs, table_data):
+        x = []
+        y = []
+        for i, row in enumerate(table_data):
+            cell_to_match = row[graph_configs["Graph1"]["column"]]
+            m = re.search(graph_configs["Graph1"]["pattern"], cell_to_match)
+            if(m is not None):
+                y.append(int(m.group(1)))
+                x.append(i)
+        
+        pg.setConfigOption('background', 'w')
+        pg.setConfigOption('foreground', 'k')
+        pg.plot(x, y, title = "Graph1")
+                
     def setup_context_menu(self):
         self.menuFilter = QMenu(self)
         

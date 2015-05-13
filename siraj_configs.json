@@ -55,5 +55,14 @@
 			"foreground" : "black",		
 			"background" : "yellow"
 		}
+	},
+	"graph_configs" :
+	{
+		"Graph1" : 
+		{
+			"column"  	: 2,
+			"pattern" 	: "Value = (\\d+)",
+			"color"		: "blue"
+		}
 	}
 }
