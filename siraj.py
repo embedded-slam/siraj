@@ -270,7 +270,7 @@ class LogSParserMain(QMainWindow):
         
         plot_window = pg.plot(x, y, title = "Graph1", pen=pg.mkPen(width = 1, color = QColor("maroon")))
         print()
-                
+                 
     def setup_context_menu(self):
         self.menuFilter = QMenu(self)
         
