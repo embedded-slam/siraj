@@ -114,15 +114,17 @@ class LogSParserMain(QMainWindow):
         search_toolbar.setAllowedAreas(Qt.TopToolBarArea | Qt.BottomToolBarArea)
         self.ledSearchBox = QLineEdit()
         self.ledSearchBox.textChanged.connect(self.invalidate_search_criteria)
+        self.ledSearchBox.keyPressEvent = self.search_box_key_pressed
+
         self.user_interface.mnuActionOpen.triggered.connect(self.menu_open_file)
         search_toolbar.addWidget(self.ledSearchBox)
         
         tbrActionPrevSearchMatch = QAction('<<', self)                               
-        tbrActionPrevSearchMatch.triggered.connect(functools.partial(self.select_search_match, self.ledSearchBox.text, False))
+        tbrActionPrevSearchMatch.triggered.connect(functools.partial(self.select_search_match, False))
         tbrActionPrevSearchMatch.setToolTip("Go to previous search match")                  
 
         tbrActionNextSearchMatch = QAction('>>', self)                               
-        tbrActionNextSearchMatch.triggered.connect(functools.partial(self.select_search_match, self.ledSearchBox.text, True))             
+        tbrActionNextSearchMatch.triggered.connect(functools.partial(self.select_search_match, True))             
         tbrActionNextSearchMatch.setToolTip("Go to next search match")                  
 
         tbrActionIgnoreCase = QAction('Ignore Case', self)                               
@@ -173,7 +175,7 @@ class LogSParserMain(QMainWindow):
         search_proxy.setFilterCaseSensitivity(case_sensitivity)
         search_proxy.setFilterKeyColumn(key_column)
         if(self.is_match_whole_word):
-            search_criteria = r"\\b{}\\b".format(search_criteria)
+            search_criteria = r"\b{}\b".format(search_criteria)
             
         search_proxy.setFilterRegExp(search_criteria)
         matched_row_list = []
@@ -183,7 +185,7 @@ class LogSParserMain(QMainWindow):
         self.search_criteria_updated = False    
         return matched_row_list
 
-    def select_search_match(self, get_search_criteria_callback, is_forward):
+    def select_search_match(self, is_forward):
         selected_indexes = self.get_selected_indexes()
         
         if(len(selected_indexes) == 0):
@@ -195,7 +197,7 @@ class LogSParserMain(QMainWindow):
             index = self.get_selected_indexes()[0]
             row = index.row()
             column = index.column()
-            search_criteria = get_search_criteria_callback()
+            search_criteria = self.ledSearchBox.text()
             if(self.search_criteria_updated):
                 self.matched_row_list = self.get_matched_row_list(column, search_criteria, self.case_sensitive_search_type)
             if(len(self.matched_row_list) > 0):    
@@ -222,7 +224,6 @@ class LogSParserMain(QMainWindow):
                         is_match_found = True
                 if(is_match_found):
                     self.select_cell_by_row_and_column(self.matched_row_list[matched_row_index], column)
-                    self.user_interface.tblLogData.setFocus()
             else:
                 self.display_message_box(
                      "No match found", 
@@ -550,6 +551,17 @@ siraj.  If not, see
             self.user_interface.tblLogData.setFocus() 
         self.update_status_bar()
 
+    def search_box_key_pressed(self, q_key_event):
+        key = q_key_event.key()
+        if (key in [Qt.Key_Enter, Qt.Key_Return]):
+            if(Qt.ShiftModifier == (int(q_key_event.modifiers()) & (Qt.ShiftModifier))):
+                self.select_search_match(False)
+            else:
+                self.select_search_match(True)
+        else:
+            QLineEdit.keyPressEvent(self.ledSearchBox, q_key_event)
+                                        
+
     def cell_key_pressed(self, q_key_event):
         """
         Handles the event of pressing a keyboard key while on the table.
@@ -597,6 +609,11 @@ siraj.  If not, see
             elif key == Qt.Key_G:
                 data = [1,4,3,4,6,3,6,4,2,6,7,4,4,5,4,]
                 pg.plot(data)
+            elif key == Qt.Key_Comma:
+                self.select_search_match(False)
+            elif key == Qt.Key_Period:
+                self.select_search_match(True)
+
         else:
             QTableView.keyPressEvent(self.user_interface.tblLogData, q_key_event)
             
@@ -631,18 +648,22 @@ siraj.  If not, see
         table view to make that cell in the middle of the visible part of the
         table.
         """
+        self.user_interface.tblLogData.clearSelection()
         index = self.get_index_by_row_and_column(row, column)
         self.user_interface.tblLogData.setCurrentIndex(index)  
         self.user_interface.tblLogData.scrollTo(index, hint = QAbstractItemView.PositionAtCenter)
+        self.user_interface.tblLogData.setFocus()
         self.update_status_bar()
         
     def select_cell_by_index(self, index):        
         """
         Select a cell at the given index.
         """
+        self.user_interface.tblLogData.clearSelection()
         index = self.proxy_model.mapFromSource(index)
         self.user_interface.tblLogData.setCurrentIndex(index)  
         self.user_interface.tblLogData.scrollTo(index, hint = QAbstractItemView.PositionAtCenter)
+        self.user_interface.tblLogData.setFocus()
         self.update_status_bar()
         
     def go_to_prev_match(self, selected_cell):
@@ -654,7 +675,6 @@ siraj.  If not, see
         index = matches_list.index(selected_cell.row())
         if(index > 0):
             new_row = matches_list[index - 1]
-            self.user_interface.tblLogData.clearSelection()
             self.select_cell_by_row_and_column(new_row, selected_cell.column())
             
     def go_to_next_match(self, selected_cell):
@@ -666,7 +686,6 @@ siraj.  If not, see
         index = matches_list.index(selected_cell.row())
         if(index < (len(matches_list) - 1)):
             new_row = matches_list[index + 1]
-            self.user_interface.tblLogData.clearSelection()
             self.select_cell_by_row_and_column(new_row, selected_cell.column())
     
     
