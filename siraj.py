@@ -266,8 +266,10 @@ class LogSParserMain(QMainWindow):
                 x.append(i)
         
         pg.setConfigOption('background', 'w')
-        pg.setConfigOption('foreground', 'k')
-        pg.plot(x, y, title = "Graph1")
+        pg.setConfigOption('foreground', QColor("black"))
+        
+        plot_window = pg.plot(x, y, title = "Graph1", pen=pg.mkPen(width = 1, color = QColor("maroon")))
+        print()
                 
     def setup_context_menu(self):
         self.menuFilter = QMenu(self)
