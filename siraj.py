@@ -615,7 +615,7 @@ siraj.  If not, see
                 self.select_search_match(True)
 
         else:
-            QTableView.keyPressEvent(self.user_interface.tblLogData, q_key_event)
+            QTableView.keyPressEvent(self.user_interface.tblLogData, q_key_event) 
             
     def prepare_clipboard_text(self):
         """
