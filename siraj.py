@@ -98,6 +98,7 @@ class LogSParserMain(QMainWindow):
 
         self.user_interface.tblLogData.setAcceptDrops(False)
         self.setAcceptDrops(True)
+
         
     def setup_toolbars(self):
         source_toolbar = self.addToolBar('SourceToolbar')
@@ -116,7 +117,6 @@ class LogSParserMain(QMainWindow):
         self.ledSearchBox.textChanged.connect(self.invalidate_search_criteria)
         self.ledSearchBox.keyPressEvent = self.search_box_key_pressed
 
-        self.user_interface.mnuActionOpen.triggered.connect(self.menu_open_file)
         search_toolbar.addWidget(self.ledSearchBox)
         
         tbrActionPrevSearchMatch = QAction('<<', self)                               
@@ -244,13 +244,43 @@ class LogSParserMain(QMainWindow):
         self.file_column_pattern = cross_reference_configs["file_column_pattern"]
         self.line_column = cross_reference_configs["line_column_number_zero_based"]
         self.line_column_pattern = cross_reference_configs["line_column_pattern"]
+        
+        self.graph_configs = self.config.get_config_item("graph_configs")
 
         self.root_source_path_prefix = cross_reference_configs["root_source_path_prefix"]
         self.syntax_highlighting_style = cross_reference_configs["pygments_syntax_highlighting_style"]
         
         self.table_conditional_formatting_config = self.config.get_config_item("table_conditional_formatting_configs")
         self.load_log_file(self.log_file_full_path)
+
         
+    def load_graphs(self, graph_configs, table_data):
+        
+        pg.setConfigOption('background', QColor("white"))
+        pg.setConfigOption('foreground', QColor("black"))
+        pg.setConfigOptions(antialias=True)
+        graphs = list(graph_configs.keys())
+        graph_data = [([],[],) for _ in graphs] 
+
+        x = []
+        y = []
+        
+        for row_number, row_data in enumerate(table_data):
+            for graph_number, graph_name in enumerate(graphs):
+                cell_to_match = row_data[graph_configs[graph_name]["column"]]
+                m = re.search(graph_configs[graph_name]["pattern"], cell_to_match)
+                if(m is not None):
+                    graph_data[graph_number][0].append(row_number)          # X-Axis value
+                    graph_data[graph_number][1].append(int(m.group(1)))     # Y-Axis value
+            
+        
+        for graph_number, graph in enumerate(graphs):
+            plot_window = pg.plot(graph_data[graph_number][0], 
+                                  graph_data[graph_number][1],
+                                  parent = self, 
+                                  title = graph, 
+                                  pen = pg.mkPen(width = 1, color = QColor(graph_configs[graph]["color"])))
+                 
     def setup_context_menu(self):
         self.menuFilter = QMenu(self)
         
@@ -379,7 +409,8 @@ siraj.  If not, see
         if(len(self.per_column_filter_in_set_list) == 0):
             self.per_column_filter_in_set_list = [set() for column in range(len(self.table_data[0]))]
         
-        self.extract_column_dictionaries(self.header, self.table_data)    
+        self.extract_column_dictionaries(self.header, self.table_data)
+        self.load_graphs(self.graph_configs, self.table_data)    
     
     def extract_column_dictionaries(self, header_vector_list, data_matrix_list):
         """
@@ -606,9 +637,6 @@ siraj.  If not, see
                 else:
                     selected_indexes = self.get_selected_indexes()
                     self.table_model.toggleBookmarks(selected_indexes)
-            elif key == Qt.Key_G:
-                data = [1,4,3,4,6,3,6,4,2,6,7,4,4,5,4,]
-                pg.plot(data)
             elif key == Qt.Key_Comma:
                 self.select_search_match(False)
             elif key == Qt.Key_Period:
@@ -796,7 +824,13 @@ siraj.  If not, see
         log_file_list = [url.toLocalFile() for url in url_list]
         self.log_file_full_path = log_file_list[0]
         self.load_log_file(self.log_file_full_path)
-            
+    
+    def closeEvent(self, event):
+        app = QApplication([])
+#         app.closeAllWindows() 
+        app.deleteLater()
+        app.closeAllWindows()
+                          
 def main():
     logging.basicConfig(
         format='%(levelname)s||%(funcName)s||%(message)s||%(created)f||%(filename)s:%(lineno)s', 
