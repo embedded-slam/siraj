@@ -255,20 +255,30 @@ class LogSParserMain(QMainWindow):
 
         
     def load_graphs(self, graph_configs, table_data):
+        
+        pg.setConfigOption('background', QColor("white"))
+        pg.setConfigOption('foreground', QColor("black"))
+        graphs = list(graph_configs.keys())
+        graph_data = [([],[],) for _ in graphs] 
+
         x = []
         y = []
-        for i, row in enumerate(table_data):
-            cell_to_match = row[graph_configs["Graph1"]["column"]]
-            m = re.search(graph_configs["Graph1"]["pattern"], cell_to_match)
-            if(m is not None):
-                y.append(int(m.group(1)))
-                x.append(i)
         
-        pg.setConfigOption('background', 'w')
-        pg.setConfigOption('foreground', QColor("black"))
+        for row_number, row_data in enumerate(table_data):
+            for graph_number, graph_name in enumerate(graphs):
+                cell_to_match = row_data[graph_configs[graph_name]["column"]]
+                m = re.search(graph_configs[graph_name]["pattern"], cell_to_match)
+                if(m is not None):
+                    graph_data[graph_number][0].append(row_number)          # X-Axis value
+                    graph_data[graph_number][1].append(int(m.group(1)))     # Y-Axis value
+            
         
-        plot_window = pg.plot(x, y, title = "Graph1", pen=pg.mkPen(width = 1, color = QColor("maroon")))
-        print()
+        for graph_number, graph in enumerate(graphs):
+            plot_window = pg.plot(graph_data[graph_number][0], 
+                                  graph_data[graph_number][1],
+                                  parent = self, 
+                                  title = graph, 
+                                  pen = pg.mkPen(width = 1, color = QColor(graph_configs[graph]["color"])))
                  
     def setup_context_menu(self):
         self.menuFilter = QMenu(self)

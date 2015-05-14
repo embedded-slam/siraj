@@ -58,11 +58,17 @@
 	},
 	"graph_configs" :
 	{
-		"Graph1" : 
+		"My First Graph" : 
 		{
 			"column"  	: 2,
 			"pattern" 	: "Value = (\\d+)",
-			"color"		: "blue"
+			"color"		: "green"
+		},
+		"Yet Another Graph" : 
+		{
+			"column"  	: 2,
+			"pattern" 	: "The number of items is (\\d+) item\\(s\\)",
+			"color"		: "brown"
 		}
 	}
 }

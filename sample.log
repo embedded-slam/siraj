@@ -6,15 +6,20 @@ INFO||get_config_item||Getting item ['log_row_pattern'] value...||1429977122.608
 INFO||get_config_item||Getting item ['log_file_full_path'] value...||1429977122.608959||sj_configs.py:65
 INFO||get_config_item||Getting item ['file_line_column_number_zero_based'] value...||1429977122.609000||sj_configs.py:65
 INFO||get_config_item||Getting item ['root_source_path_prefix'] value...||1429977122.609039||sj_configs.py:65
+INFO||main||The number of items is 3 item(s)||1429977122.667415||siraj.py:1
 DEBUG||main||Value = 7||1429977122.667415||siraj.py:1
 INFO||get_config_item||Getting item ['time_stamp_column_number_zero_based'] value...||1429977122.609076||sj_configs.py:65
+INFO||main||The number of items is 1 item(s)||1429977122.667415||siraj.py:1
+INFO||main||The number of items is 50 item(s)||1429977122.667415||siraj.py:1
 INFO||get_config_item||Getting item ['table_conditional_formatting_config'] value...||1429977122.609112||sj_configs.py:65
+INFO||main||The number of items is 0 item(s)||1429977122.667415||siraj.py:1
 INFO||get_config_item||Getting item ['pygments_syntax_highlighting_style'] value...||1429977122.609149||sj_configs.py:65
 INFO||load_log_file||Headers: ['LEVEL', 'FUNCTION', 'MESSAGE', 'TIME', 'FILE_AND_LINE']||1429977122.610949||siraj.py:358
 DEBUG||main||Value = 8||1429977122.667415||siraj.py:1
 INFO||load_log_file||sample.log has 132 lines||1429977122.611020||siraj.py:359
 DEBUG||main||Exiting...||1429977122.667415||siraj.py:738 
 DEBUG||main||Value = 5||1429977122.667415||siraj.py:1
+INFO||main||The number of items is 30 item(s)||1429977122.667415||siraj.py:1
 INFO||cell_left_clicked||cell[8][1] = get_config_item||1429977123.903169||siraj.py:407
 INFO||cell_left_clicked||cell[14][1] = cell_left_clicked||1429977124.351174||siraj.py:407
 DEBUG||main||Value = 22||1429977122.667415||siraj.py:1
@@ -25,22 +30,30 @@ INFO||cell_left_clicked||cell[15][2] = cell[13][2] = cell[16][0] = INFO||1429977
 INFO||cell_left_clicked||cell[19][2] = Key = 16777223||1429977126.239118||siraj.py:407
 DEBUG||main||Value = 2||1429977122.667415||siraj.py:1
 INFO||cell_left_clicked||cell[15][3] = 1429977018.519534||1429977126.927148||siraj.py:407
+INFO||main||The number of items is 15 item(s)||1429977122.667415||siraj.py:1
 INFO||cell_left_clicked||cell[14][4] = siraj.py:407||1429977127.464090||siraj.py:407
 DEBUG||main||Value = 1||1429977122.667415||siraj.py:1
+INFO||main||The number of items is 19 item(s)||1429977122.667415||siraj.py:1
 INFO||cell_left_clicked||cell[17][4] = siraj.py:475||1429977128.080146||siraj.py:407
 INFO||cell_left_clicked||cell[20][4] = siraj.py:407||1429977128.591655||siraj.py:407
+INFO||main||The number of items is 24 item(s)||1429977122.667415||siraj.py:1
 DEBUG||main||Value = 3||1429977122.667415||siraj.py:1
 INFO||cell_left_clicked||cell[14][2] = cell[17][2] = cell[20][1] = hide_filtered_out_entries||1429977130.873158||siraj.py:407
+INFO||main||The number of items is 50 item(s)||1429977122.667415||siraj.py:1
 WARNING||cell_key_pressed||A key was pressed!!!||1429977134.058095||siraj.py:522
 INFO||cell_key_pressed||Key = 16777249||1429977134.058413||siraj.py:524
+INFO||main||The number of items is 9 item(s)||1429977122.667415||siraj.py:1
 WARNING||cell_key_pressed||A key was pressed!!!||1429977135.041457||siraj.py:522
 INFO||cell_key_pressed||Key = 79||1429977135.041773||siraj.py:524
+INFO||main||The number of items is 22 item(s)||1429977122.667415||siraj.py:1
 WARNING||cell_key_pressed||A key was pressed!!!||1429977136.111766||siraj.py:522
 INFO||cell_key_pressed||Key = 16777249||1429977136.112073||siraj.py:524
+INFO||main||The number of items is 42 item(s)||1429977122.667415||siraj.py:1
 WARNING||cell_key_pressed||A key was pressed!!!||1429977136.419974||siraj.py:522
+INFO||main||The number of items is 6 item(s)||1429977122.667415||siraj.py:1
 DEBUG||main||Value = 3||1429977122.667415||siraj.py:1
 INFO||cell_key_pressed||Key = 16777223||1429977136.420107||siraj.py:524
 DEBUG||main||Value = 3||1429977122.667415||siraj.py:1
 INFO||cell_key_pressed||Delete key pressed while in the table. Clear all filters||1429977136.420187||siraj.py:528
-
+INFO||main||The number of items is 3 item(s)||1429977122.667415||siraj.py:1
 DEBUG||main||Value = 3||1429977122.667415||siraj.py:1
