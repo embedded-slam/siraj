@@ -117,7 +117,6 @@ class LogSParserMain(QMainWindow):
         self.ledSearchBox.textChanged.connect(self.invalidate_search_criteria)
         self.ledSearchBox.keyPressEvent = self.search_box_key_pressed
 
-        self.user_interface.mnuActionOpen.triggered.connect(self.menu_open_file)
         search_toolbar.addWidget(self.ledSearchBox)
         
         tbrActionPrevSearchMatch = QAction('<<', self)                               
