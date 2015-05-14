@@ -252,7 +252,7 @@ class LogSParserMain(QMainWindow):
         
         self.table_conditional_formatting_config = self.config.get_config_item("table_conditional_formatting_configs")
         self.load_log_file(self.log_file_full_path)
-        self.load_graphs(self.graph_configs, self.table_data)
+
         
     def load_graphs(self, graph_configs, table_data):
         x = []
@@ -398,7 +398,8 @@ siraj.  If not, see
         if(len(self.per_column_filter_in_set_list) == 0):
             self.per_column_filter_in_set_list = [set() for column in range(len(self.table_data[0]))]
         
-        self.extract_column_dictionaries(self.header, self.table_data)    
+        self.extract_column_dictionaries(self.header, self.table_data)
+        self.load_graphs(self.graph_configs, self.table_data)    
     
     def extract_column_dictionaries(self, header_vector_list, data_matrix_list):
         """
