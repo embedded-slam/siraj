@@ -258,6 +258,7 @@ class LogSParserMain(QMainWindow):
         
         pg.setConfigOption('background', QColor("white"))
         pg.setConfigOption('foreground', QColor("black"))
+        pg.setConfigOptions(antialias=True)
         graphs = list(graph_configs.keys())
         graph_data = [([],[],) for _ in graphs] 
 
