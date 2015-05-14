@@ -637,9 +637,6 @@ siraj.  If not, see
                 else:
                     selected_indexes = self.get_selected_indexes()
                     self.table_model.toggleBookmarks(selected_indexes)
-            elif key == Qt.Key_G:
-                data = [1,4,3,4,6,3,6,4,2,6,7,4,4,5,4,]
-                pg.plot(data)
             elif key == Qt.Key_Comma:
                 self.select_search_match(False)
             elif key == Qt.Key_Period:
@@ -827,7 +824,13 @@ siraj.  If not, see
         log_file_list = [url.toLocalFile() for url in url_list]
         self.log_file_full_path = log_file_list[0]
         self.load_log_file(self.log_file_full_path)
-            
+    
+    def closeEvent(self, event):
+        app = QApplication([])
+#         app.closeAllWindows() 
+        app.deleteLater()
+        app.closeAllWindows()
+                          
 def main():
     logging.basicConfig(
         format='%(levelname)s||%(funcName)s||%(message)s||%(created)f||%(filename)s:%(lineno)s', 
