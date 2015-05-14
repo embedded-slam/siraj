@@ -24,7 +24,8 @@ that generated it to give context while analyzing the log.
 7.	Calculating the **time difference** between any two rows in the table if applicable.
 8.	Adding/removing **bookmarks** on desired log traces (i.e. table rows).
 9.  **Cross-platform**, Works on Linux, Windows, and Mac (not tested on Mac yet but it should work).
-10.  **Light-weight**, It relies on the Qt (which is written in C++) to do the heavy-lifting.
+10. **Light-weight**, It relies on the Qt (which is written in C++) to do the heavy-lifting.
+11. Generatig **Graphs** out of the existing data using **Regular Expressions**.
 
 
 ------------------------------------------------------------
@@ -108,7 +109,7 @@ Since JSON doesn't allow inline comments, the different configuration items are 
 				"cell_left_clicked" : 
 				{
 					"foreground" : "white",
-					"background" : "purple"
+					"background" : "limegreen"
 				},
 				"hide_filtered_out_entries" : 
 				{
@@ -125,6 +126,21 @@ Since JSON doesn't allow inline comments, the different configuration items are 
 			{
 				"foreground" : "black",		
 				"background" : "yellow"
+			}
+		},
+		"graph_configs" :
+		{
+			"My First Graph" : 
+			{
+				"column"  	: 2,
+				"pattern" 	: "Value = (\\d+)",
+				"color"		: "green"
+			},
+			"Yet Another Graph" : 
+			{
+				"column"  	: 2,
+				"pattern" 	: "The number of items is (\\d+) item\\(s\\)",
+				"color"		: "brown"
 			}
 		}
 	}
@@ -202,6 +218,19 @@ Example for this can be seen in the _FUNCTION_  column in the screenshot above.
 `bookmark_color_dict`  
 Holds the background/foreground colors to use with bookmakrs.
 
+`graph_configs`  
+Holds a list of graph entries (one entry per graph). Each entry consists of
+- `Graph Name`	Will be used as a graph window title (ex. `My First Graph`).
+- `column`  	This represents the columns at which to perform RegEx matching.
+- `pattern`	The pattern to be used to extract the graph data.
+- `color`		The line color to use when drawing the graph.
+
+If the graph_configs is empty, graphing functionality is disabled automatically. This can be achieved as follows
+
+	"graph_configs" :
+	{
+	}
+	
 ## Functions
 
 `Search`  
@@ -260,4 +289,6 @@ This will open the file that generated the current log in an external text edito
 
 `Drag and Drop`  
 Drag log file from your file explorer and drop them into the table to load them. The log file shall follow the same format as that defined in the currently loaded configuration file. It currently support dropping a single log file at a time, when dropping more than one file, the first one is loaded and the rest are ignored.
+
+
 
