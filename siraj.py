@@ -641,7 +641,9 @@ siraj.  If not, see
                 self.select_search_match(False)
             elif key == Qt.Key_Period:
                 self.select_search_match(True)
-
+        elif key == Qt.Key_F5:
+            self.load_log_file(self.log_file_full_path)
+        
         else:
             QTableView.keyPressEvent(self.user_interface.tblLogData, q_key_event) 
             

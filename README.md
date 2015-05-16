@@ -278,6 +278,9 @@ Jumps to the next search match (if any).
 `Ctrl+Shift+B`  
 Clears all bookmarks.
 
+`F5`  
+Reload the currently loaded file from the desk. Useful if the file contents can change while opening it.
+
 `Selecting two cells from different columns`  
 will show the elapsed time between the two logs. This is only applicable if the log fields contains a time field and it is specified in the configuration via `time_stamp_column_number_zero_based`.  
 
