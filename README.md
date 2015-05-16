@@ -195,9 +195,7 @@ This is the command format to use when invoking the external editor. For example
 This command open my_file.c and highlight line number 30.
 
 `table_conditional_formatting_configs`  
-Contains the conditional formatting dictionary for foreground and background colors. Color supported currently are the [Qt predefined colors] (http://pyqt.sourceforge.net/Docs/PyQt4/qcolor.html#predefined-colors)
-
-![Qt Predefined Colors](https://raw.githubusercontent.com/embedded-slam/siraj/master/qt_predefined_colors.png)
+Contains the conditional formatting dictionary for foreground and background colors. Color supported currently are the [Qt predefined colors] (http://pyqt.sourceforge.net/Docs/PyQt4/qcolor.html#predefined-colors) as well as the [SVG colors] (http://www.w3.org/TR/SVG/types.html#ColorKeywords)
 
 `foreground_key_column and background_key_column`  
 Determines which columns will be used to determine the foreground and background colors of each rows based on the row contents intersecting with that column.
