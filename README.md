@@ -49,9 +49,9 @@ follows:
 If you only need to use the tool and don't have/need python or Qt, you can 
 download one of the following archives based on your system. 
                  
-1.	[Linux.]  	(https://github.com/embedded-slam/siraj/raw/release/release/linux/siraj_linux.tar.gz)
-2. 	[Windows.]	(https://github.com/embedded-slam/siraj/raw/release/release/windows/siraj_windows.zip) 
-3.	[Mac.]      (https://github.com/embedded-slam/siraj/raw/release/release/mac/siraj_mac.zip) 
+1.	[Linux.]  	(https://github.com/embedded-slam/siraj/releases/download/v1.2.0/siraj_linux.tar.gz)
+2. 	[Windows.]	(https://github.com/embedded-slam/siraj/releases/download/v1.2.0/siraj_windows.zip) 
+3.	[Mac.]      (https://github.com/embedded-slam/siraj/releases/download/v1.2.0/siraj_mac.zip) 
 
 Once downloaded, you'll need to extract it and run *sirag*. This will run with 
 the provided sample log `sample.log` and the provided sample configuration 
