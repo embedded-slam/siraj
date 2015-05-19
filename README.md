@@ -1,9 +1,9 @@
 *Siraj* is a cross-platform textual log parser that was built using Python3 and Qt  
-![Siraj UI](https://raw.githubusercontent.com/embedded-slam/siraj/master/siraj_screenshot.png)
+![Siraj UI](https://raw.githubusercontent.com/embedded-slam/siraj/release/siraj_screenshot.png)
 
 
 # Problem
-Textual logs can sometimes be huge. And going through them with standard text 
+Text-based logs can sometimes be huge. And going through them with standard text 
 editor without color coding or filtering can be really frustrating job.
 
 # Solution
@@ -24,7 +24,8 @@ that generated it to give context while analyzing the log.
 7.	Calculating the **time difference** between any two rows in the table if applicable.
 8.	Adding/removing **bookmarks** on desired log traces (i.e. table rows).
 9.  **Cross-platform**, Works on Linux, Windows, and Mac (not tested on Mac yet but it should work).
-10.  **Light-weight**, It relies on the Qt (which is written in C++) to do the heavy-lifting.
+10. **Light-weight**, It relies on the Qt (which is written in C++) to do the heavy-lifting.
+11. Generatig **Graphs** out of the existing data using **Regular Expressions**.
 
 
 ------------------------------------------------------------
@@ -50,7 +51,7 @@ download one of the following archives based on your system.
                  
 1.	[Linux.]  	(https://github.com/embedded-slam/siraj/raw/release/release/linux/siraj_linux.tar.gz)
 2. 	[Windows.]	(https://github.com/embedded-slam/siraj/raw/release/release/windows/siraj_windows.zip) 
-3.	Mac.  _Comming soon!_  
+3.	[Mac.]      (https://github.com/embedded-slam/siraj/raw/release/release/mac/siraj_mac.zip) 
 
 Once downloaded, you'll need to extract it and run *sirag*. This will run with 
 the provided sample log `sample.log` and the provided sample configuration 
@@ -108,7 +109,7 @@ Since JSON doesn't allow inline comments, the different configuration items are 
 				"cell_left_clicked" : 
 				{
 					"foreground" : "white",
-					"background" : "purple"
+					"background" : "limegreen"
 				},
 				"hide_filtered_out_entries" : 
 				{
@@ -125,6 +126,21 @@ Since JSON doesn't allow inline comments, the different configuration items are 
 			{
 				"foreground" : "black",		
 				"background" : "yellow"
+			}
+		},
+		"graph_configs" :
+		{
+			"My First Graph" : 
+			{
+				"column"  	: 2,
+				"pattern" 	: "Value = (\\d+)",
+				"color"		: "green"
+			},
+			"Yet Another Graph" : 
+			{
+				"column"  	: 2,
+				"pattern" 	: "The number of items is (\\d+) item\\(s\\)",
+				"color"		: "brown"
 			}
 		}
 	}
@@ -179,9 +195,7 @@ This is the command format to use when invoking the external editor. For example
 This command open my_file.c and highlight line number 30.
 
 `table_conditional_formatting_configs`  
-Contains the conditional formatting dictionary for foreground and background colors. Color supported currently are the [Qt predefined colors] (http://pyqt.sourceforge.net/Docs/PyQt4/qcolor.html#predefined-colors)
-
-![Qt Predefined Colors](https://raw.githubusercontent.com/embedded-slam/siraj/master/qt_predefined_colors.png)
+Contains the conditional formatting dictionary for foreground and background colors. Color supported currently are the [Qt predefined colors] (http://pyqt.sourceforge.net/Docs/PyQt4/qcolor.html#predefined-colors) as well as the [SVG colors] (http://www.w3.org/TR/SVG/types.html#ColorKeywords)
 
 `foreground_key_column and background_key_column`  
 Determines which columns will be used to determine the foreground and background colors of each rows based on the row contents intersecting with that column.
@@ -202,6 +216,19 @@ Example for this can be seen in the _FUNCTION_  column in the screenshot above.
 `bookmark_color_dict`  
 Holds the background/foreground colors to use with bookmakrs.
 
+`graph_configs`  
+Holds a list of graph entries (one entry per graph). Each entry consists of
+- `Graph Name`	Will be used as a graph window title (ex. `My First Graph`).
+- `column`  	This represents the columns at which to perform RegEx matching.
+- `pattern`	The pattern to be used to extract the graph data.
+- `color`		The line color to use when drawing the graph.
+
+If the graph_configs is empty, graphing functionality is disabled automatically. This can be achieved as follows
+
+	"graph_configs" :
+	{
+	}
+	
 ## Functions
 
 `Search`  
@@ -240,8 +267,17 @@ Jumps to the previous bookmark (if any).
 `Ctrl+Shif+N`  
 Jumps to the next bookmark (if any).
 
+`Ctrl+<`  
+Jumps to the previous search match (if any).
+
+`Ctrl+>`  
+Jumps to the next search match (if any).
+
 `Ctrl+Shift+B`  
 Clears all bookmarks.
+
+`F5`  
+Reload the currently loaded file from the desk. Useful if the file contents can change while opening it.
 
 `Selecting two cells from different columns`  
 will show the elapsed time between the two logs. This is only applicable if the log fields contains a time field and it is specified in the configuration via `time_stamp_column_number_zero_based`.  
@@ -254,4 +290,6 @@ This will open the file that generated the current log in an external text edito
 
 `Drag and Drop`  
 Drag log file from your file explorer and drop them into the table to load them. The log file shall follow the same format as that defined in the currently loaded configuration file. It currently support dropping a single log file at a time, when dropping more than one file, the first one is loaded and the rest are ignored.
+
+
 

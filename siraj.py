@@ -38,8 +38,9 @@ import functools
 import json
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
-from pygments.lexers import (get_lexer_for_filename)
+from pygments.lexers import (get_lexer_by_name, get_lexer_for_filename)
 from bisect import (bisect_left, bisect_right)
+import pyqtgraph as pg
 
 class LogSParserMain(QMainWindow):
     """
@@ -54,6 +55,7 @@ class LogSParserMain(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
         
+        self.graph_dict = {}
         self.menuFilter = None
         self.proxy_model = None
         self.table_data = None
@@ -96,6 +98,7 @@ class LogSParserMain(QMainWindow):
 
         self.user_interface.tblLogData.setAcceptDrops(False)
         self.setAcceptDrops(True)
+
         
     def setup_toolbars(self):
         source_toolbar = self.addToolBar('SourceToolbar')
@@ -112,15 +115,16 @@ class LogSParserMain(QMainWindow):
         search_toolbar.setAllowedAreas(Qt.TopToolBarArea | Qt.BottomToolBarArea)
         self.ledSearchBox = QLineEdit()
         self.ledSearchBox.textChanged.connect(self.invalidate_search_criteria)
-        self.user_interface.mnuActionOpen.triggered.connect(self.menu_open_file)
+        self.ledSearchBox.keyPressEvent = self.search_box_key_pressed
+
         search_toolbar.addWidget(self.ledSearchBox)
         
         tbrActionPrevSearchMatch = QAction('<<', self)                               
-        tbrActionPrevSearchMatch.triggered.connect(functools.partial(self.select_search_match, self.ledSearchBox.text, False))
+        tbrActionPrevSearchMatch.triggered.connect(functools.partial(self.select_search_match, False))
         tbrActionPrevSearchMatch.setToolTip("Go to previous search match")                  
 
         tbrActionNextSearchMatch = QAction('>>', self)                               
-        tbrActionNextSearchMatch.triggered.connect(functools.partial(self.select_search_match, self.ledSearchBox.text, True))             
+        tbrActionNextSearchMatch.triggered.connect(functools.partial(self.select_search_match, True))             
         tbrActionNextSearchMatch.setToolTip("Go to next search match")                  
 
         tbrActionIgnoreCase = QAction('Ignore Case', self)                               
@@ -171,7 +175,7 @@ class LogSParserMain(QMainWindow):
         search_proxy.setFilterCaseSensitivity(case_sensitivity)
         search_proxy.setFilterKeyColumn(key_column)
         if(self.is_match_whole_word):
-            search_criteria = r"\\b{}\\b".format(search_criteria)
+            search_criteria = r"\b{}\b".format(search_criteria)
             
         search_proxy.setFilterRegExp(search_criteria)
         matched_row_list = []
@@ -181,7 +185,7 @@ class LogSParserMain(QMainWindow):
         self.search_criteria_updated = False    
         return matched_row_list
 
-    def select_search_match(self, get_search_criteria_callback, is_forward):
+    def select_search_match(self, is_forward):
         selected_indexes = self.get_selected_indexes()
         
         if(len(selected_indexes) == 0):
@@ -193,7 +197,7 @@ class LogSParserMain(QMainWindow):
             index = self.get_selected_indexes()[0]
             row = index.row()
             column = index.column()
-            search_criteria = get_search_criteria_callback()
+            search_criteria = self.ledSearchBox.text()
             if(self.search_criteria_updated):
                 self.matched_row_list = self.get_matched_row_list(column, search_criteria, self.case_sensitive_search_type)
             if(len(self.matched_row_list) > 0):    
@@ -220,7 +224,6 @@ class LogSParserMain(QMainWindow):
                         is_match_found = True
                 if(is_match_found):
                     self.select_cell_by_row_and_column(self.matched_row_list[matched_row_index], column)
-                    self.user_interface.tblLogData.setFocus()
             else:
                 self.display_message_box(
                      "No match found", 
@@ -228,6 +231,7 @@ class LogSParserMain(QMainWindow):
                      QMessageBox.Warning)
 
     def load_configuration_file(self, config_file_path="siraj_configs.json"):
+        self.graph_dict.clear()
         self.config = LogSParserConfigs(config_file_path)
         self.log_file_full_path = self.config.get_config_item("log_file_full_path")
         self.log_trace_regex_pattern = self.config.get_config_item("log_row_pattern")
@@ -241,13 +245,51 @@ class LogSParserMain(QMainWindow):
         self.file_column_pattern = cross_reference_configs["file_column_pattern"]
         self.line_column = cross_reference_configs["line_column_number_zero_based"]
         self.line_column_pattern = cross_reference_configs["line_column_pattern"]
+        
+        self.graph_configs = self.config.get_config_item("graph_configs")
 
         self.root_source_path_prefix = cross_reference_configs["root_source_path_prefix"]
         self.syntax_highlighting_style = cross_reference_configs["pygments_syntax_highlighting_style"]
         
         self.table_conditional_formatting_config = self.config.get_config_item("table_conditional_formatting_configs")
         self.load_log_file(self.log_file_full_path)
+
         
+    def load_graphs(self, graph_configs, table_data):
+        
+        pg.setConfigOption('background', QColor("white"))
+        pg.setConfigOption('foreground', QColor("black"))
+        pg.setConfigOptions(antialias=True)
+        graphs = list(graph_configs.keys())
+        graph_data = [([],[],) for _ in graphs] 
+
+        x = []
+        y = []
+        
+        for row_number, row_data in enumerate(table_data):
+            for graph_number, graph_name in enumerate(graphs):
+                cell_to_match = row_data[graph_configs[graph_name]["column"]]
+                m = re.search(graph_configs[graph_name]["pattern"], cell_to_match)
+                if(m is not None):
+                    graph_data[graph_number][0].append(row_number)          # X-Axis value
+                    graph_data[graph_number][1].append(int(m.group(1)))     # Y-Axis value
+            
+        
+        for graph_number, graph in enumerate(graphs):
+            window = None
+            if (graph in self.graph_dict):
+                window = self.graph_dict[graph]
+                window.clear()
+            else:
+                window = pg.GraphicsWindow(title=graph)
+                self.graph_dict[graph] = window
+                
+            p = window.addPlot(title = graph)
+            p.plot(graph_data[graph_number][0], 
+                   graph_data[graph_number][1],
+                   pen = pg.mkPen(width = 1, color = QColor(graph_configs[graph]["color"])))
+              
+                 
     def setup_context_menu(self):
         self.menuFilter = QMenu(self)
         
@@ -376,7 +418,8 @@ siraj.  If not, see
         if(len(self.per_column_filter_in_set_list) == 0):
             self.per_column_filter_in_set_list = [set() for column in range(len(self.table_data[0]))]
         
-        self.extract_column_dictionaries(self.header, self.table_data)    
+        self.extract_column_dictionaries(self.header, self.table_data)
+        self.load_graphs(self.graph_configs, self.table_data)    
     
     def extract_column_dictionaries(self, header_vector_list, data_matrix_list):
         """
@@ -548,6 +591,17 @@ siraj.  If not, see
             self.user_interface.tblLogData.setFocus() 
         self.update_status_bar()
 
+    def search_box_key_pressed(self, q_key_event):
+        key = q_key_event.key()
+        if (key in [Qt.Key_Enter, Qt.Key_Return]):
+            if(Qt.ShiftModifier == (int(q_key_event.modifiers()) & (Qt.ShiftModifier))):
+                self.select_search_match(False)
+            else:
+                self.select_search_match(True)
+        else:
+            QLineEdit.keyPressEvent(self.ledSearchBox, q_key_event)
+                                        
+
     def cell_key_pressed(self, q_key_event):
         """
         Handles the event of pressing a keyboard key while on the table.
@@ -592,8 +646,15 @@ siraj.  If not, see
                 else:
                     selected_indexes = self.get_selected_indexes()
                     self.table_model.toggleBookmarks(selected_indexes)
+            elif key == Qt.Key_Comma:
+                self.select_search_match(False)
+            elif key == Qt.Key_Period:
+                self.select_search_match(True)
+        elif key == Qt.Key_F5:
+            self.load_log_file(self.log_file_full_path)
+        
         else:
-            QTableView.keyPressEvent(self.user_interface.tblLogData, q_key_event)
+            QTableView.keyPressEvent(self.user_interface.tblLogData, q_key_event) 
             
     def prepare_clipboard_text(self):
         """
@@ -626,18 +687,22 @@ siraj.  If not, see
         table view to make that cell in the middle of the visible part of the
         table.
         """
+        self.user_interface.tblLogData.clearSelection()
         index = self.get_index_by_row_and_column(row, column)
         self.user_interface.tblLogData.setCurrentIndex(index)  
         self.user_interface.tblLogData.scrollTo(index, hint = QAbstractItemView.PositionAtCenter)
+        self.user_interface.tblLogData.setFocus()
         self.update_status_bar()
         
     def select_cell_by_index(self, index):        
         """
         Select a cell at the given index.
         """
+        self.user_interface.tblLogData.clearSelection()
         index = self.proxy_model.mapFromSource(index)
         self.user_interface.tblLogData.setCurrentIndex(index)  
         self.user_interface.tblLogData.scrollTo(index, hint = QAbstractItemView.PositionAtCenter)
+        self.user_interface.tblLogData.setFocus()
         self.update_status_bar()
         
     def go_to_prev_match(self, selected_cell):
@@ -649,7 +714,6 @@ siraj.  If not, see
         index = matches_list.index(selected_cell.row())
         if(index > 0):
             new_row = matches_list[index - 1]
-            self.user_interface.tblLogData.clearSelection()
             self.select_cell_by_row_and_column(new_row, selected_cell.column())
             
     def go_to_next_match(self, selected_cell):
@@ -661,7 +725,6 @@ siraj.  If not, see
         index = matches_list.index(selected_cell.row())
         if(index < (len(matches_list) - 1)):
             new_row = matches_list[index + 1]
-            self.user_interface.tblLogData.clearSelection()
             self.select_cell_by_row_and_column(new_row, selected_cell.column())
     
     
@@ -772,7 +835,13 @@ siraj.  If not, see
         log_file_list = [url.toLocalFile() for url in url_list]
         self.log_file_full_path = log_file_list[0]
         self.load_log_file(self.log_file_full_path)
-            
+    
+    def closeEvent(self, event):
+        app = QApplication([])
+#         app.closeAllWindows() 
+        app.deleteLater()
+        app.closeAllWindows()
+                          
 def main():
     logging.basicConfig(
         format='%(levelname)s||%(funcName)s||%(message)s||%(created)f||%(filename)s:%(lineno)s', 
