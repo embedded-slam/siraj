@@ -37,7 +37,7 @@
 			"cell_left_clicked" : 
 			{
 				"foreground" : "white",
-				"background" : "limegreen"
+				"background" : "purple"
 			},
 			"hide_filtered_out_entries" : 
 			{
