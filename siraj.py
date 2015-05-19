@@ -56,6 +56,7 @@ class LogSParserMain(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
         
+        self.graph_dict = {}
         self.menuFilter = None
         self.proxy_model = None
         self.table_data = None
@@ -231,6 +232,7 @@ class LogSParserMain(QMainWindow):
                      QMessageBox.Warning)
 
     def load_configuration_file(self, config_file_path="siraj_configs.json"):
+        self.graph_dict.clear()
         self.config = LogSParserConfigs(config_file_path)
         self.log_file_full_path = self.config.get_config_item("log_file_full_path")
         self.log_trace_regex_pattern = self.config.get_config_item("log_row_pattern")
@@ -275,11 +277,19 @@ class LogSParserMain(QMainWindow):
             
         
         for graph_number, graph in enumerate(graphs):
-            plot_window = pg.plot(graph_data[graph_number][0], 
-                                  graph_data[graph_number][1],
-                                  parent = self, 
-                                  title = graph, 
-                                  pen = pg.mkPen(width = 1, color = QColor(graph_configs[graph]["color"])))
+            window = None
+            if (graph in self.graph_dict):
+                window = self.graph_dict[graph]
+                window.clear()
+            else:
+                window = pg.GraphicsWindow(title=graph)
+                self.graph_dict[graph] = window
+                
+            p = window.addPlot(title = graph)
+            p.plot(graph_data[graph_number][0], 
+                   graph_data[graph_number][1],
+                   pen = pg.mkPen(width = 1, color = QColor(graph_configs[graph]["color"])))
+              
                  
     def setup_context_menu(self):
         self.menuFilter = QMenu(self)
