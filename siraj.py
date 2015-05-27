@@ -419,7 +419,8 @@ siraj.  If not, see
             self.per_column_filter_in_set_list = [set() for column in range(len(self.table_data[0]))]
         
         self.extract_column_dictionaries(self.header, self.table_data)
-        self.load_graphs(self.graph_configs, self.table_data)    
+        self.load_graphs(self.graph_configs, self.table_data) 
+        self.setWindowTitle("Siraj | {}".format(log_file_full_path))   
     
     def extract_column_dictionaries(self, header_vector_list, data_matrix_list):
         """
