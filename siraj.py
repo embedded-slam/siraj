@@ -94,7 +94,7 @@ class LogSParserMain(QMainWindow):
         
         self.case_sensitive_search_type = Qt.CaseInsensitive
         self.is_wrap_search = True  
-        self.is_match_whole_word = True
+        self.is_match_whole_word = False
 
         self.user_interface.tblLogData.setAcceptDrops(False)
         self.setAcceptDrops(True)
@@ -141,7 +141,7 @@ class LogSParserMain(QMainWindow):
         
         tbrActionMatchWholeWord = QAction('Match Whole Word', self)                               
         tbrActionMatchWholeWord.setCheckable(True)
-        tbrActionMatchWholeWord.setChecked(True)
+        tbrActionMatchWholeWord.setChecked(False)
         tbrActionMatchWholeWord.triggered.connect(self.set_match_whole_word, tbrActionMatchWholeWord.isChecked())             
         tbrActionMatchWholeWord.setToolTip("Match Whole Word") 
                                                
