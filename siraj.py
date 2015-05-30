@@ -389,11 +389,14 @@ siraj.  If not, see
             self.load_configuration_file(self.config_file_full_path)
             
         
+    def reset_per_log_file_data(self):
+        self.invalidate_search_criteria()
+        
     def load_log_file(self, log_file_full_path):
         """
         Loads the given log file into the table.
         """
-
+        self.reset_per_log_file_data()
         with open(log_file_full_path, "r") as log_file_handle:
             log_file_content_lines = log_file_handle.read().splitlines()
         
