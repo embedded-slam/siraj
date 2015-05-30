@@ -39,6 +39,9 @@ on your target system:
 1.  [Python3](https://www.python.org/downloads/). 
 2.  [SIP](http://www.riverbankcomputing.com/software/sip/download).
 3.  [PyQt4](http://www.riverbankcomputing.com/software/pyqt/download).
+4.	[Pygments](http://pygments.org/download/). For the syntax highlighting functionality.
+5.	[PyQtGraph](http://www.pyqtgraph.org/). For the graphing functionality.
+6.  [CxFreeze](http://cx-freeze.sourceforge.net/). Optional, for packaging.
 
 Once you have the prerequisites you can run the tool using it's main module as
 follows:
