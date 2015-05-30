@@ -230,8 +230,15 @@ class LogSParserMain(QMainWindow):
                      'Search pattern "{}" was not found in column "{}"'.format(search_criteria, self.header[column]), 
                      QMessageBox.Warning)
 
-    def load_configuration_file(self, config_file_path="siraj_configs.json"):
+    def reset_per_config_file_data(self):
         self.graph_dict.clear()
+        self.reset_per_log_file_data()
+        self.table_data = None
+        self.table_model = None
+        self.proxy_model = None
+        
+    def load_configuration_file(self, config_file_path="siraj_configs.json"):
+        self.reset_per_config_file_data()
         self.config = LogSParserConfigs(config_file_path)
         self.log_file_full_path = self.config.get_config_item("log_file_full_path")
         self.log_trace_regex_pattern = self.config.get_config_item("log_row_pattern")
