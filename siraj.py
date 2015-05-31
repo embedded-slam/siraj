@@ -787,7 +787,18 @@ siraj.  If not, see
         for index in selected_indexes:
             column = index.column()
             self.per_column_filter_out_set_list[column].add(index.data())
+        
+        new_selected_row = None
+        min_selected_row = selected_indexes[0].row()    
+        max_selected_row = selected_indexes[-1].row()    
+        if(min_selected_row != 0):
+            new_selected_row = min_selected_row - 1
+        elif(max_selected_row != self.table_model.columnCount(None)):
+            new_selected_row = max_selected_row + 1
+            
         self.apply_filter(is_filtering_mode_out=True)    
+        
+        self.select_cell_by_row_and_column(new_selected_row, selected_indexes[0].column())
         self.update_status_bar()   
             
     def show_rows_based_on_selected_cells(self):
