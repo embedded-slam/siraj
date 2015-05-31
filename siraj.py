@@ -630,25 +630,26 @@ siraj.  If not, see
                 self.hide_rows_based_on_selected_cells()
             elif key == Qt.Key_O:
                 self.show_rows_based_on_selected_cells()
-            elif key == Qt.Key_N:
+            elif key == Qt.Key_Up: # Jump to previous match
                 selected_indexes = self.get_selected_indexes()
                 if(len(selected_indexes) == 1):
-                    if(Qt.ShiftModifier == (int(q_key_event.modifiers()) & (Qt.ShiftModifier))):
-                        next_bookmark_index = self.table_model.getNextBookmarkIndex(selected_indexes[0])
-                        if(next_bookmark_index is not None):
-                            self.select_cell_by_index(next_bookmark_index)
-
-                    else:
-                        self.go_to_next_match(selected_indexes[0])           
-            elif key == Qt.Key_P:
+                    self.go_to_prev_match(selected_indexes[0])
+            elif key == Qt.Key_Down: # Jump to next match
                 selected_indexes = self.get_selected_indexes()
                 if(len(selected_indexes) == 1):
-                    if(Qt.ShiftModifier == (int(q_key_event.modifiers()) & (Qt.ShiftModifier))):
-                        prev_bookmark_index = self.table_model.getPrevBookmarkIndex(selected_indexes[0])
-                        if(prev_bookmark_index is not None):
-                            self.select_cell_by_index(prev_bookmark_index)
-                    else:
-                        self.go_to_prev_match(selected_indexes[0])
+                    self.go_to_next_match(selected_indexes[0])           
+            elif key == Qt.Key_PageUp:
+                selected_indexes = self.get_selected_indexes()
+                if(len(selected_indexes) == 1):
+                    prev_bookmark_index = self.table_model.getPrevBookmarkIndex(selected_indexes[0])
+                    if(prev_bookmark_index is not None):
+                        self.select_cell_by_index(prev_bookmark_index)
+            elif key == Qt.Key_PageDown:
+                selected_indexes = self.get_selected_indexes()
+                if(len(selected_indexes) == 1):
+                    next_bookmark_index = self.table_model.getNextBookmarkIndex(selected_indexes[0])
+                    if(next_bookmark_index is not None):
+                        self.select_cell_by_index(next_bookmark_index)
             elif key == Qt.Key_C:
                 selected_indexes = self.get_selected_indexes()
                 self.prepare_clipboard_text()
@@ -658,10 +659,10 @@ siraj.  If not, see
                 else:
                     selected_indexes = self.get_selected_indexes()
                     self.table_model.toggleBookmarks(selected_indexes)
-            elif key == Qt.Key_Comma:
-                self.select_search_match(False)
-            elif key == Qt.Key_Period:
-                self.select_search_match(True)
+            elif key == Qt.Key_Left:
+                self.select_search_match(is_forward=False)
+            elif key == Qt.Key_Right:
+                self.select_search_match(is_forward=True)
         elif key == Qt.Key_F5:
             self.load_log_file(self.log_file_full_path)
         

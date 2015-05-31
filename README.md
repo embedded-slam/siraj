@@ -252,10 +252,10 @@ When multiple cells are selected which belong to one or more column(s) and the h
 
 When multiple cells are selected which belong to one or more column(s) and the show-only option is triggered, then a row will be shown only if all of its fields(columns) matches the corresponding filtered-in column.
 
-`Ctrl+P`  
+`Ctrl+Up`  
 Jumps to the previous matching cell (if one exists) from the same column. Works only when a single cell is selected.  
 
-`Ctrl+N`  
+`Ctrl+Down`  
 Jumps to the next matching cell (if one exists) from the same column. Works only when a single cell is selected.  
 
 `Ctrl+C`  
@@ -264,16 +264,16 @@ Copies the selected cell text into the clipboard. If a single cell is selected w
 `Ctrl+B` 
 Toggles the _bookmarked_ state of the current row. 
 
-`Ctrl+Shif+P`  
+`Ctrl+PageUp`  
 Jumps to the previous bookmark (if any).
 
-`Ctrl+Shif+N`  
+`Ctrl+PageDown`  
 Jumps to the next bookmark (if any).
 
-`Ctrl+<`  
+`Ctrl+LeftArrow`  
 Jumps to the previous search match (if any).
 
-`Ctrl+>`  
+`Ctrl+RightArrow`  
 Jumps to the next search match (if any).
 
 `Ctrl+Shift+B`  
