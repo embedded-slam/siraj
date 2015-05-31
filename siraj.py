@@ -74,7 +74,6 @@ class LogSParserMain(QMainWindow):
         self.user_interface.tblLogData.setContextMenuPolicy(Qt.CustomContextMenu)
         self.user_interface.tblLogData.customContextMenuRequested.connect(self.cell_right_clicked)
         self.user_interface.txtSourceFile.setReadOnly(True)
-        self.load_configuration_file()
 
         
         self.is_table_visible = True
@@ -89,7 +88,7 @@ class LogSParserMain(QMainWindow):
         self.clipboard = QApplication.clipboard()
         self.is_filtering_mode_out = True
         
-        self.matched_row_list = None
+        self.matched_row_list = []
         self.search_criteria_updated = True
         
         self.case_sensitive_search_type = Qt.CaseInsensitive
@@ -99,6 +98,7 @@ class LogSParserMain(QMainWindow):
         self.user_interface.tblLogData.setAcceptDrops(False)
         self.setAcceptDrops(True)
 
+        self.load_configuration_file()
         
     def setup_toolbars(self):
         source_toolbar = self.addToolBar('SourceToolbar')
@@ -168,6 +168,7 @@ class LogSParserMain(QMainWindow):
   
     def invalidate_search_criteria(self):
         self.search_criteria_updated = True;
+        self.matched_row_list.clear()
         
     def get_matched_row_list(self, key_column, search_criteria, case_sensitivity):
         search_proxy = QSortFilterProxyModel()
