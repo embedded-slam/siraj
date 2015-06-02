@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import sys
 from cx_Freeze import setup, Executable
 
