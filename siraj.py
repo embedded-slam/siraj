@@ -405,34 +405,42 @@ siraj.  If not, see
         Loads the given log file into the table.
         """
         self.reset_per_log_file_data()
-        with open(log_file_full_path, "r") as log_file_handle:
-            log_file_content_lines = log_file_handle.read().splitlines()
-        
-        pattern = re.compile(self.log_trace_regex_pattern)        
-        
-        self.table_data = []
-        for line in log_file_content_lines:
-            m = pattern.match(line)
-            if(m is not None):
-                self.table_data.append([group.strip() for group in m.groups()])
-        
-        m = re.match(self.log_trace_regex_pattern, log_file_content_lines[1])
-        self.header = [group_name for group_name in sorted(m.groupdict().keys(), key=lambda k: m.start(k))]
-        self.table_model = MyTableModel(self.table_data, self.header, self.table_conditional_formatting_config, self)
-        logging.info("Headers: %s", self.header)
-        logging.info("%s has %d lines", self.log_file_full_path, len(self.table_data))
-        self.proxy_model = MySortFilterProxyModel(self)
-        self.proxy_model.setSourceModel(self.table_model)
-        self.user_interface.tblLogData.setModel(self.proxy_model)
-        if(len(self.per_column_filter_out_set_list) == 0):
-            self.per_column_filter_out_set_list = [set() for column in range(len(self.table_data[0]))]
-        if(len(self.per_column_filter_in_set_list) == 0):
-            self.per_column_filter_in_set_list = [set() for column in range(len(self.table_data[0]))]
-        
-        self.extract_column_dictionaries(self.header, self.table_data)
-        self.load_graphs(self.graph_configs, self.table_data) 
-        self.setWindowTitle("Siraj | {}".format(log_file_full_path))   
-    
+        if (log_file_full_path == ""):
+            pass
+        elif (os.path.isfile(log_file_full_path)):
+            with open(log_file_full_path, "r") as log_file_handle:
+                log_file_content_lines = log_file_handle.read().splitlines()
+            
+            pattern = re.compile(self.log_trace_regex_pattern)        
+            
+            self.table_data = []
+            for line in log_file_content_lines:
+                m = pattern.match(line)
+                if(m is not None):
+                    self.table_data.append([group.strip() for group in m.groups()])
+            
+            m = re.match(self.log_trace_regex_pattern, log_file_content_lines[1])
+            self.header = [group_name for group_name in sorted(m.groupdict().keys(), key=lambda k: m.start(k))]
+            self.table_model = MyTableModel(self.table_data, self.header, self.table_conditional_formatting_config, self)
+            logging.info("Headers: %s", self.header)
+            logging.info("%s has %d lines", self.log_file_full_path, len(self.table_data))
+            self.proxy_model = MySortFilterProxyModel(self)
+            self.proxy_model.setSourceModel(self.table_model)
+            self.user_interface.tblLogData.setModel(self.proxy_model)
+            if(len(self.per_column_filter_out_set_list) == 0):
+                self.per_column_filter_out_set_list = [set() for column in range(len(self.table_data[0]))]
+            if(len(self.per_column_filter_in_set_list) == 0):
+                self.per_column_filter_in_set_list = [set() for column in range(len(self.table_data[0]))]
+            
+            self.extract_column_dictionaries(self.header, self.table_data)
+            self.load_graphs(self.graph_configs, self.table_data) 
+            self.setWindowTitle("Siraj | {}".format(log_file_full_path))   
+        else:
+            self.display_message_box(
+                "File not Found!", 
+                "File <b>`{}`</b> was not found. You can either: <br><br>1. Open a log file via the File menu. Or<br>2. Drag a log file from the system and drop it into the application".format(log_file_full_path), 
+                QMessageBox.Critical)
+            
     def extract_column_dictionaries(self, header_vector_list, data_matrix_list):
         """
         This function extracts a dictionary of dictionaries

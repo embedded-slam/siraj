@@ -150,7 +150,7 @@ Since JSON doesn't allow inline comments, the different configuration items are 
 ------------------------------------------------------------
 
 `log_file_full_path`  
-The log file to load initially on startup. Other log files can be opened from the GUI through File > Open menu. Currently the configuration file name is hard-coded. Later it can be loaded from the GUI.
+The log file to load initially on startup. Other log files can be opened from the GUI through File > Open menu. If `log_file_full_path` is empty then nothing is loaded when the tool opens.
 
 `log_row_pattern`  
 This is the most important configuration. This tells Siraj how to identify fields in the log lines. Matched log line is placed in the table. This uses RegEx named group to achieve two goals:
