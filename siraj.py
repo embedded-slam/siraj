@@ -419,7 +419,7 @@ siraj.  If not, see
                 if(m is not None):
                     self.table_data.append([group.strip() for group in m.groups()])
             
-            m = re.match(self.log_trace_regex_pattern, log_file_content_lines[1])
+            m = re.search(self.log_trace_regex_pattern, log_file_content_lines[1])
             self.header = [group_name for group_name in sorted(m.groupdict().keys(), key=lambda k: m.start(k))]
             self.table_model = MyTableModel(self.table_data, self.header, self.table_conditional_formatting_config, self)
             logging.info("Headers: %s", self.header)
