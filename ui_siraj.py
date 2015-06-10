@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'siraj.ui'
 #
-# Created: Wed Jun 10 09:09:01 2015
+# Created: Wed Jun 10 09:14:16 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -43,6 +43,8 @@ class Ui_Siraj(object):
         self.tblLogData = QtGui.QTableView(self.verticalLayoutWidget)
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Courier"))
+        font.setBold(True)
+        font.setWeight(75)
         self.tblLogData.setFont(font)
         self.tblLogData.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         self.tblLogData.setProperty("showDropIndicator", False)
