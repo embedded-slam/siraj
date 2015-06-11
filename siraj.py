@@ -414,7 +414,7 @@ siraj.  If not, see
         Filter view is an empty table. The user can drag cells to it and it will display all similar cells. This
         is useful when the user want to build his filter as he/she goes through the main log.
         """
-        self.ui_filter = SirajFilter()
+        self.ui_filter = SirajFilter(self.table_model)
         self.ui_filter.showMaximized()
         
            

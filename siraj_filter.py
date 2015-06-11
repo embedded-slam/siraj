@@ -52,7 +52,7 @@ class SirajFilter(QMainWindow):
     per_column_filter_in_set_list = list()
     header = list()
     table_conditional_formatting_config = None
-    def __init__(self):
+    def __init__(self, table_model):
         QMainWindow.__init__(self)
         
         self.graph_dict = {}
@@ -61,7 +61,15 @@ class SirajFilter(QMainWindow):
         self.table_data = None
         self.ui_filter = Ui_SirajFilter()  
         self.ui_filter.setupUi(self) 
+        self.table_model = table_model
         
+        self.filter_proxy_model = MySortFilterProxyModel(self)
+        self.filter_proxy_model.setSourceModel(self.table_model)
+        self.ui_filter.tblLogFilter.setModel(self.filter_proxy_model)
+        
+        # Initially the filter in list is empty
+        self.filter_proxy_model.setFilterInList(["This value can never exist in a log!!!"])
+        self.filter_proxy_model.invalidate()
     
         
         self.ui_filter.centralwidget.setLayout(self.ui_filter.verticalLayout)

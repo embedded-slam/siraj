@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'siraj_filter.ui'
 #
-# Created: Thu Jun 11 09:21:02 2015
+# Created: Thu Jun 11 09:37:57 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -36,7 +36,21 @@ class Ui_SirajFilter(object):
         self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.tblLogFilter = QtGui.QTableView(self.verticalLayoutWidget)
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Courier"))
+        font.setBold(True)
+        font.setWeight(75)
+        self.tblLogFilter.setFont(font)
+        self.tblLogFilter.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+        self.tblLogFilter.setProperty("showDropIndicator", False)
+        self.tblLogFilter.setDragDropOverwriteMode(False)
+        self.tblLogFilter.setSelectionBehavior(QtGui.QAbstractItemView.SelectItems)
+        self.tblLogFilter.setShowGrid(False)
         self.tblLogFilter.setObjectName(_fromUtf8("tblLogFilter"))
+        self.tblLogFilter.horizontalHeader().setCascadingSectionResizes(False)
+        self.tblLogFilter.horizontalHeader().setStretchLastSection(True)
+        self.tblLogFilter.verticalHeader().setCascadingSectionResizes(False)
+        self.tblLogFilter.verticalHeader().setMinimumSectionSize(18)
         self.verticalLayout.addWidget(self.tblLogFilter)
         SirajFilter.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(SirajFilter)
