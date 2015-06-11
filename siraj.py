@@ -41,6 +41,7 @@ from pygments.formatters import HtmlFormatter
 from pygments.lexers import (get_lexer_by_name, get_lexer_for_filename)
 from bisect import (bisect_left, bisect_right)
 import pyqtgraph as pg
+from siraj_filter import SirajFilter
 
 class LogSParserMain(QMainWindow):
     """
@@ -59,29 +60,27 @@ class LogSParserMain(QMainWindow):
         self.menuFilter = None
         self.proxy_model = None
         self.table_data = None
-        self.user_interface = Ui_Siraj()  
-        self.user_interface.setupUi(self) 
+        self.ui_main = Ui_Siraj()  
+        self.ui_main.setupUi(self) 
         
-        self.user_interface.mnuActionOpen.triggered.connect(self.menu_open_file)
-        self.user_interface.mnuActionLoadConfigs.triggered.connect(self.menu_load_configs)
-        self.user_interface.mnuActionExit.triggered.connect(self.menu_exit)
-        self.user_interface.mnuActionAbout.triggered.connect(self.menu_about)
-        self.user_interface.centralwidget.setLayout(self.user_interface.verticalLayout)
-        self.user_interface.dckSourceContents.setLayout(self.user_interface.lytSource)
-        self.user_interface.tblLogData.doubleClicked.connect(self.cell_double_clicked)
-        self.user_interface.tblLogData.clicked.connect(self.cell_left_clicked)
-        self.user_interface.tblLogData.keyPressEvent = self.cell_key_pressed
-        self.user_interface.tblLogData.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.user_interface.tblLogData.customContextMenuRequested.connect(self.cell_right_clicked)
-        self.user_interface.txtSourceFile.setReadOnly(True)
 
         
-        self.is_table_visible = True
+        self.ui_main.centralwidget.setLayout(self.ui_main.verticalLayout)
+        self.ui_main.dckSourceContents.setLayout(self.ui_main.lytSource)
+        self.ui_main.tblLogData.doubleClicked.connect(self.cell_double_clicked)
+        self.ui_main.tblLogData.clicked.connect(self.cell_left_clicked)
+        self.ui_main.tblLogData.keyPressEvent = self.cell_key_pressed
+        self.ui_main.tblLogData.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.ui_main.tblLogData.customContextMenuRequested.connect(self.cell_right_clicked)
+        self.ui_main.txtSourceFile.setReadOnly(True)
+
+        
         self.is_source_visible = True
         
-        self.user_interface.tblLogData.resizeColumnsToContents() 
-        self.user_interface.tblLogData.resizeRowsToContents() 
+        self.ui_main.tblLogData.resizeColumnsToContents() 
+        self.ui_main.tblLogData.resizeRowsToContents() 
         
+        self.setup_menu()
         self.setup_context_menu()
         self.setup_toolbars()
         
@@ -95,7 +94,7 @@ class LogSParserMain(QMainWindow):
         self.is_wrap_search = True  
         self.is_match_whole_word = False
 
-        self.user_interface.tblLogData.setAcceptDrops(False)
+        self.ui_main.tblLogData.setAcceptDrops(False)
         self.setAcceptDrops(True)
 
         self.load_configuration_file()
@@ -172,7 +171,7 @@ class LogSParserMain(QMainWindow):
         
     def get_matched_row_list(self, key_column, search_criteria, case_sensitivity):
         search_proxy = QSortFilterProxyModel()
-        search_proxy.setSourceModel(self.user_interface.tblLogData.model())
+        search_proxy.setSourceModel(self.ui_main.tblLogData.model())
         search_proxy.setFilterCaseSensitivity(case_sensitivity)
         search_proxy.setFilterKeyColumn(key_column)
         if(self.is_match_whole_word):
@@ -297,8 +296,20 @@ class LogSParserMain(QMainWindow):
                    graph_data[graph_number][1],
                    pen = pg.mkPen(width = 1, color = QColor(graph_configs[graph]["color"])))
               
-                 
+    def setup_menu(self):
+        """
+        Initializes the program menus.
+        """
+        self.ui_main.mnuActionOpen.triggered.connect(self.menu_open_file)
+        self.ui_main.mnuActionLoadConfigs.triggered.connect(self.menu_load_configs)
+        self.ui_main.mnuActionNewFilterView.triggered.connect(self.menu_new_filter_view)
+        self.ui_main.mnuActionExit.triggered.connect(self.menu_exit)
+        self.ui_main.mnuActionAbout.triggered.connect(self.menu_about)
+                     
     def setup_context_menu(self):
+        """
+        Initializes the context menu that appear when user right-click a cell.
+        """
         self.menuFilter = QMenu(self)
         
         self.hide_action                 = QAction('Hide selected values', self)
@@ -327,7 +338,7 @@ class LogSParserMain(QMainWindow):
         
     def toggle_source_view(self):
         self.is_source_visible = not self.is_source_visible
-        self.user_interface.dckSource.setVisible(self.is_source_visible)
+        self.ui_main.dckSource.setVisible(self.is_source_visible)
         logging.info("Source view is now {}".format("Visible" if self.is_source_visible else "Invisible"))
 
     def display_message_box(self, title, message, icon):
@@ -396,7 +407,17 @@ siraj.  If not, see
         if(self.config_file_full_path != ''):
             self.load_configuration_file(self.config_file_full_path)
             
+    def menu_new_filter_view(self):
+        """
+        Open a new filter view. 
         
+        Filter view is an empty table. The user can drag cells to it and it will display all similar cells. This
+        is useful when the user want to build his filter as he/she goes through the main log.
+        """
+        self.ui_filter = SirajFilter()
+        self.ui_filter.showMaximized()
+        
+           
     def reset_per_log_file_data(self):
         self.invalidate_search_criteria()
         
@@ -426,7 +447,7 @@ siraj.  If not, see
             logging.info("%s has %d lines", self.log_file_full_path, len(self.table_data))
             self.proxy_model = MySortFilterProxyModel(self)
             self.proxy_model.setSourceModel(self.table_model)
-            self.user_interface.tblLogData.setModel(self.proxy_model)
+            self.ui_main.tblLogData.setModel(self.proxy_model)
             if(len(self.per_column_filter_out_set_list) == 0):
                 self.per_column_filter_out_set_list = [set() for column in range(len(self.table_data[0]))]
             if(len(self.per_column_filter_in_set_list) == 0):
@@ -489,7 +510,7 @@ siraj.  If not, see
                 line = line_matcher.group(1)
                 full_path = "{}{}".format(self.root_source_path_prefix, file.strip())
                 self.load_source_file(full_path, line)
-                self.user_interface.tblLogData.setFocus() 
+                self.ui_main.tblLogData.setFocus() 
         self.update_status_bar()
         
     def load_source_file(self, file, line):    
@@ -501,13 +522,13 @@ siraj.  If not, see
                                   style = self.syntax_highlighting_style,
                                   hl_lines = [line])
         result = highlight(code, lexer, formatter)
-        self.user_interface.txtSourceFile.setHtml(result)
+        self.ui_main.txtSourceFile.setHtml(result)
         
-        text_block = self.user_interface.txtSourceFile.document().findBlockByLineNumber(int(line))      
-        text_cursor = self.user_interface.txtSourceFile.textCursor()
+        text_block = self.ui_main.txtSourceFile.document().findBlockByLineNumber(int(line))      
+        text_cursor = self.ui_main.txtSourceFile.textCursor()
         text_cursor.setPosition(text_block.position())        
-        self.user_interface.txtSourceFile.setTextCursor(text_cursor)
-        self.user_interface.txtSourceFile.ensureCursorVisible()
+        self.ui_main.txtSourceFile.setTextCursor(text_cursor)
+        self.ui_main.txtSourceFile.ensureCursorVisible()
 
     def get_selected_indexes(self):
         """
@@ -515,7 +536,7 @@ siraj.  If not, see
         
         mapToSource is needed to retrive the actual row number regardless of whether filtering is applied or not.
         """
-        return [self.proxy_model.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
+        return [self.proxy_model.mapToSource(index) for index in self.ui_main.tblLogData.selectedIndexes()]
                     
     def update_status_bar(self):
         """
@@ -526,7 +547,7 @@ siraj.  If not, see
         if(len(selected_indexes) == 1):
             selected_cell_index = selected_indexes[0]
             number_of_occurances = len(self.columns_dict[selected_cell_index.column()][selected_cell_index.data()])
-            self.user_interface.statusbar.showMessage(
+            self.ui_main.statusbar.showMessage(
                 '["{}"] occurred {} time(s) ~ {}%'.format(
                 selected_cell_index.data(), 
                 number_of_occurances,
@@ -536,9 +557,9 @@ siraj.  If not, see
             row_2 = selected_indexes[1].row()
             time_stamp1 = float(self.table_data[row_1][self.time_stamp_column])
             time_stamp2 = float(self.table_data[row_2][self.time_stamp_column])
-            self.user_interface.statusbar.showMessage("Time difference = {}".format(abs(time_stamp2 - time_stamp1)))
+            self.ui_main.statusbar.showMessage("Time difference = {}".format(abs(time_stamp2 - time_stamp1)))
         else:
-            self.user_interface.statusbar.showMessage("")
+            self.ui_main.statusbar.showMessage("")
 
     def cell_right_clicked(self, point):
         """
@@ -548,7 +569,7 @@ siraj.  If not, see
         to choose from.
         """
         index = self.proxy_model.mapToSource(
-            self.user_interface.tblLogData.indexAt(point))
+            self.ui_main.tblLogData.indexAt(point))
         logging.debug("Cell[%d, %d] was right-clicked. Contents = %s", index.row(), index.column(), index.data())
 
         self.right_clicked_cell_index = index
@@ -608,7 +629,7 @@ siraj.  If not, see
             
             call(editor_command,
                 shell=True)
-            self.user_interface.tblLogData.setFocus() 
+            self.ui_main.tblLogData.setFocus() 
         self.update_status_bar()
 
     def search_box_key_pressed(self, q_key_event):
@@ -679,7 +700,7 @@ siraj.  If not, see
             self.load_log_file(self.log_file_full_path)
         
         else:
-            QTableView.keyPressEvent(self.user_interface.tblLogData, q_key_event) 
+            QTableView.keyPressEvent(self.ui_main.tblLogData, q_key_event) 
             
     def prepare_clipboard_text(self):
         """
@@ -690,7 +711,7 @@ siraj.  If not, see
         if(len(selected_indexes) == 0):
             clipboard_text = ""
         elif(len(selected_indexes) == 1):
-            clipboard_text = self.user_interface.tblLogData.currentIndex().data()
+            clipboard_text = self.ui_main.tblLogData.currentIndex().data()
         else:
             unique_rows_set = set([index.row() for index in sorted(selected_indexes)])
             row_text_list = [str(row) + "," + ",".join([self.proxy_model.index(row, column, QModelIndex()).data() for column in range(self.proxy_model.columnCount())]) for row in sorted(unique_rows_set)]
@@ -712,22 +733,22 @@ siraj.  If not, see
         table view to make that cell in the middle of the visible part of the
         table.
         """
-        self.user_interface.tblLogData.clearSelection()
+        self.ui_main.tblLogData.clearSelection()
         index = self.get_index_by_row_and_column(row, column)
-        self.user_interface.tblLogData.setCurrentIndex(index)  
-        self.user_interface.tblLogData.scrollTo(index, hint = QAbstractItemView.PositionAtCenter)
-        self.user_interface.tblLogData.setFocus()
+        self.ui_main.tblLogData.setCurrentIndex(index)  
+        self.ui_main.tblLogData.scrollTo(index, hint = QAbstractItemView.PositionAtCenter)
+        self.ui_main.tblLogData.setFocus()
         self.update_status_bar()
         
     def select_cell_by_index(self, index):        
         """
         Select a cell at the given index.
         """
-        self.user_interface.tblLogData.clearSelection()
+        self.ui_main.tblLogData.clearSelection()
         index = self.proxy_model.mapFromSource(index)
-        self.user_interface.tblLogData.setCurrentIndex(index)  
-        self.user_interface.tblLogData.scrollTo(index, hint = QAbstractItemView.PositionAtCenter)
-        self.user_interface.tblLogData.setFocus()
+        self.ui_main.tblLogData.setCurrentIndex(index)  
+        self.ui_main.tblLogData.scrollTo(index, hint = QAbstractItemView.PositionAtCenter)
+        self.ui_main.tblLogData.setFocus()
         self.update_status_bar()
         
     def go_to_prev_match(self, selected_cell):

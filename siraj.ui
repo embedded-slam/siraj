@@ -87,6 +87,8 @@
     <addaction name="mnuActionOpen"/>
     <addaction name="mnuActionLoadConfigs"/>
     <addaction name="separator"/>
+    <addaction name="mnuActionNewFilterView"/>
+    <addaction name="separator"/>
     <addaction name="mnuActionExit"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
@@ -163,6 +165,11 @@
   <action name="mnuActionLoadConfigs">
    <property name="text">
     <string>Load configuration...</string>
+   </property>
+  </action>
+  <action name="mnuActionNewFilterView">
+   <property name="text">
+    <string>New Filter View...</string>
    </property>
   </action>
  </widget>
