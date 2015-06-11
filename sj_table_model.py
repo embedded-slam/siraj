@@ -106,7 +106,7 @@ class MyTableModel(QAbstractTableModel):
             if(orientation == Qt.Horizontal):
                 return self.headerdata[section]
             elif(orientation == Qt.Vertical):
-                return section
+                return section + 1
         return None
 
     def getConditionalFormattingColor(self, row, color_dict, key_column):
