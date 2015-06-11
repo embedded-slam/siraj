@@ -63,7 +63,7 @@ class LogSParserMain(QMainWindow):
         self.ui_main = Ui_Siraj()  
         self.ui_main.setupUi(self) 
         
-
+        self.ui_filter = None
         
         self.ui_main.centralwidget.setLayout(self.ui_main.verticalLayout)
         self.ui_main.dckSourceContents.setLayout(self.ui_main.lytSource)
@@ -695,7 +695,16 @@ siraj.  If not, see
             elif key == Qt.Key_Home:
                 self.select_cell_by_row_and_column(0, 0);
             elif key == Qt.Key_End:
-                self.select_cell_by_row_and_column(self.table_model.rowCount(None) - 1, 0);               
+                self.select_cell_by_row_and_column(self.table_model.rowCount(None) - 1, 0);
+            elif key == Qt.Key_F:
+                if(self.ui_filter is not None):
+                    selected_indexes = self.get_selected_indexes()
+                    if(len(selected_indexes) == 1): 
+                        self.ui_filter.add_to_filter_view(selected_indexes[0].column(), selected_indexes[0].data())
+                    else:
+                        self.display_message_box("Filter View", "Only one cell can be selected to use this feature", QMessageBox.Information)                              
+                else:
+                    self.display_message_box("Filter View", "Filter view need to be opened first before using this feature", QMessageBox.Information)                              
         elif key == Qt.Key_F5:
             self.load_log_file(self.log_file_full_path)
         

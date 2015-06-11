@@ -68,7 +68,11 @@ class SirajFilter(QMainWindow):
         self.ui_filter.tblLogFilter.setModel(self.filter_proxy_model)
         
         # Initially the filter in list is empty
-        self.filter_proxy_model.setFilterInList(["This value can never exist in a log!!!"])
+        self.per_column_filter_in_set_list = [set() for column in range(self.table_model.columnCount(None))]
+        
+#         [self.per_column_filter_in_set_list[column].add("Impossible to exist value!") for column in range(self.table_model.columnCount(None))]
+        
+        self.filter_proxy_model.setFilterInList(self.per_column_filter_in_set_list)
         self.filter_proxy_model.invalidate()
     
         
@@ -80,4 +84,14 @@ class SirajFilter(QMainWindow):
         self.clipboard = QApplication.clipboard()
         self.ui_filter.tblLogFilter.setAcceptDrops(True)
     
+    def add_to_filter_view(self, column, data):
+        """
+        Add the given cell index to the filtered view.
+        """
+
+        self.per_column_filter_in_set_list[column].add(data)
+        self.filter_proxy_model.setFilterInList(self.per_column_filter_in_set_list)
+        self.filter_proxy_model.invalidate()
+#         self.filter_proxy_model.setFilterKeyColumn(0)
+        
         
