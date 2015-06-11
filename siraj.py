@@ -671,6 +671,10 @@ siraj.  If not, see
                 self.select_search_match(is_forward=False)
             elif key == Qt.Key_Right:
                 self.select_search_match(is_forward=True)
+            elif key == Qt.Key_Home:
+                self.select_cell_by_row_and_column(0, 0);
+            elif key == Qt.Key_End:
+                self.select_cell_by_row_and_column(self.table_model.rowCount(None) - 1, 0);               
         elif key == Qt.Key_F5:
             self.load_log_file(self.log_file_full_path)
         
