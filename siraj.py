@@ -302,7 +302,7 @@ class LogSParserMain(QMainWindow):
         """
         self.ui_main.mnuActionOpen.triggered.connect(self.menu_open_file)
         self.ui_main.mnuActionLoadConfigs.triggered.connect(self.menu_load_configs)
-        self.ui_main.mnuActionNewFilterView.triggered.connect(self.menu_new_filter_view)
+        self.ui_main.mnuActionNewFilterView.triggered.connect(self.open_new_filter_view)
         self.ui_main.mnuActionExit.triggered.connect(self.menu_exit)
         self.ui_main.mnuActionAbout.triggered.connect(self.menu_about)
                      
@@ -407,7 +407,7 @@ siraj.  If not, see
         if(self.config_file_full_path != ''):
             self.load_configuration_file(self.config_file_full_path)
             
-    def menu_new_filter_view(self):
+    def open_new_filter_view(self):
         """
         Open a new filter view. 
         
@@ -415,8 +415,14 @@ siraj.  If not, see
         is useful when the user want to build his filter as he/she goes through the main log.
         """
         self.ui_filter = SirajFilter(self.table_model)
+        self.ui_filter.destroyed.connect(self.on_filter_view_close)
         self.ui_filter.showMaximized()
         
+    def on_filter_view_close(self):
+        """
+        This callback is called whenever the filter view is closed. It's used to cleanup its reference in the main window.
+        """
+        self.ui_filter = None
            
     def reset_per_log_file_data(self):
         self.invalidate_search_criteria()
@@ -697,17 +703,15 @@ siraj.  If not, see
             elif key == Qt.Key_End:
                 self.select_cell_by_row_and_column(self.table_model.rowCount(None) - 1, 0);
             elif key == Qt.Key_F:
-                if(self.ui_filter is not None):
-                    selected_indexes = self.get_selected_indexes()
-                    if(len(selected_indexes) == 1): 
-                        self.ui_filter.add_to_filter_view(selected_indexes[0].column(), selected_indexes[0].data())
-                    else:
-                        self.display_message_box("Filter View", "Only one cell can be selected to use this feature", QMessageBox.Information)                              
+                selected_indexes = self.get_selected_indexes()
+                if(len(selected_indexes) == 1): 
+                    if(self.ui_filter is None):
+                        self.open_new_filter_view()
+                    self.ui_filter.add_to_filter_view(selected_indexes[0].column(), selected_indexes[0].data())
                 else:
-                    self.display_message_box("Filter View", "Filter view need to be opened first before using this feature", QMessageBox.Information)                              
+                    self.display_message_box("Filter View", "Only one cell can be selected to use this feature", QMessageBox.Information)                              
         elif key == Qt.Key_F5:
             self.load_log_file(self.log_file_full_path)
-        
         else:
             QTableView.keyPressEvent(self.ui_main.tblLogData, q_key_event) 
             

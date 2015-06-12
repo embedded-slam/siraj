@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'siraj.ui'
 #
-# Created: Thu Jun 11 08:45:04 2015
+# Created: Thu Jun 11 23:39:33 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -35,7 +35,7 @@ class Ui_Siraj(object):
         self.centralwidget = QtGui.QWidget(Siraj)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.verticalLayoutWidget = QtGui.QWidget(self.centralwidget)
-        self.verticalLayoutWidget.setGeometry(QtCore.QRect(360, 60, 160, 80))
+        self.verticalLayoutWidget.setGeometry(QtCore.QRect(300, 290, 160, 80))
         self.verticalLayoutWidget.setObjectName(_fromUtf8("verticalLayoutWidget"))
         self.verticalLayout = QtGui.QVBoxLayout(self.verticalLayoutWidget)
         self.verticalLayout.setMargin(0)
@@ -107,8 +107,6 @@ class Ui_Siraj(object):
         self.mnuActionNewFilterView.setObjectName(_fromUtf8("mnuActionNewFilterView"))
         self.menuFile.addAction(self.mnuActionOpen)
         self.menuFile.addAction(self.mnuActionLoadConfigs)
-        self.menuFile.addSeparator()
-        self.menuFile.addAction(self.mnuActionNewFilterView)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.mnuActionExit)
         self.menuAbout.addAction(self.mnuActionAbout)

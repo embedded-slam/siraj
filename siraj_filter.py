@@ -83,6 +83,10 @@ class SirajFilter(QMainWindow):
         
         self.clipboard = QApplication.clipboard()
         self.ui_filter.tblLogFilter.setAcceptDrops(True)
+        
+        self.setAttribute(Qt.WA_DeleteOnClose)
+        self.ui_filter.tblLogFilter.keyPressEvent = self.cell_key_pressed
+
     
     def add_to_filter_view(self, column, data):
         """
@@ -91,7 +95,51 @@ class SirajFilter(QMainWindow):
 
         self.per_column_filter_in_set_list[column].add(data)
         self.filter_proxy_model.setFilterInList(self.per_column_filter_in_set_list)
+        self.filter_proxy_model.invalidate()    
+        
+    def remove_from_filter_view(self, column, data):
+        """
+        Add the given cell index to the filtered view.
+        """
+
+        self.per_column_filter_in_set_list[column].remove(data)
+        self.filter_proxy_model.setFilterInList(self.per_column_filter_in_set_list)
         self.filter_proxy_model.invalidate()
-#         self.filter_proxy_model.setFilterKeyColumn(0)
+
+    def on_close(self):
+        """ 
+        Send a signal so that main view can cleanup the reference. 
+        """
+        print("HHHHHHHHHHHH")
+        self.close_signal.emit()
         
         
+        
+    def cell_key_pressed(self, q_key_event):
+        """
+        Handles the event of pressing a keyboard key while on the table.
+        """
+        logging.warning("A key was pressed!!!")
+        key = q_key_event.key()
+        logging.info("Key = {}".format(key))
+
+        if(Qt.ControlModifier == (int(q_key_event.modifiers()) & (Qt.ControlModifier))):
+            if key == Qt.Key_U: # Unfilter the selected cell
+                selected_indexes = self.get_selected_indexes()
+                if(len(selected_indexes) == 1):
+                    self.remove_from_filter_view(selected_indexes[0].column(), selected_indexes[0].data())
+        else:
+            QTableView.keyPressEvent(self.ui_main.tblLogData, q_key_event)
+            
+            
+    """
+    @TODO: Extract all generic function form siraj.py into a common module. 
+    """    
+    def get_selected_indexes(self):
+        """
+        Returns a list of the currently selected indexes mapped to the source numbering.
+        
+        mapToSource is needed to retrive the actual row number regardless of whether filtering is applied or not.
+        """
+        return [self.filter_proxy_model.mapToSource(index) for index in self.ui_filter.tblLogFilter.selectedIndexes()]
+                    

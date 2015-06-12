@@ -279,6 +279,13 @@ Jumps to the next search match (if any).
 `Ctrl+Shift+B`  
 Clears all bookmarks.
 
+`Ctrl+F`  
+When selecting a *single cell*, this open the filter view and add the selected cell and all matching cells to the filter view.
+
+`Ctrl+U`
+Works inside the fitler view only. And it unhide the selected cell and all it's maches from the filter view. Works with single cell only for now, and
+it has to be the same cell (column) used to add the cell to the filter view.
+
 `Ctrl+Home`  
 Jumps to the first row in the table.
 
@@ -287,8 +294,6 @@ Jumps to the last row in the table.
 
 `F5`  
 Reload the currently loaded file from the desk. Useful if the file contents can change while opening it.
-
-
 
 `Selecting two cells from different columns`  
 will show the elapsed time between the two logs. This is only applicable if the log fields contains a time field and it is specified in the configuration via `time_stamp_column_number_zero_based`.  
