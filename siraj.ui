@@ -23,8 +23,8 @@
    <widget class="QWidget" name="verticalLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>360</x>
-      <y>60</y>
+      <x>300</x>
+      <y>290</y>
       <width>160</width>
       <height>80</height>
      </rect>
@@ -163,6 +163,11 @@
   <action name="mnuActionLoadConfigs">
    <property name="text">
     <string>Load configuration...</string>
+   </property>
+  </action>
+  <action name="mnuActionNewFilterView">
+   <property name="text">
+    <string>New Filter View...</string>
    </property>
   </action>
  </widget>

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'siraj.ui'
 #
-# Created: Wed Jun 10 09:14:16 2015
+# Created: Thu Jun 11 23:39:33 2015
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -35,7 +35,7 @@ class Ui_Siraj(object):
         self.centralwidget = QtGui.QWidget(Siraj)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.verticalLayoutWidget = QtGui.QWidget(self.centralwidget)
-        self.verticalLayoutWidget.setGeometry(QtCore.QRect(360, 60, 160, 80))
+        self.verticalLayoutWidget.setGeometry(QtCore.QRect(300, 290, 160, 80))
         self.verticalLayoutWidget.setObjectName(_fromUtf8("verticalLayoutWidget"))
         self.verticalLayout = QtGui.QVBoxLayout(self.verticalLayoutWidget)
         self.verticalLayout.setMargin(0)
@@ -103,6 +103,8 @@ class Ui_Siraj(object):
         self.mnuActionAbout.setObjectName(_fromUtf8("mnuActionAbout"))
         self.mnuActionLoadConfigs = QtGui.QAction(Siraj)
         self.mnuActionLoadConfigs.setObjectName(_fromUtf8("mnuActionLoadConfigs"))
+        self.mnuActionNewFilterView = QtGui.QAction(Siraj)
+        self.mnuActionNewFilterView.setObjectName(_fromUtf8("mnuActionNewFilterView"))
         self.menuFile.addAction(self.mnuActionOpen)
         self.menuFile.addAction(self.mnuActionLoadConfigs)
         self.menuFile.addSeparator()
@@ -122,4 +124,5 @@ class Ui_Siraj(object):
         self.mnuActionExit.setText(_translate("Siraj", "Exit", None))
         self.mnuActionAbout.setText(_translate("Siraj", "About", None))
         self.mnuActionLoadConfigs.setText(_translate("Siraj", "Load configuration...", None))
+        self.mnuActionNewFilterView.setText(_translate("Siraj", "New Filter View...", None))
 
