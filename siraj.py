@@ -52,7 +52,7 @@ class Siraj(SirajBase):
         
         self.graph_dict = {}
         self.menuFilter = None
-        # self.proxy_model = None
+        # self.table_proxy = None
         # self.table_data = None
         # self.user_interface = Ui_Siraj()
         # self.user_interface.setupUi(self)
@@ -233,7 +233,7 @@ class Siraj(SirajBase):
         self.reset_per_log_file_data()
         self.table_data = None
         self.table_model = None
-        self.proxy_model = None
+        self.table_proxy = None
 
     def load_configuration_file(self, config_file_path="siraj_configs.json"):
         self.reset_per_config_file_data()
@@ -457,9 +457,9 @@ siraj.  If not, see
             table_model = MyTableModel(self.table_data, self.header, self.table_conditional_formatting_config, self)
             # logging.info("Headers: %s", self.header)
             # logging.info("%s has %d lines", self.log_file_full_path, len(self.table_data))
-            # self.proxy_model = MySortFilterProxyModel(self)
-            # self.proxy_model.setSourceModel(self.table_model)
-            # self.user_interface.tblLogData.setModel(self.proxy_model)
+            # self.table_proxy = MySortFilterProxyModel(self)
+            # self.table_proxy.setSourceModel(self.table_model)
+            # self.user_interface.tblLogData.setModel(self.table_proxy)
             # if(len(self.per_column_filter_out_set_list) == 0):
             #     self.per_column_filter_out_set_list = [set() for column in range(len(self.table_data[0]))]
             # if(len(self.per_column_filter_in_set_list) == 0):
@@ -515,7 +515,7 @@ siraj.  If not, see
 #
 #         This is only done if the source view is visible.
 #         """
-#         index = self.proxy_model.mapToSource(index)
+    #         index = self.table_proxy.mapToSource(index)
 #
 #         if(self.is_source_visible):
 #             logging.info("cell[%d][%d] = %s", index.row(), index.column(), index.data())
@@ -555,7 +555,7 @@ siraj.  If not, see
 #
 #         mapToSource is needed to retrive the actual row number regardless of whether filtering is applied or not.
 #         """
-#         return [self.proxy_model.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
+    #         return [self.table_proxy.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
 #
 #     def update_status_bar(self):
 #         """
@@ -587,7 +587,7 @@ siraj.  If not, see
         This function is responsible for showing the context menu for the user
         to choose from.
         """
-        index = self.proxy_model.mapToSource(
+        index = self.table_proxy.mapToSource(
             self.user_interface.tblLogData.indexAt(point))
         logging.debug("Cell[%d, %d] was right-clicked. Contents = %s", index.row(), index.column(), index.data())
 
@@ -608,7 +608,7 @@ siraj.  If not, see
         if(len(filtered_out_set) > 0):
             self.unhide_menu.setEnabled(True)
             for filtered_string in filtered_out_set:
-                temp_action = QAction(filtered_string, self.unhide_menu);
+                temp_action = QAction(filtered_string, self.unhide_menu)
                 temp_action.triggered.connect(functools.partial(self.unhide_selected_rows_only_based_on_column, self.right_clicked_cell_index.column(), filtered_string))
                 self.unhide_menu.addAction(temp_action)
         else:
@@ -624,7 +624,7 @@ siraj.  If not, see
 #         it point on the corresponding line.
 #         """
 #
-#         index = self.proxy_model.mapToSource(index)
+        #         index = self.table_proxy.mapToSource(index)
 #
 #         logging.info("cell[%d][%d] = %s", index.row(), index.column(), index.data())
 #         row = index.row()
@@ -742,7 +742,7 @@ siraj.  If not, see
 #             clipboard_text = self.user_interface.tblLogData.currentIndex().data()
 #         else:
 #             unique_rows_set = set([index.row() for index in sorted(selected_indexes)])
-#             row_text_list = [str(row) + "," + ",".join([self.proxy_model.index(row, column, QModelIndex()).data() for column in range(self.proxy_model.columnCount())]) for row in sorted(unique_rows_set)]
+        #             row_text_list = [str(row) + "," + ",".join([self.table_proxy.index(row, column, QModelIndex()).data() for column in range(self.table_proxy.columnCount())]) for row in sorted(unique_rows_set)]
 #             clipboard_text = "\n".join(row_text_list)
 #         self.clipboard.setText(clipboard_text)
 #
@@ -752,7 +752,7 @@ siraj.  If not, see
 #         Get the table index value by the given row and column
 #         """
 #         index = self.table_model.createIndex(row, column)
-#         index = self.proxy_model.mapFromSource(index)
+        #         index = self.table_proxy.mapFromSource(index)
 #         return index
 #
 #     def select_cell_by_row_and_column(self, row, column):
@@ -773,7 +773,7 @@ siraj.  If not, see
 #         Select a cell at the given index.
 #         """
 #         self.user_interface.tblLogData.clearSelection()
-#         index = self.proxy_model.mapFromSource(index)
+        #         index = self.table_proxy.mapFromSource(index)
 #         self.user_interface.tblLogData.setCurrentIndex(index)
 #         self.user_interface.tblLogData.scrollTo(index, hint = QAbstractItemView.PositionAtCenter)
 #         self.user_interface.tblLogData.setFocus()
@@ -902,16 +902,16 @@ siraj.  If not, see
         """
         self.is_filtering_mode_out = is_filtering_mode_out
         if(is_filtering_mode_out):
-            self.proxy_model.setFilterOutList(self.per_column_filter_out_set_list)
+            self.table_proxy.setFilterOutList(self.per_column_filter_out_set_list)
         else:
-            self.proxy_model.setFilterInList(self.per_column_filter_in_set_list)
+            self.table_proxy.setFilterInList(self.per_column_filter_in_set_list)
 
         # This is just to trigger the proxy model to apply the filter
-        self.proxy_model.setFilterKeyColumn(0)
+        self.table_proxy.setFilterKeyColumn(0)
 
     def dragEnterEvent(self, q_drag_enter_event):
         if(q_drag_enter_event.mimeData().hasFormat("text/uri-list")):
-            q_drag_enter_event.acceptProposedAction();
+            q_drag_enter_event.acceptProposedAction()
 
     def dropEvent(self, q_drop_event):
         url_list = q_drop_event.mimeData().urls()
