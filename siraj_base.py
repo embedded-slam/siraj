@@ -25,13 +25,15 @@ from bisect import (bisect_left, bisect_right)
 import functools
 import logging
 
-from PyQt4.QtCore import (Qt, QModelIndex)
+from PyQt4.QtCore import (Qt)
 from PyQt4.QtGui import (QMainWindow, QApplication, QSortFilterProxyModel, QAction, QMessageBox, QAbstractItemView, QTableView, QLineEdit)
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import get_lexer_for_filename
 
 from ui_siraj import Ui_Siraj
+from sj_filter_proxy import MySortFilterProxyModel
+
 
 class SirajBase(QMainWindow):
     """
@@ -39,16 +41,17 @@ class SirajBase(QMainWindow):
     the log data in a tabular format as well as allowing the user to filter the
     logs displayed.
     """
-    # per_column_filter_out_set_list = list()
-    # per_column_filter_in_set_list = list()
-    # header = list()
-    # table_conditional_formatting_config = None
+    per_column_filter_out_set_list = list()
+    per_column_filter_in_set_list = list()
+    header = list()
+    table_conditional_formatting_config = None
+    columns_dict = {}
     def __init__(self):
         QMainWindow.__init__(self)
         
         # self.graph_dict = {}
         # self.menuFilter = None
-        self.proxy_model = None
+        self.table_proxy = None
         self.table_model = None
         self.table_data = None
         self.user_interface = Ui_Siraj()  
@@ -64,17 +67,15 @@ class SirajBase(QMainWindow):
         self.user_interface.tblLogData.clicked.connect(self.cell_left_clicked)
         self.user_interface.tblLogData.keyPressEvent = self.cell_key_pressed
         self.user_interface.tblLogData.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.user_interface.tblLogData.customContextMenuRequested.connect(self.cell_right_clicked)
         self.user_interface.txtSourceFile.setReadOnly(True)
 
-        
         self.is_table_visible = True
         self.is_source_visible = True
         
         self.user_interface.tblLogData.resizeColumnsToContents() 
         self.user_interface.tblLogData.resizeRowsToContents() 
         
-        self.setup_context_menu()
+        # self.setup_context_menu()
         self.setup_toolbars()
         
         self.clipboard = QApplication.clipboard()
@@ -91,10 +92,37 @@ class SirajBase(QMainWindow):
         # self.setAcceptDrops(True)
 
         # self.load_configuration_file()
-        
+
+    def set_configs(self, source_cross_reference_configs, external_editor_configs, time_stamp_column):
+        self.file_column = source_cross_reference_configs["file_column_number_zero_based"]
+        self.file_column_pattern = source_cross_reference_configs["file_column_pattern"]
+        self.line_column = source_cross_reference_configs["line_column_number_zero_based"]
+        self.line_column_pattern = source_cross_reference_configs["line_column_pattern"]
+        self.root_source_path_prefix = source_cross_reference_configs["root_source_path_prefix"]
+        self.syntax_highlighting_style = source_cross_reference_configs["pygments_syntax_highlighting_style"]
+
+        self.external_editor_configs = external_editor_configs
+        self.time_stamp_column = time_stamp_column
+
+    def set_table_model(self, table_model):
+        self.table_model = table_model
+        logging.info("Headers: %s", self.header)
+        # logging.info("%s has %d lines", self.log_file_full_path, table_model.columnCount(self))
+        self.table_proxy = MySortFilterProxyModel(self)
+        self.table_proxy.setSourceModel(self.table_model)
+        self.user_interface.tblLogData.setModel(self.table_proxy)
+
+        if(len(self.per_column_filter_out_set_list) == 0):
+            self.per_column_filter_out_set_list = [set() for column in range(table_model.rowCount(self))]
+        if(len(self.per_column_filter_in_set_list) == 0):
+            self.per_column_filter_in_set_list = [set() for column in range(table_model.rowCount(self))]
+
+    def set_columns_dict(self, columns_dict):
+        self.columns_dict = columns_dict
+
     def setup_toolbars(self):
         source_toolbar = self.addToolBar('SourceToolbar')
-        
+
         tbrActionToggleSourceView = QAction('C/C++', self)
         tbrActionToggleSourceView.triggered.connect(self.toggle_source_view)
         tbrActionToggleSourceView.setToolTip("Toggle source code view")
@@ -228,7 +256,7 @@ class SirajBase(QMainWindow):
     #     self.reset_per_log_file_data()
     #     self.table_data = None
     #     self.table_model = None
-    #     self.proxy_model = None
+    #     self.table_proxy = None
         
     # def load_configuration_file(self, config_file_path="siraj_configs.json"):
     #     self.reset_per_config_file_data()
@@ -416,9 +444,9 @@ class SirajBase(QMainWindow):
     #         self.table_model = MyTableModel(self.table_data, self.header, self.table_conditional_formatting_config, self)
     #         logging.info("Headers: %s", self.header)
     #         logging.info("%s has %d lines", self.log_file_full_path, len(self.table_data))
-    #         self.proxy_model = MySortFilterProxyModel(self)
-    #         self.proxy_model.setSourceModel(self.table_model)
-    #         self.user_interface.tblLogData.setModel(self.proxy_model)
+    #         self.table_proxy = MySortFilterProxyModel(self)
+    #         self.table_proxy.setSourceModel(self.table_model)
+    #         self.user_interface.tblLogData.setModel(self.table_proxy)
     #         if(len(self.per_column_filter_out_set_list) == 0):
     #             self.per_column_filter_out_set_list = [set() for column in range(len(self.table_data[0]))]
     #         if(len(self.per_column_filter_in_set_list) == 0):
@@ -433,30 +461,30 @@ class SirajBase(QMainWindow):
     #             "File <b>`{}`</b> was not found. You can either: <br><br>1. Open a log file via the File menu. Or<br>2. Drag a log file from the system and drop it into the application".format(log_file_full_path),
     #             QMessageBox.Critical)
             
-    def extract_column_dictionaries(self, header_vector_list, data_matrix_list):
-        """
-        This function extracts a dictionary of dictionaries
-        
-        The extracted is a dictionary of columns where key is the column name, 
-        and the data is another dictionary.
-        
-        The inner dictionary has a key equal to a specific cell value of the 
-        current column, and the value is a list of row number where this value
-        appeared in.
-        
-        This will be used to provide quick navigation through the log.        
-        """
-        column_count = len(header_vector_list)
-        self.columns_dict = {}
-        for column, column_name in enumerate(header_vector_list):
-            self.columns_dict[column] = {}
-            
-        for row, log in enumerate(data_matrix_list):
-            for column, field in enumerate(log):
-                if(log[column] not in self.columns_dict[column]):
-                    self.columns_dict[column][log[column]] = []
-                self.columns_dict[column][log[column]].append(row)
-    
+    # def extract_column_dictionaries(self, header_vector_list, data_matrix_list):
+    #     """
+    #     This function extracts a dictionary of dictionaries
+    #
+    #     The extracted is a dictionary of columns where key is the column name,
+    #     and the data is another dictionary.
+    #
+    #     The inner dictionary has a key equal to a specific cell value of the
+    #     current column, and the value is a list of row number where this value
+    #     appeared in.
+    #
+    #     This will be used to provide quick navigation through the log.
+    #     """
+    #     column_count = len(header_vector_list)
+    #     self.columns_dict = {}
+    #     for column, column_name in enumerate(header_vector_list):
+    #         self.columns_dict[column] = {}
+    #
+    #     for row, log in enumerate(data_matrix_list):
+    #         for column, field in enumerate(log):
+    #             if(log[column] not in self.columns_dict[column]):
+    #                 self.columns_dict[column][log[column]] = []
+    #             self.columns_dict[column][log[column]].append(row)
+
     def cell_left_clicked(self, index):
         """
         Handles the event of clicking on a table cell.
@@ -467,14 +495,17 @@ class SirajBase(QMainWindow):
         
         This is only done if the source view is visible.
         """
-        index = self.proxy_model.mapToSource(index)
+        index = self.table_proxy.mapToSource(index)
 
         if(self.is_source_visible):
             logging.info("cell[%d][%d] = %s", index.row(), index.column(), index.data())
             row = index.row()
-            
-            file_matcher = re.search(self.file_column_pattern, self.table_data[row][self.file_column])
-            line_matcher = re.search(self.line_column_pattern, self.table_data[row][self.line_column])
+
+            file_cell_contents = self.get_index_by_row_and_column(row, self.file_column).data()
+            line_cell_contents = self.get_index_by_row_and_column(row, self.line_column).data()
+
+            file_matcher = re.search(self.file_column_pattern, file_cell_contents)
+            line_matcher = re.search(self.line_column_pattern, line_cell_contents)
             
             if((file_matcher is not None) and (line_matcher is not None)):
                 file = file_matcher.group(1)
@@ -507,7 +538,7 @@ class SirajBase(QMainWindow):
         
         mapToSource is needed to retrive the actual row number regardless of whether filtering is applied or not.
         """
-        return [self.proxy_model.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
+        return [self.table_proxy.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
                     
     def update_status_bar(self):
         """
@@ -522,12 +553,12 @@ class SirajBase(QMainWindow):
                 '["{}"] occurred {} time(s) ~ {}%'.format(
                 selected_cell_index.data(), 
                 number_of_occurances,
-                number_of_occurances * 100 // len(self.table_data)))
+                number_of_occurances * 100 // (self.table_model.rowCount(self))))
         elif(len(selected_indexes) == 2):
             row_1 = selected_indexes[0].row()
             row_2 = selected_indexes[1].row()
-            time_stamp1 = float(self.table_data[row_1][self.time_stamp_column])
-            time_stamp2 = float(self.table_data[row_2][self.time_stamp_column])
+            time_stamp1 = float(self.get_index_by_row_and_column(row_1, self.time_stamp_column).data())
+            time_stamp2 = float(self.get_index_by_row_and_column(row_2, self.time_stamp_column).data())
             self.user_interface.statusbar.showMessage("Time difference = {}".format(abs(time_stamp2 - time_stamp1)))
         else:
             self.user_interface.statusbar.showMessage("")
@@ -539,7 +570,7 @@ class SirajBase(QMainWindow):
     #     This function is responsible for showing the context menu for the user
     #     to choose from.
     #     """
-    #     index = self.proxy_model.mapToSource(
+    #     index = self.table_proxy.mapToSource(
     #         self.user_interface.tblLogData.indexAt(point))
     #     logging.debug("Cell[%d, %d] was right-clicked. Contents = %s", index.row(), index.column(), index.data())
     #
@@ -575,13 +606,13 @@ class SirajBase(QMainWindow):
         it point on the corresponding line.
         """
         
-        index = self.proxy_model.mapToSource(index)
+        index = self.table_proxy.mapToSource(index)
 
         logging.info("cell[%d][%d] = %s", index.row(), index.column(), index.data())
         row = index.row()
         
-        file_matcher = re.search(self.file_column_pattern, self.table_data[row][self.file_column])
-        line_matcher = re.search(self.line_column_pattern, self.table_data[row][self.line_column])
+        file_matcher = re.search(self.file_column_pattern, self.get_index_by_row_and_column(row, self.file_column).data())
+        line_matcher = re.search(self.line_column_pattern, self.get_index_by_row_and_column(row, self.line_column).data())
         
         if((file_matcher is not None) and (line_matcher is not None)):
             file = file_matcher.group(1)
@@ -682,8 +713,10 @@ class SirajBase(QMainWindow):
         elif(len(selected_indexes) == 1):
             clipboard_text = self.user_interface.tblLogData.currentIndex().data()
         else:
+            print(selected_indexes)
             unique_rows_set = set([index.row() for index in sorted(selected_indexes)])
-            row_text_list = [str(row) + "," + ",".join([self.proxy_model.index(row, column, QModelIndex()).data() for column in range(self.proxy_model.columnCount())]) for row in sorted(unique_rows_set)]
+            print(unique_rows_set)
+            row_text_list = [str(row) + "," + ",".join([self.get_index_by_row_and_column(row, column).data() for column in range(self.table_proxy.columnCount())]) for row in sorted(unique_rows_set)]
             clipboard_text = "\n".join(row_text_list)
         self.clipboard.setText(clipboard_text)
 
@@ -693,7 +726,7 @@ class SirajBase(QMainWindow):
         Get the table index value by the given row and column
         """
         index = self.table_model.createIndex(row, column)
-        index = self.proxy_model.mapFromSource(index)
+        index = self.table_proxy.mapFromSource(index)
         return index
            
     def select_cell_by_row_and_column(self, row, column):
@@ -714,7 +747,7 @@ class SirajBase(QMainWindow):
         Select a cell at the given index.
         """
         self.user_interface.tblLogData.clearSelection()
-        index = self.proxy_model.mapFromSource(index)
+        index = self.table_proxy.mapFromSource(index)
         self.user_interface.tblLogData.setCurrentIndex(index)  
         self.user_interface.tblLogData.scrollTo(index, hint = QAbstractItemView.PositionAtCenter)
         self.user_interface.tblLogData.setFocus()
@@ -843,12 +876,12 @@ class SirajBase(QMainWindow):
     #     """
     #     self.is_filtering_mode_out = is_filtering_mode_out
     #     if(is_filtering_mode_out):
-    #         self.proxy_model.setFilterOutList(self.per_column_filter_out_set_list)
+    #         self.table_proxy.setFilterOutList(self.per_column_filter_out_set_list)
     #     else:
-    #         self.proxy_model.setFilterInList(self.per_column_filter_in_set_list)
+    #         self.table_proxy.setFilterInList(self.per_column_filter_in_set_list)
     #
     #     # This is just to trigger the proxy model to apply the filter
-    #     self.proxy_model.setFilterKeyColumn(0)
+    #     self.table_proxy.setFilterKeyColumn(0)
     #
     # def dragEnterEvent(self, q_drag_enter_event):
     #     if(q_drag_enter_event.mimeData().hasFormat("text/uri-list")):
@@ -862,8 +895,8 @@ class SirajBase(QMainWindow):
     #     self.log_file_full_path = log_file_list[0]
     #     self.load_log_file(self.log_file_full_path)
     
-    def closeEvent(self, event):
-        app = QApplication([])
-#         app.closeAllWindows() 
-        app.deleteLater()
-        app.closeAllWindows()
+#     def closeEvent(self, event):
+#         app = QApplication([])
+# #         app.closeAllWindows()
+#         app.deleteLater()
+#         app.closeAllWindows()
