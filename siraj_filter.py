@@ -71,6 +71,12 @@ class SirajFilter(SirajBase):
         
         self.setAttribute(Qt.WA_DeleteOnClose)
         self.user_interface.tblLogData.keyPressEvent = self.cell_key_pressed
+        """
+        @todo This is a hack to disable the menu bar in the filter menu. The proper way is to remove the menu bar from
+        the SirajBase Class altogether and add it where it belongs (in Siraj class which has the main window).
+        """
+
+        self.setMenuBar(None)
 
     
     def add_to_filter_view(self, column, data):
