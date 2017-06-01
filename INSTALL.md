@@ -35,7 +35,10 @@ This document explains installtion on Ubuntu. Other system should have similar s
     http://www.pyqtgraph.org/  
   
 * Install it using the following command  
-    ```sudo python3 setup.py install```  
+    ```sudo python3 setup.py install``` 
+    
+* Install Python3 module
+    ```sudo pip3 install pyqtgraph```
 
 # Pygments  
 
