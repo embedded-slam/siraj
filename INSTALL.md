@@ -25,7 +25,7 @@ This document explains installtion on Ubuntu. Other system should have similar s
 * Change directory to the extracted directory, and run the following list of commands to build it  
     ```
     python3 configure-ng.py      # Accept the license when prompted by typing 'yes' and hitting enter  
-    make -j  
+    make
     sudo make install  
     ```
 
