@@ -26,13 +26,14 @@ import functools
 import logging
 
 from PyQt4.QtCore import (Qt)
+
 from PyQt4.QtGui import (QFileDialog, QColor, QCursor, QMessageBox, QApplication, QMenu, QAction)
 import pyqtgraph as pg
 
 from siraj_base import SirajBase
 from sj_configs import LogSParserConfigs
 from sj_table_model import MyTableModel
-from sj_filter_proxy import MySortFilterProxyModel
+from siraj_filter import SirajFilter
 
 
 class Siraj(SirajBase):
@@ -41,17 +42,17 @@ class Siraj(SirajBase):
     the log data in a tabular format as well as allowing the user to filter the
     logs displayed.
     """
-    per_column_filter_out_set_list = list()
-    per_column_filter_in_set_list = list()
-    header = list()
-    table_conditional_formatting_config = None
+    # per_column_filter_out_set_list = list()
+    # per_column_filter_in_set_list = list()
+    # header = list()
+    # table_conditional_formatting_config = None
 
     def __init__(self):
         SirajBase.__init__(self)
         
         self.graph_dict = {}
         self.menuFilter = None
-        # self.proxy_model = None
+        # self.table_proxy = None
         # self.table_data = None
         # self.user_interface = Ui_Siraj()
         # self.user_interface.setupUi(self)
@@ -76,7 +77,7 @@ class Siraj(SirajBase):
         # self.user_interface.tblLogData.resizeColumnsToContents()
         # self.user_interface.tblLogData.resizeRowsToContents()
         #
-        # self.setup_context_menu()
+        self.setup_context_menu()
         # self.setup_toolbars()
         #
         # self.clipboard = QApplication.clipboard()
@@ -93,6 +94,8 @@ class Siraj(SirajBase):
         self.setAcceptDrops(True)
 
         self.load_configuration_file()
+        self.ui_filter = None
+
 #
 #     def setup_toolbars(self):
 #         source_toolbar = self.addToolBar('SourceToolbar')
@@ -230,7 +233,7 @@ class Siraj(SirajBase):
         self.reset_per_log_file_data()
         self.table_data = None
         self.table_model = None
-        self.proxy_model = None
+        self.table_proxy = None
 
     def load_configuration_file(self, config_file_path="siraj_configs.json"):
         self.reset_per_config_file_data()
@@ -241,17 +244,19 @@ class Siraj(SirajBase):
 
         self.external_editor_configs = self.config.get_config_item("external_editor_configs")
 
-        cross_reference_configs = self.config.get_config_item("source_cross_reference_configs")
+        self.cross_reference_configs = self.config.get_config_item("source_cross_reference_configs")
 
-        self.file_column = cross_reference_configs["file_column_number_zero_based"]
-        self.file_column_pattern = cross_reference_configs["file_column_pattern"]
-        self.line_column = cross_reference_configs["line_column_number_zero_based"]
-        self.line_column_pattern = cross_reference_configs["line_column_pattern"]
+        SirajBase.set_configs(SirajBase, self.cross_reference_configs, self.external_editor_configs, int(self.time_stamp_column))
+
+        # self.file_column = self.cross_reference_configs["file_column_number_zero_based"]
+        # self.file_column_pattern = self.cross_reference_configs["file_column_pattern"]
+        # self.line_column = self.cross_reference_configs["line_column_number_zero_based"]
+        # self.line_column_pattern = self.cross_reference_configs["line_column_pattern"]
 
         self.graph_configs = self.config.get_config_item("graph_configs")
 
-        self.root_source_path_prefix = cross_reference_configs["root_source_path_prefix"]
-        self.syntax_highlighting_style = cross_reference_configs["pygments_syntax_highlighting_style"]
+        self.root_source_path_prefix = self.cross_reference_configs["root_source_path_prefix"]
+        self.syntax_highlighting_style = self.cross_reference_configs["pygments_syntax_highlighting_style"]
 
         self.table_conditional_formatting_config = self.config.get_config_item("table_conditional_formatting_configs")
         self.load_log_file(self.log_file_full_path)
@@ -292,7 +297,21 @@ class Siraj(SirajBase):
                    pen = pg.mkPen(width = 1, color = QColor(graph_configs[graph]["color"])))
 
 
+              
+    def setup_menu(self):
+        """
+        Initializes the program menus.
+        """
+        self.user_interface.mnuActionOpen.triggered.connect(self.menu_open_file)
+        self.user_interface.mnuActionLoadConfigs.triggered.connect(self.menu_load_configs)
+        self.user_interface.mnuActionNewFilterView.triggered.connect(self.open_new_filter_view)
+        self.user_interface.mnuActionExit.triggered.connect(self.menu_exit)
+        self.user_interface.mnuActionAbout.triggered.connect(self.menu_about)
+                     
     def setup_context_menu(self):
+        """
+        Initializes the context menu that appear when user right-click a cell.
+        """
         self.menuFilter = QMenu(self)
 
         self.hide_action                 = QAction('Hide selected values', self)
@@ -391,6 +410,26 @@ siraj.  If not, see
             self.load_configuration_file(self.config_file_full_path)
 
 
+            
+    def open_new_filter_view(self):
+        """
+        Open a new filter view. 
+        
+        Filter view is an empty table. The user can drag cells to it and it will display all similar cells. This
+        is useful when the user want to build his filter as he/she goes through the main log.
+        """
+        self.ui_filter = SirajFilter(self.table_model, self.columns_dict)
+        self.ui_filter.destroyed.connect(self.on_filter_view_close)
+        # self.ui_filter.showMaximized()
+        self.ui_filter.show()
+
+        
+    def on_filter_view_close(self):
+        """
+        This callback is called whenever the filter view is closed. It's used to cleanup its reference in the main window.
+        """
+        self.ui_filter = None
+           
     def reset_per_log_file_data(self):
         self.invalidate_search_criteria()
 
@@ -415,18 +454,22 @@ siraj.  If not, see
 
             m = re.search(self.log_trace_regex_pattern, log_file_content_lines[1])
             self.header = [group_name for group_name in sorted(m.groupdict().keys(), key=lambda k: m.start(k))]
-            self.table_model = MyTableModel(self.table_data, self.header, self.table_conditional_formatting_config, self)
-            logging.info("Headers: %s", self.header)
-            logging.info("%s has %d lines", self.log_file_full_path, len(self.table_data))
-            self.proxy_model = MySortFilterProxyModel(self)
-            self.proxy_model.setSourceModel(self.table_model)
-            self.user_interface.tblLogData.setModel(self.proxy_model)
-            if(len(self.per_column_filter_out_set_list) == 0):
-                self.per_column_filter_out_set_list = [set() for column in range(len(self.table_data[0]))]
-            if(len(self.per_column_filter_in_set_list) == 0):
-                self.per_column_filter_in_set_list = [set() for column in range(len(self.table_data[0]))]
+            table_model = MyTableModel(self.table_data, self.header, self.table_conditional_formatting_config, self)
+            # logging.info("Headers: %s", self.header)
+            # logging.info("%s has %d lines", self.log_file_full_path, len(self.table_data))
+            # self.table_proxy = MySortFilterProxyModel(self)
+            # self.table_proxy.setSourceModel(self.table_model)
+            # self.user_interface.tblLogData.setModel(self.table_proxy)
+            # if(len(self.per_column_filter_out_set_list) == 0):
+            #     self.per_column_filter_out_set_list = [set() for column in range(len(self.table_data[0]))]
+            # if(len(self.per_column_filter_in_set_list) == 0):
+            #     self.per_column_filter_in_set_list = [set() for column in range(len(self.table_data[0]))]
 
-            self.extract_column_dictionaries(self.header, self.table_data)
+            columns_dict = self.extract_column_dictionaries(self.header, self.table_data)
+            
+            SirajBase.set_table_model(self, table_model)
+            SirajBase.set_columns_dict(self, columns_dict)
+
             self.load_graphs(self.graph_configs, self.table_data)
             self.setWindowTitle("Siraj | {}".format(log_file_full_path))
         else:
@@ -435,29 +478,32 @@ siraj.  If not, see
                 "File <b>`{}`</b> was not found. You can either: <br><br>1. Open a log file via the File menu. Or<br>2. Drag a log file from the system and drop it into the application".format(log_file_full_path),
                 QMessageBox.Critical)
 
-#     def extract_column_dictionaries(self, header_vector_list, data_matrix_list):
-#         """
-#         This function extracts a dictionary of dictionaries
-#
-#         The extracted is a dictionary of columns where key is the column name,
-#         and the data is another dictionary.
-#
-#         The inner dictionary has a key equal to a specific cell value of the
-#         current column, and the value is a list of row number where this value
-#         appeared in.
-#
-#         This will be used to provide quick navigation through the log.
-#         """
-#         column_count = len(header_vector_list)
-#         self.columns_dict = {}
-#         for column, column_name in enumerate(header_vector_list):
-#             self.columns_dict[column] = {}
-#
-#         for row, log in enumerate(data_matrix_list):
-#             for column, field in enumerate(log):
-#                 if(log[column] not in self.columns_dict[column]):
-#                     self.columns_dict[column][log[column]] = []
-#                 self.columns_dict[column][log[column]].append(row)
+    def extract_column_dictionaries(self, header_vector_list, data_matrix_list):
+        """
+        This function extracts a dictionary of dictionaries
+
+        The extracted is a dictionary of columns where key is the column name,
+        and the data is another dictionary.
+
+        The inner dictionary has a key equal to a specific cell value of the
+        current column, and the value is a list of row number where this value
+        appeared in.
+
+        This will be used to provide quick navigation through the log.
+        """
+        column_count = len(header_vector_list)
+        columns_dict = {}
+
+        for column, column_name in enumerate(header_vector_list):
+            columns_dict[column] = {}
+
+        for row, log in enumerate(data_matrix_list):
+            for column, field in enumerate(log):
+                if(log[column] not in columns_dict[column]):
+                    columns_dict[column][log[column]] = []
+                columns_dict[column][log[column]].append(row)
+        return columns_dict
+
 #
 #     def cell_left_clicked(self, index):
 #         """
@@ -469,7 +515,7 @@ siraj.  If not, see
 #
 #         This is only done if the source view is visible.
 #         """
-#         index = self.proxy_model.mapToSource(index)
+    #         index = self.table_proxy.mapToSource(index)
 #
 #         if(self.is_source_visible):
 #             logging.info("cell[%d][%d] = %s", index.row(), index.column(), index.data())
@@ -509,7 +555,7 @@ siraj.  If not, see
 #
 #         mapToSource is needed to retrive the actual row number regardless of whether filtering is applied or not.
 #         """
-#         return [self.proxy_model.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
+    #         return [self.table_proxy.mapToSource(index) for index in self.user_interface.tblLogData.selectedIndexes()]
 #
 #     def update_status_bar(self):
 #         """
@@ -541,7 +587,7 @@ siraj.  If not, see
         This function is responsible for showing the context menu for the user
         to choose from.
         """
-        index = self.proxy_model.mapToSource(
+        index = self.table_proxy.mapToSource(
             self.user_interface.tblLogData.indexAt(point))
         logging.debug("Cell[%d, %d] was right-clicked. Contents = %s", index.row(), index.column(), index.data())
 
@@ -562,7 +608,7 @@ siraj.  If not, see
         if(len(filtered_out_set) > 0):
             self.unhide_menu.setEnabled(True)
             for filtered_string in filtered_out_set:
-                temp_action = QAction(filtered_string, self.unhide_menu);
+                temp_action = QAction(filtered_string, self.unhide_menu)
                 temp_action.triggered.connect(functools.partial(self.unhide_selected_rows_only_based_on_column, self.right_clicked_cell_index.column(), filtered_string))
                 self.unhide_menu.addAction(temp_action)
         else:
@@ -578,7 +624,7 @@ siraj.  If not, see
 #         it point on the corresponding line.
 #         """
 #
-#         index = self.proxy_model.mapToSource(index)
+        #         index = self.table_proxy.mapToSource(index)
 #
 #         logging.info("cell[%d][%d] = %s", index.row(), index.column(), index.data())
 #         row = index.row()
@@ -632,6 +678,13 @@ siraj.  If not, see
                 self.hide_rows_based_on_selected_cells()
             elif key == Qt.Key_O:
                 self.show_rows_based_on_selected_cells()
+            elif key == Qt.Key_F:
+                selected_indexes = self.get_selected_indexes()
+                if(len(selected_indexes) == 1):
+                    if(self.ui_filter is None):
+                        self.open_new_filter_view()
+                    self.ui_filter.add_to_filter_view(selected_indexes[0].column(), selected_indexes[0].data())
+
         #     elif key == Qt.Key_Up: # Jump to previous match
         #         selected_indexes = self.get_selected_indexes()
         #         if(len(selected_indexes) == 1):
@@ -689,7 +742,7 @@ siraj.  If not, see
 #             clipboard_text = self.user_interface.tblLogData.currentIndex().data()
 #         else:
 #             unique_rows_set = set([index.row() for index in sorted(selected_indexes)])
-#             row_text_list = [str(row) + "," + ",".join([self.proxy_model.index(row, column, QModelIndex()).data() for column in range(self.proxy_model.columnCount())]) for row in sorted(unique_rows_set)]
+        #             row_text_list = [str(row) + "," + ",".join([self.table_proxy.index(row, column, QModelIndex()).data() for column in range(self.table_proxy.columnCount())]) for row in sorted(unique_rows_set)]
 #             clipboard_text = "\n".join(row_text_list)
 #         self.clipboard.setText(clipboard_text)
 #
@@ -699,7 +752,7 @@ siraj.  If not, see
 #         Get the table index value by the given row and column
 #         """
 #         index = self.table_model.createIndex(row, column)
-#         index = self.proxy_model.mapFromSource(index)
+        #         index = self.table_proxy.mapFromSource(index)
 #         return index
 #
 #     def select_cell_by_row_and_column(self, row, column):
@@ -720,7 +773,7 @@ siraj.  If not, see
 #         Select a cell at the given index.
 #         """
 #         self.user_interface.tblLogData.clearSelection()
-#         index = self.proxy_model.mapFromSource(index)
+        #         index = self.table_proxy.mapFromSource(index)
 #         self.user_interface.tblLogData.setCurrentIndex(index)
 #         self.user_interface.tblLogData.scrollTo(index, hint = QAbstractItemView.PositionAtCenter)
 #         self.user_interface.tblLogData.setFocus()
@@ -849,16 +902,16 @@ siraj.  If not, see
         """
         self.is_filtering_mode_out = is_filtering_mode_out
         if(is_filtering_mode_out):
-            self.proxy_model.setFilterOutList(self.per_column_filter_out_set_list)
+            self.table_proxy.setFilterOutList(self.per_column_filter_out_set_list)
         else:
-            self.proxy_model.setFilterInList(self.per_column_filter_in_set_list)
+            self.table_proxy.setFilterInList(self.per_column_filter_in_set_list)
 
         # This is just to trigger the proxy model to apply the filter
-        self.proxy_model.setFilterKeyColumn(0)
+        self.table_proxy.setFilterKeyColumn(0)
 
     def dragEnterEvent(self, q_drag_enter_event):
         if(q_drag_enter_event.mimeData().hasFormat("text/uri-list")):
-            q_drag_enter_event.acceptProposedAction();
+            q_drag_enter_event.acceptProposedAction()
 
     def dropEvent(self, q_drop_event):
         url_list = q_drop_event.mimeData().urls()
@@ -868,11 +921,11 @@ siraj.  If not, see
         self.log_file_full_path = log_file_list[0]
         self.load_log_file(self.log_file_full_path)
 
-#     def closeEvent(self, event):
-#         app = QApplication([])
-# #         app.closeAllWindows()
-#         app.deleteLater()
+    def closeEvent(self, event):
+        app = QApplication([])
 #         app.closeAllWindows()
+        app.deleteLater()
+        app.closeAllWindows()
                           
 def main():
     logging.basicConfig(
@@ -885,7 +938,8 @@ def main():
     logging.debug('Entering...')
     APP = QApplication(sys.argv)
     MAIN = Siraj()
-    MAIN.showMaximized()
+    # MAIN.showMaximized()
+    MAIN.show()
     logging.debug('Exiting...')
     sys.exit(APP.exec_())
 

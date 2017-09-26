@@ -47,13 +47,13 @@ class MySortFilterProxyModel(QSortFilterProxyModel):
                     show_row = False
                     break
         else: # filter-in mode
-            show_row = True
+            show_row = False
             for column, column_filter_in_set in enumerate(self.filter_in_list):
-                if(len(column_filter_in_set) > 0):
-                    index = self.sourceModel().index(sourceRow, column, sourceParent)
-                    if(index.data() not in column_filter_in_set):
-                        show_row = False
-                        break
+                index = self.sourceModel().index(sourceRow, column, sourceParent)
+                if(index.data() in column_filter_in_set):
+                    show_row = True
+                    break
+
         return show_row
     
     def setFilterOutList(self, filter_out_list):
