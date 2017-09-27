@@ -447,11 +447,17 @@ siraj.  If not, see
             pattern = re.compile(self.log_trace_regex_pattern)
 
             self.table_data = []
+            most_recent_valid_table_entry = []
             for line in log_file_content_lines:
                 m = pattern.match(line)
                 if(m is not None):
-                    self.table_data.append([group.strip() for group in m.groups()])
-
+                    most_recent_valid_table_entry = [group.strip() for group in m.groups()]
+                    self.table_data.append(list(most_recent_valid_table_entry))
+                else:
+                    temp_list = list(most_recent_valid_table_entry)
+                    temp_list[3] = line
+                    self.table_data.append(temp_list)
+            
             m = re.search(self.log_trace_regex_pattern, log_file_content_lines[1])
             self.header = [group_name for group_name in sorted(m.groupdict().keys(), key=lambda k: m.start(k))]
             table_model = MyTableModel(self.table_data, self.header, self.table_conditional_formatting_config, self)
