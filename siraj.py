@@ -244,6 +244,7 @@ class LogSParserMain(QMainWindow):
         self.log_file_full_path = self.config.get_config_item("log_file_full_path")
         self.log_trace_regex_pattern = self.config.get_config_item("log_row_pattern")
         self.time_stamp_column = self.config.get_config_item("time_stamp_column_number_zero_based")
+        self.non_matching_line_target_column_zero_based = self.config.get_config_item("non_matching_line_target_column_zero_based")
 
         self.external_editor_configs = self.config.get_config_item("external_editor_configs")
         
@@ -414,10 +415,17 @@ siraj.  If not, see
             pattern = re.compile(self.log_trace_regex_pattern)        
             
             self.table_data = []
+            most_recent_valid_table_entry = []
             for line in log_file_content_lines:
                 m = pattern.match(line)
                 if(m is not None):
-                    self.table_data.append([group.strip() for group in m.groups()])
+                    most_recent_valid_table_entry = [group.strip() for group in m.groups()]
+                    self.table_data.append(list(most_recent_valid_table_entry))
+                else:
+                    if(self.non_matching_line_target_column_zero_based != -1):
+                        temp_list = list(most_recent_valid_table_entry)
+                        temp_list[self.non_matching_line_target_column_zero_based] = line
+                        self.table_data.append(temp_list)                    
             
             m = re.search(self.log_trace_regex_pattern, log_file_content_lines[1])
             self.header = [group_name for group_name in sorted(m.groupdict().keys(), key=lambda k: m.start(k))]
