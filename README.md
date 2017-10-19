@@ -77,6 +77,7 @@ Since JSON doesn't allow inline comments, the different configuration items are 
 		"log_file_full_path": "sample.log", 
 		"log_row_pattern" : "^(?P<LEVEL>.+)\\|\\|(?P<FUNCTION>.+)\\|\\|(?P<MESSAGE>.+)\\|\\|(?P<TIME>.+)\\|\\|(?P<FILE_AND_LINE>[^:]+:\\d+)\\s*$",
 		"time_stamp_column_number_zero_based": 3,
+		"non_matching_line_target_column_zero_based" : -1, 
 		"source_cross_reference_configs" :
 		{
 			"root_source_path_prefix" : "",
@@ -160,6 +161,10 @@ This is the most important configuration. This tells Siraj how to identify field
 
 `time_stamp_column_number_zero_based`  
 Determines the column index that contains the timing information (if any). This is mainly used to calculate the elapsed time between any two selected logs.
+
+`non_matching_line_target_column_zero_based`
+Sometimes, there are log entries that doesn't match the regex pattern specified by _log_row_pattern_, but still it needs to be displayed. This parameter specifies
+which column will hold these non matching data when encountered. The values of the remaining columns will be copied as is from the previous row.
 
 `source_cross_reference_configs`  
 Holds configurations related to source code cross-referencing. This is used when selecting a table cell to display the corresponding source code that generated the currently selected row (if applicable).
