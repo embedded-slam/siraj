@@ -4,7 +4,7 @@ from cx_Freeze import setup, Executable
 
 # Dependencies are automatically detected, but it might need fine tuning.
 build_exe_options = {
-                     "packages": ["os","pygments","pygments.lexers","pygments.formatters"], 
+                     "packages": ["os","pygments","pygments.lexers","pygments.formatters", 'numpy.core._methods', 'numpy.lib.format', "pyqtgraph"], 
                      "excludes": ["tkinter"],
                      "include_files":['README.md', 'sample.log', 'siraj_configs.json', 'siraj_screenshot.png', 'sj_configs.py', 'siraj.py']
                      }
