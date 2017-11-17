@@ -527,7 +527,7 @@ siraj.  If not, see
                     
     def update_status_bar(self):
         """
-        Updates the status bar with relevant informations
+        Updates the status bar with relevant information
         """
         selected_indexes = self.get_selected_indexes()
         
