@@ -82,13 +82,14 @@ class MyTableModel(QAbstractTableModel):
                 if(index.row() in self.bookmarked_rows_set):
                     return QBrush(QColor(self.bookmark_color_dict["background"]))
                 else:
-                    if((index.column() == self.special_formatting_column) and (index.data() in self.special_formatting_color_dict)):
-                        return QBrush(QColor(self.special_formatting_color_dict[index.data()]["background"]))
-                    else:
+                    if(self.arraydata[index.row()][self.background_key_column] in self.background_color_dict):
+                        # print(self.background_key_column, index.row())
                         return QBrush(self.getConditionalFormattingColor(
                             index.row(),
                             self.background_color_dict,
                             self.background_key_column))
+                    elif((index.column() == self.special_formatting_column) and (index.data() in self.special_formatting_color_dict)):
+                        return QBrush(QColor(self.special_formatting_color_dict[index.data()]["background"]))
 #             elif(role == Qt.FontRole):
 #                 if(index.row() in self.bookmarked_rows_set):
 #                     font = QFont()
