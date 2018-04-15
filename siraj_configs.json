@@ -33,23 +33,29 @@
 		
 		},		
 		"special_formatting_key_column" : 1,
-		"special_formatting_color_dict":
+		"special_formatting_style_dict":
 		{
-			"cell_left_clicked" : 
+			"style1" :
 			{
 				"foreground" : "white",
 				"background" : "purple"
 			},
-			"hide_filtered_out_entries" : 
+			"style2" :
 			{
 				"foreground" : "white",
 				"background" : "blue"
 			},
-			"get_config_item" : 
+			"style3" :
 			{
 				"foreground" : "white",
 				"background" : "darkCyan"
 			}			
+		},
+		"special_formatting_color_dict":
+		{
+			"cell_left_clicked" : "style1",
+			"hide_filtered_out_entries" : "style2",
+			"get_config_item" : "style3"
 		},
 		"bookmark_color_dict":
 		{
@@ -61,15 +67,24 @@
 	{
 		"My First Graph" : 
 		{
+			"plot" 		: "First Plot",
 			"column"  	: 2,
 			"pattern" 	: "Value = (\\d+)",
 			"color"		: "green"
 		},
-		"Yet Another Graph" : 
+		"Another Graph - Same Plot" :
 		{
+			"plot" 		: "First Plot",
 			"column"  	: 2,
 			"pattern" 	: "The number of items is (\\d+) item\\(s\\)",
 			"color"		: "brown"
+		},
+    	"Third Graph - Different Plot" :
+		{
+			"plot" 		: "Second Plot",
+			"column"  	: 2,
+			"pattern" 	: "The number of items is (\\d+) item\\(s\\)",
+			"color"		: "red"
 		}
 	}
 }
