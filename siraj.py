@@ -286,18 +286,22 @@ class LogSParserMain(QMainWindow):
         
         for graph_number, graph in enumerate(graphs):
             window = None
-            if (graph in self.graph_dict):
-                window = self.graph_dict[graph]
-                window.clear()
+            plot = graph_configs[graph]["plot"]
+            if (plot in self.graph_dict):
+                window = self.graph_dict[plot]
+                # window.clear()
             else:
-                window = pg.GraphicsWindow(title=graph)
-                self.graph_dict[graph] = window
-                
-            p = window.addPlot(title = graph)
-            p.plot(graph_data[graph_number][0], 
+                window = pg.GraphicsWindow(title=plot)
+
+                self.graph_dict[plot] = window
+
+            p = window.addPlot(title=graph)
+            p.plot(graph_data[graph_number][0],
                    graph_data[graph_number][1],
-                   pen = pg.mkPen(width = 1, color = QColor(graph_configs[graph]["color"])))
-              
+                   pen = pg.mkPen(width = 1, color = QColor(graph_configs[graph]["color"])), name = graph)
+            p.showGrid(x=True, y=True)
+            window.nextRow()
+
                  
     def setup_context_menu(self):
         self.menuFilter = QMenu(self)
