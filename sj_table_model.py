@@ -38,6 +38,7 @@ class MyTableModel(QAbstractTableModel):
         self.background_color_dict          = conditional_formatting_config_dict["background_color_dict"]
         self.special_formatting_column      = conditional_formatting_config_dict["special_formatting_key_column"]
         self.special_formatting_color_dict  = conditional_formatting_config_dict["special_formatting_color_dict"]
+        self.special_formatting_style_dict  = conditional_formatting_config_dict["special_formatting_style_dict"]
         self.bookmark_color_dict            = conditional_formatting_config_dict["bookmark_color_dict"]
         self.row_count                      = len(self.arraydata)
         self.column_count                   = len(self.arraydata[0])
@@ -71,7 +72,7 @@ class MyTableModel(QAbstractTableModel):
                     return QColor(self.bookmark_color_dict["foreground"])
                 else:
                     if((index.column() == self.special_formatting_column) and (index.data() in self.special_formatting_color_dict)):
-                        return QColor(self.special_formatting_color_dict[index.data()]["foreground"])
+                        return QColor(self.special_formatting_style_dict[self.special_formatting_color_dict[index.data()]]["foreground"])
         
                     else:
                         return self.getConditionalFormattingColor(
@@ -89,7 +90,7 @@ class MyTableModel(QAbstractTableModel):
                             self.background_color_dict,
                             self.background_key_column))
                     elif((index.column() == self.special_formatting_column) and (index.data() in self.special_formatting_color_dict)):
-                        return QBrush(QColor(self.special_formatting_color_dict[index.data()]["background"]))
+                        return QBrush(QColor(self.special_formatting_style_dict[self.special_formatting_color_dict[index.data()]]["background"]))
 #             elif(role == Qt.FontRole):
 #                 if(index.row() in self.bookmarked_rows_set):
 #                     font = QFont()
