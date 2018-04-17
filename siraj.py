@@ -286,14 +286,14 @@ class LogSParserMain(QMainWindow):
         
         for graph_number, graph in enumerate(graphs):
             window = None
-            plot = graph_configs[graph]["plot"]
-            if (plot in self.graph_dict):
-                window = self.graph_dict[plot]
+            wnd = graph_configs[graph]["window"]
+            if (wnd in self.graph_dict):
+                window = self.graph_dict[wnd]
                 # window.clear()
             else:
-                window = pg.GraphicsWindow(title=plot)
+                window = pg.GraphicsWindow(title=wnd)
 
-                self.graph_dict[plot] = window
+                self.graph_dict[wnd] = window
 
             p = window.addPlot(title=graph)
             p.plot(graph_data[graph_number][0],
