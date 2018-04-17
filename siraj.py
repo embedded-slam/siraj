@@ -26,6 +26,11 @@ from PyQt4.QtCore import (Qt, QModelIndex)
 from PyQt4.QtGui import (qApp, QMainWindow, QFileDialog, QApplication, 
 QSortFilterProxyModel, QTextCursor, QTextCharFormat, QBrush, QColor, QMenu, 
 QAction, QCursor, QMessageBox, QItemSelectionModel, QAbstractItemView, QTableView, QLineEdit)
+
+#from PyQt5.QtCore import (Qt, QModelIndex, QSortFilterProxyModel)
+#from PyQt5.QtGui import (QCursor)
+#from PyQt5.QtWidgets import (QMainWindow,QFileDialog, QApplication, QMenu, QAction, QMessageBox, QAbstractItemView, QLineEdit)
+
 from subprocess import call
 from sj_configs import LogSParserConfigs
 from sj_table_model import MyTableModel
@@ -99,17 +104,19 @@ class LogSParserMain(QMainWindow):
         self.setAcceptDrops(True)
 
         self.load_configuration_file()
+
+        self.toggle_source_view()
         
     def setup_toolbars(self):
         source_toolbar = self.addToolBar('SourceToolbar')
         
-        tbrActionToggleSourceView = QAction('C/C++', self)
-        tbrActionToggleSourceView.triggered.connect(self.toggle_source_view)
-        tbrActionToggleSourceView.setToolTip("Toggle source code view")
-        tbrActionToggleSourceView.setCheckable(True)
-        tbrActionToggleSourceView.setChecked(True)
+        self.user_interface.tbrActionToggleSourceView = QAction('C/C++', self)
+        self.user_interface.tbrActionToggleSourceView.triggered.connect(self.toggle_source_view)
+        self.user_interface.tbrActionToggleSourceView.setToolTip("Toggle source code view")
+        self.user_interface.tbrActionToggleSourceView.setCheckable(True)
+        self.user_interface.tbrActionToggleSourceView.setChecked(True)
         
-        source_toolbar.addAction(tbrActionToggleSourceView)
+        source_toolbar.addAction(self.user_interface.tbrActionToggleSourceView)
         
         search_toolbar = self.addToolBar("SearchToolbar")
         search_toolbar.setAllowedAreas(Qt.TopToolBarArea | Qt.BottomToolBarArea)
@@ -272,9 +279,6 @@ class LogSParserMain(QMainWindow):
         graphs = list(graph_configs.keys())
         graph_data = [([],[],) for _ in graphs] 
 
-        x = []
-        y = []
-        
         for row_number, row_data in enumerate(table_data):
             for graph_number, graph_name in enumerate(graphs):
                 cell_to_match = row_data[graph_configs[graph_name]["column"]]
@@ -332,6 +336,8 @@ class LogSParserMain(QMainWindow):
         
     def toggle_source_view(self):
         self.is_source_visible = not self.is_source_visible
+        self.user_interface.tbrActionToggleSourceView.setChecked(self.is_source_visible)
+
         self.user_interface.dckSource.setVisible(self.is_source_visible)
         logging.info("Source view is now {}".format("Visible" if self.is_source_visible else "Invisible"))
 
