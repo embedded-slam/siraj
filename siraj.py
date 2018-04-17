@@ -276,7 +276,7 @@ class LogSParserMain(QMainWindow):
         pg.setConfigOption('background', QColor("white"))
         pg.setConfigOption('foreground', QColor("black"))
         pg.setConfigOptions(antialias=True)
-        graphs = list(graph_configs.keys())
+        graphs = list(sorted(graph_configs.keys(), key=lambda k: graph_configs[k]["index"]))
         graph_data = [([],[],) for _ in graphs] 
 
         for row_number, row_data in enumerate(table_data):
