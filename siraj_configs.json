@@ -1,90 +1,93 @@
 {
-	"log_file_full_path": "sample.log", 
-	"log_row_pattern" : "^(?P<LEVEL>.+)\\|\\|(?P<FUNCTION>.+)\\|\\|(?P<MESSAGE>.+)\\|\\|(?P<TIME>.+)\\|\\|(?P<FILE_AND_LINE>[^:]+:\\d+)\\s*$",
-	"time_stamp_column_number_zero_based": 3,
-	"non_matching_line_target_column_zero_based" : -1, 
-	"source_cross_reference_configs" :
-	{
-		"root_source_path_prefix" : "",
-		"pygments_syntax_highlighting_style":"vs",
-		"file_column_number_zero_based": 4,
-		"file_column_pattern" : "(?P<FILE>[^:]+):",
-		"line_column_number_zero_based": 4,
-		"line_column_pattern" : ":(?P<LINE>\\d+)"
-	},
-	"external_editor_configs" :
-	{
-		"editor" : "gedit",
-		"editor_command_format" : "{editor_executable} +{line_number} {file_name}"
-	},
-	"table_conditional_formatting_configs" : 
-	{
-		"foreground_key_column" : 0,
-		"foreground_color_dict" : 
-		{
-			"DEBUG" 	: "green",
-			"INFO" 		: "blue",
-			"WARNING" 	: "white"
-		},
-		"background_key_column" : 0,
-		"background_color_dict" : 
-		{
-		    "WARNING" 	: "orange"
-		
-		},		
-		"special_formatting_key_column" : 1,
-		"special_formatting_style_dict":
-		{
-			"style1" :
-			{
-				"foreground" : "white",
-				"background" : "purple"
-			},
-			"style2" :
-			{
-				"foreground" : "white",
-				"background" : "blue"
-			},
-			"style3" :
-			{
-				"foreground" : "white",
-				"background" : "darkCyan"
-			}			
-		},
-		"special_formatting_color_dict":
-		{
-			"cell_left_clicked" : "style1",
-			"hide_filtered_out_entries" : "style2",
-			"get_config_item" : "style3"
-		},
-		"bookmark_color_dict":
-		{
-			"foreground" : "black",		
-			"background" : "yellow"
-		}
-	},
-	"graph_configs" :
-	{
-		"My First Graph" : 
-		{
-			"plot" 		: "First Plot",
-			"column"  	: 2,
-			"pattern" 	: "Value = (\\d+)",
-			"color"		: "green"
-		},
-		"Another Graph - Same Plot" :
-		{
-			"plot" 		: "First Plot",
-			"column"  	: 2,
-			"pattern" 	: "The number of items is (\\d+) item\\(s\\)",
-			"color"		: "brown"
-		},
-    	"Third Graph - Different Plot" :
-		{
-			"plot" 		: "Second Plot",
-			"column"  	: 2,
-			"pattern" 	: "The number of items is (\\d+) item\\(s\\)",
-			"color"		: "red"
-		}
-	}
+    "log_file_full_path": "sample.log",
+    "log_row_pattern" : "^(?P<LEVEL>.+)\\|\\|(?P<FUNCTION>.+)\\|\\|(?P<MESSAGE>.+)\\|\\|(?P<TIME>.+)\\|\\|(?P<FILE_AND_LINE>[^:]+:\\d+)\\s*$",
+    "time_stamp_column_number_zero_based": 3,
+    "non_matching_line_target_column_zero_based" : -1,
+    "source_cross_reference_configs" :
+    {
+        "root_source_path_prefix" : "",
+        "pygments_syntax_highlighting_style":"vs",
+        "file_column_number_zero_based": 4,
+        "file_column_pattern" : "(?P<FILE>[^:]+):",
+        "line_column_number_zero_based": 4,
+        "line_column_pattern" : ":(?P<LINE>\\d+)"
+    },
+    "external_editor_configs" :
+    {
+        "editor" : "gedit",
+        "editor_command_format" : "{editor_executable} +{line_number} {file_name}"
+    },
+    "table_conditional_formatting_configs" :
+    {
+        "foreground_key_column" : 0,
+        "foreground_color_dict" :
+        {
+            "DEBUG" 	: "green",
+            "INFO" 		: "blue",
+            "WARNING" 	: "white"
+        },
+        "background_key_column" : 0,
+        "background_color_dict" :
+        {
+            "WARNING" 	: "orange"
+
+        },
+        "special_formatting_key_column" : 1,
+        "special_formatting_style_dict":
+        {
+            "style1" :
+            {
+                "foreground" : "white",
+                "background" : "purple"
+            },
+            "style2" :
+            {
+                "foreground" : "white",
+                "background" : "blue"
+            },
+            "style3" :
+            {
+                "foreground" : "white",
+                "background" : "darkCyan"
+            }
+        },
+        "special_formatting_color_dict":
+        {
+            "cell_left_clicked" : "style1",
+            "hide_filtered_out_entries" : "style2",
+            "get_config_item" : "style3"
+        },
+        "bookmark_color_dict":
+        {
+            "foreground" : "black",
+            "background" : "yellow"
+        }
+    },
+    "graph_configs" :
+    {
+        "My First Graph" :
+        {
+            "index"		: 0,
+            "window" 	: "First Window",
+            "column"  	: 2,
+            "pattern" 	: "Value = (\\d+)",
+            "color"		: "green"
+        },
+        "Another Graph - Same Window" :
+        {
+            "index"		: 1,
+            "window" 	: "First Window",
+            "column"  	: 2,
+            "pattern" 	: "The number of items is (\\d+) item\\(s\\)",
+            "color"		: "brown"
+        },
+        "Third Graph - Different Window" :
+        {
+            "index"		: 0,
+            "window" 	: "Second Window",
+            "column"  	: 2,
+            "pattern" 	: "The number of items is (\\d+) item\\(s\\)",
+            "color"		: "red"
+        }
+    }
 }
