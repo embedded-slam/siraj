@@ -287,7 +287,14 @@ class LogSParserMain(QMainWindow):
                     graph_data[graph_number][0].append(row_number)          # X-Axis value
                     graph_data[graph_number][1].append(int(m.group(1)))     # Y-Axis value
             
-        
+
+        for graph in graphs:
+            window = None
+            wnd = graph_configs[graph]["window"]
+            if (wnd in self.graph_dict):
+                window = self.graph_dict[wnd]
+                window.clear()
+
         for graph_number, graph in enumerate(graphs):
             window = None
             wnd = graph_configs[graph]["window"]
