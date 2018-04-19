@@ -296,7 +296,7 @@ class LogSParserMain(QMainWindow):
                 window.clear()
 
         is_new_window = False
-        first_plot_handle = None
+        first_plot_name = None
         for graph_number, graph in enumerate(graphs):
             window = None
             wnd = graph_configs[graph]["window"]
@@ -316,9 +316,9 @@ class LogSParserMain(QMainWindow):
                    graph_data[graph_number][1],
                    pen=pg.mkPen(width = 1, color = QColor(graph_configs[graph]["color"])), name = graph)
             p.showGrid(x=True, y=True)
-            if is_new_window:
-                first_plot_handle = graph
-            p.setXLink(first_plot_handle)
+            if first_plot_name == None:
+                first_plot_name = graph
+            p.setXLink(first_plot_name)
 
             window.nextRow()
 
