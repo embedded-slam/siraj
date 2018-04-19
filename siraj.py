@@ -318,8 +318,7 @@ class LogSParserMain(QMainWindow):
             p.showGrid(x=True, y=True)
             if is_new_window:
                 first_plot_handle = graph
-            else:
-                p.setXLink(first_plot_handle)
+            p.setXLink(first_plot_handle)
 
             window.nextRow()
 
