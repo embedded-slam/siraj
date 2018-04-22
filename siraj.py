@@ -106,6 +106,8 @@ class LogSParserMain(QMainWindow):
         self.load_configuration_file()
 
         self.toggle_source_view()
+
+        self.select_cell_by_row_and_column(0, self.user_data_column_zero_based)
         
     def setup_toolbars(self):
         source_toolbar = self.addToolBar('SourceToolbar')
@@ -251,7 +253,7 @@ class LogSParserMain(QMainWindow):
         self.log_file_full_path = self.config.get_config_item("log_file_full_path")
         self.log_trace_regex_pattern = self.config.get_config_item("log_row_pattern")
         self.time_stamp_column = self.config.get_config_item("time_stamp_column_number_zero_based")
-        self.non_matching_line_target_column_zero_based = self.config.get_config_item("non_matching_line_target_column_zero_based")
+        self.user_data_column_zero_based = self.config.get_config_item("user_data_column_zero_based")
 
         self.external_editor_configs = self.config.get_config_item("external_editor_configs")
         
@@ -277,7 +279,7 @@ class LogSParserMain(QMainWindow):
         pg.setConfigOption('foreground', QColor("black"))
         pg.setConfigOptions(antialias=True)
         graphs = list(sorted(graph_configs.keys(), key=lambda k: graph_configs[k]["index"]))
-        graph_data = [([],[],) for _ in graphs] 
+        graph_data = [([],[],) for _ in graphs]
 
         for row_number, row_data in enumerate(table_data):
             for graph_number, graph_name in enumerate(graphs):
@@ -448,9 +450,9 @@ siraj.  If not, see
                     most_recent_valid_table_entry = [group.strip() for group in m.groups()]
                     self.table_data.append(list(most_recent_valid_table_entry))
                 else:
-                    if(self.non_matching_line_target_column_zero_based != -1):
+                    if(self.user_data_column_zero_based != -1):
                         temp_list = list(most_recent_valid_table_entry)
-                        temp_list[self.non_matching_line_target_column_zero_based] = line
+                        temp_list[self.user_data_column_zero_based] = line
                         self.table_data.append(temp_list)                    
             
             m = re.search(self.log_trace_regex_pattern, log_file_content_lines[1])
