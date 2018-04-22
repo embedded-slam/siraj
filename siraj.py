@@ -319,7 +319,7 @@ class LogSParserMain(QMainWindow):
 
             p.plot(graph_data[graph_number][0],
                    graph_data[graph_number][1],
-                   pen=pg.mkPen(width=1, color=QColor(graph_configs[graph]["color"])), symbol='d', symbolPen='w', symbolBrush=(0,0,0), name=graph)
+                   pen=pg.mkPen(width=1, color=QColor(graph_configs[graph]["color"])), symbol=graph_configs[graph]["symbol"], symbolPen='w', symbolBrush=QColor(graph_configs[graph]["color"]), name=graph)
             p.showGrid(x=True, y=True)
             if first_plot_name == None:
                 first_plot_name = graph
