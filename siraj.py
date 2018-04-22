@@ -80,7 +80,6 @@ class LogSParserMain(QMainWindow):
         self.user_interface.tblLogData.customContextMenuRequested.connect(self.cell_right_clicked)
         self.user_interface.txtSourceFile.setReadOnly(True)
 
-        
         self.is_table_visible = True
         self.is_source_visible = True
         
@@ -99,6 +98,8 @@ class LogSParserMain(QMainWindow):
         self.case_sensitive_search_type = Qt.CaseInsensitive
         self.is_wrap_search = True  
         self.is_match_whole_word = False
+
+        self.graph_marker_list = []
 
         self.user_interface.tblLogData.setAcceptDrops(False)
         self.setAcceptDrops(True)
@@ -281,6 +282,8 @@ class LogSParserMain(QMainWindow):
         graphs = list(sorted(graph_configs.keys(), key=lambda k: graph_configs[k]["index"]))
         graph_data = [([],[],) for _ in graphs]
 
+        self.graph_marker_list = []
+
         for row_number, row_data in enumerate(table_data):
             for graph_number, graph_name in enumerate(graphs):
                 cell_to_match = row_data[graph_configs[graph_name]["column"]]
@@ -321,10 +324,12 @@ class LogSParserMain(QMainWindow):
             if first_plot_name == None:
                 first_plot_name = graph
             p.setXLink(first_plot_name)
+            marker = pg.InfiniteLine(angle=90, movable=False)
+            p.addItem(marker, ignoreBounds=True)
+            self.graph_marker_list.append(marker)
 
             window.nextRow()
 
-                 
     def setup_context_menu(self):
         self.menuFilter = QMenu(self)
         
@@ -476,6 +481,7 @@ siraj.  If not, see
                 "File not Found!", 
                 "File <b>`{}`</b> was not found. You can either: <br><br>1. Open a log file via the File menu. Or<br>2. Drag a log file from the system and drop it into the application".format(log_file_full_path), 
                 QMessageBox.Critical)
+
             
     def extract_column_dictionaries(self, header_vector_list, data_matrix_list):
         """
@@ -527,7 +533,9 @@ siraj.  If not, see
                 self.load_source_file(full_path, line)
                 self.user_interface.tblLogData.setFocus() 
         self.update_status_bar()
-        
+        self.update_graph_markers()
+
+
     def load_source_file(self, file, line):    
         code = open(file).read()
         lexer = get_lexer_for_filename(file)
@@ -579,7 +587,7 @@ siraj.  If not, see
     def cell_right_clicked(self, point):
         """
         Handle the event of right-clicking on a table cell.
-        
+
         This function is responsible for showing the context menu for the user
         to choose from.
         """
@@ -604,7 +612,7 @@ siraj.  If not, see
         if(len(filtered_out_set) > 0):
             self.unhide_menu.setEnabled(True)
             for filtered_string in filtered_out_set:
-                temp_action = QAction(filtered_string, self.unhide_menu);
+                temp_action = QAction(filtered_string, self.unhide_menu)
                 temp_action.triggered.connect(functools.partial(self.unhide_selected_rows_only_based_on_column, self.right_clicked_cell_index.column(), filtered_string))
                 self.unhide_menu.addAction(temp_action)
         else:
@@ -715,8 +723,15 @@ siraj.  If not, see
             self.load_log_file(self.log_file_full_path)
         
         else:
-            QTableView.keyPressEvent(self.user_interface.tblLogData, q_key_event) 
-            
+            QTableView.keyPressEvent(self.user_interface.tblLogData, q_key_event)
+        self.update_graph_markers()
+
+    def update_graph_markers(self):
+        selected_indexes = self.get_selected_indexes()
+        if (len(selected_indexes) == 1):
+            for marker in self.graph_marker_list:
+                marker.setPos(selected_indexes[0].row())
+
     def prepare_clipboard_text(self):
         """
         Copy the cell content to the clipboard if a single cell is selected. Or
