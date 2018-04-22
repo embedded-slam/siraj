@@ -107,8 +107,6 @@ class LogSParserMain(QMainWindow):
         self.load_configuration_file()
 
         self.toggle_source_view()
-
-        self.select_cell_by_row_and_column(0, self.user_data_column_zero_based)
         
     def setup_toolbars(self):
         source_toolbar = self.addToolBar('SourceToolbar')
@@ -475,7 +473,8 @@ siraj.  If not, see
             
             self.extract_column_dictionaries(self.header, self.table_data)
             self.load_graphs(self.graph_configs, self.table_data) 
-            self.setWindowTitle("Siraj | {}".format(log_file_full_path))   
+            self.setWindowTitle("Siraj | {}".format(log_file_full_path))
+            self.select_cell_by_row_and_column(0, self.user_data_column_zero_based)
         else:
             self.display_message_box(
                 "File not Found!", 
