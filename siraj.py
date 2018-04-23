@@ -47,6 +47,7 @@ from pygments.lexers import (get_lexer_by_name, get_lexer_for_filename)
 from bisect import (bisect_left, bisect_right)
 import pyqtgraph as pg
 
+
 class LogSParserMain(QMainWindow):
     """
     This is the main class in the application. It's responsible for displaying
@@ -312,7 +313,6 @@ class LogSParserMain(QMainWindow):
 
                 self.graph_dict[wnd] = window
 
-
             p = window.addPlot(name=graph, title=graph)
 
             p.plot(graph_data[graph_number][0],
@@ -325,8 +325,14 @@ class LogSParserMain(QMainWindow):
             marker = pg.InfiniteLine(angle=90, movable=False)
             p.addItem(marker, ignoreBounds=True)
             self.graph_marker_list.append(marker)
+            p.scene().sigMouseClicked.connect(functools.partial(self.graph_mouse_clicked, p))
 
             window.nextRow()
+
+    def graph_mouse_clicked(self, plt, evt):
+        point = plt.vb.mapSceneToView(evt.scenePos())
+        self.select_cell_by_row_and_column(int(round(point.x())), self.user_data_column_zero_based)
+        self.update_graph_markers()
 
     def setup_context_menu(self):
         self.menuFilter = QMenu(self)
