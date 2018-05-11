@@ -2,7 +2,7 @@ This document explains installtion on Ubuntu. Other system should have similar s
 
 # Python3
 * Install python3 and development packages:  
-    ```sudo apt-get install python3 python3-dev python3-pip```
+    ```sudo apt-get install python3 python3-dev python3-pip python3-distutils```
 
 # Qt4 and supporting libraries  
 
