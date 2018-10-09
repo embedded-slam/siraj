@@ -73,81 +73,118 @@ Siraj relies on a configuration file called siraj_configs.json which looks as sh
 Since JSON doesn't allow inline comments, the different configuration items are described below:
 
 ------------------------------------------------------------
-	{
-		"log_file_full_path": "sample.log", 
-		"log_row_pattern" : "^(?P<LEVEL>.+)\\|\\|(?P<FUNCTION>.+)\\|\\|(?P<MESSAGE>.+)\\|\\|(?P<TIME>.+)\\|\\|(?P<FILE_AND_LINE>[^:]+:\\d+)\\s*$",
-		"time_stamp_column_number_zero_based": 3,
-		"non_matching_line_target_column_zero_based" : -1, 
-		"source_cross_reference_configs" :
-		{
-			"root_source_path_prefix" : "",
-			"pygments_syntax_highlighting_style":"vs",
-			"file_column_number_zero_based": 4,
-			"file_column_pattern" : "(?P<FILE>[^:]+):",
-			"line_column_number_zero_based": 4,
-			"line_column_pattern" : ":(?P<LINE>\\d+)"
-		},
-		"external_editor_configs" :
-		{
-			"editor" : "gedit",
-			"editor_command_format" : "{editor_executable} +{line_number} {file_name}"
-		},
-		"table_conditional_formatting_configs" : 
-		{
-			"foreground_key_column" : 0,
-			"foreground_color_dict" : 
-			{
-				"DEBUG" 	: "green",
-				"INFO" 		: "blue",
-				"WARNING" 	: "white"
-			},
-			"background_key_column" : 0,
-			"background_color_dict" : 
-			{
-			    "WARNING" 	: "orange"
-			
-			},		
-			"special_formatting_key_column" : 1,
-			"special_formatting_color_dict":
-			{
-				"cell_left_clicked" : 
-				{
-					"foreground" : "white",
-					"background" : "limegreen"
-				},
-				"hide_filtered_out_entries" : 
-				{
-					"foreground" : "white",
-					"background" : "blue"
-				},
-				"get_config_item" : 
-				{
-					"foreground" : "white",
-					"background" : "darkCyan"
-				}			
-			},
-			"bookmark_color_dict":
-			{
-				"foreground" : "black",		
-				"background" : "yellow"
-			}
-		},
-		"graph_configs" :
-		{
-			"My First Graph" : 
-			{
-				"column"  	: 2,
-				"pattern" 	: "Value = (\\d+)",
-				"color"		: "green"
-			},
-			"Yet Another Graph" : 
-			{
-				"column"  	: 2,
-				"pattern" 	: "The number of items is (\\d+) item\\(s\\)",
-				"color"		: "brown"
-			}
-		}
-	}
+    {
+        "log_file_full_path": "sample.log",
+        "log_row_pattern" : "^(?P<LEVEL>.+)\\|\\|(?P<FUNCTION>.+)\\|\\|(?P<MESSAGE>.+)\\|\\|(?P<TIME>.+)\\|\\|(?P<FILE_AND_LINE>[^:]+:\\d+)\\s*$",
+        "time_stamp_column_number_zero_based": 3,
+        "user_data_column_zero_based" : 2,
+        "source_cross_reference_configs" :
+        {
+            "root_source_path_prefix" : "",
+            "pygments_syntax_highlighting_style":"vs",
+            "file_column_number_zero_based": 4,
+            "file_column_pattern" : "(?P<FILE>[^:]+):",
+            "line_column_number_zero_based": 4,
+            "line_column_pattern" : ":(?P<LINE>\\d+)"
+        },
+        "external_editor_configs" :
+        {
+            "editor" : "gedit",
+            "editor_command_format" : "{editor_executable} +{line_number} {file_name}"
+        },
+        "table_conditional_formatting_configs" :
+        {
+            "foreground_key_column" : 0,
+            "foreground_color_dict" :
+            {
+                "DEBUG"     : "green",
+                "INFO"      : "blue",
+                "WARNING"   : "white"
+            },
+            "background_key_column" : 0,
+            "background_color_dict" :
+            {
+                "WARNING"   : "orange"
+    
+            },
+            "special_formatting_key_column" : 1,
+            "special_formatting_style_dict":
+            {
+                "style1" :
+                {
+                    "foreground" : "white",
+                    "background" : "purple"
+                },
+                "style2" :
+                {
+                    "foreground" : "white",
+                    "background" : "blue"
+                },
+                "style3" :
+                {
+                    "foreground" : "white",
+                    "background" : "darkCyan"
+                }
+            },
+            "special_formatting_color_dict":
+            {
+                "cell_left_clicked" : "style1",
+                "hide_filtered_out_entries" : "style2",
+                "get_config_item" : "style3"
+            },
+            "bookmark_color_dict":
+            {
+                "foreground" : "black",
+                "background" : "yellow"
+            }
+        },
+    
+        "graph_configs": {
+            "window_dict": {
+                "window #1": {
+                    "plot_dict": {
+                        "plot #1": {
+                    "row" : 1,
+    
+                            "series_dict": {
+                                "series #1": {
+                                    "symbol": "t",
+                                    "color": "red",
+                                    "pattern"   : "Value = (\\d+)"
+                                }
+                            }
+                        },
+                        "plot #2": {
+                    "row" : 2,
+    
+                            "series_dict": {
+                                "series #2": {
+                                    "symbol": "+",
+                                    "color": "green",
+                                    "pattern"   : "The number of items is (\\d+) item\\(s\\)"
+                                }
+                            }
+                        }
+                    }
+                },
+                "window #2": {
+                    "plot_dict": {
+                        "plot #3": {
+                    "row" : 1,
+    
+                            "series_dict": {
+                                "series #3": {
+                                    "symbol": "o",
+                                    "color": "blue",
+                                    "pattern"   : "The number of items is (\\d+) item\\(s\\)"
+                                }
+                            }
+                        }
+                    }            
+                }
+            }
+        }
+    }
 ------------------------------------------------------------
 
 `log_file_full_path`  
@@ -225,11 +262,18 @@ Example for this can be seen in the _FUNCTION_  column in the screenshot above.
 Holds the background/foreground colors to use with bookmakrs.
 
 `graph_configs`  
-Holds a list of graph entries (one entry per graph). Each entry consists of
-- `Graph Name`	Will be used as a graph window title (ex. `My First Graph`).
-- `column`  	This represents the columns at which to perform RegEx matching.
-- `pattern`	The pattern to be used to extract the graph data.
-- `color`		The line color to use when drawing the graph.
+The graph can be specified heirarchical manner as follows
+- `window`      This is the top level item. It can hold one or more plots.
+- `plot`        This represents one plot. Which is the container of one or more data series.
+- `series`      This represents the a single variable to be plotted.
+
+In case of multiple plots in a window, the `row` variable specify the order of the plot within the window.
+
+For each series, the user can specify the following
+`symbol`    : The symbol to use to mark the points of that series.
+`color`     : Color used to draw the series.
+`pattern`   : The pattern used to match the series variable. This use regular expression groups to match a single group to be plotted. In the given config
+above, the integer value following the "The number of items is" string will be plotted
 
 If the graph_configs is empty, graphing functionality is disabled automatically. This can be achieved as follows
 
