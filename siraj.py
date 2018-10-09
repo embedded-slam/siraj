@@ -61,7 +61,7 @@ class LogSParserMain(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
         
-        self.graph_dict = {}
+        self.graph_window_dict = {}
         self.menuFilter = None
         self.proxy_model = None
         self.table_data = None
@@ -184,7 +184,7 @@ class LogSParserMain(QMainWindow):
         search_proxy.setSourceModel(self.user_interface.tblLogData.model())
         search_proxy.setFilterCaseSensitivity(case_sensitivity)
         search_proxy.setFilterKeyColumn(key_column)
-        if(self.is_match_whole_word):
+        if self.is_match_whole_word:
             search_criteria = r"\b{}\b".format(search_criteria)
             
         search_proxy.setFilterRegExp(search_criteria)
@@ -241,7 +241,7 @@ class LogSParserMain(QMainWindow):
                      QMessageBox.Warning)
 
     def reset_per_config_file_data(self):
-        self.graph_dict.clear()
+        self.graph_window_dict.clear()
         self.reset_per_log_file_data()
         self.table_data = None
         self.table_model = None
@@ -273,7 +273,7 @@ class LogSParserMain(QMainWindow):
         self.load_log_file(self.log_file_full_path)
 
         
-    def load_graphs(self, graph_configs, table_data):
+    def load_graphs_old(self, graph_configs, table_data):
         
         pg.setConfigOption('background', QColor("white"))
         pg.setConfigOption('foreground', QColor("black"))
@@ -295,8 +295,8 @@ class LogSParserMain(QMainWindow):
         for graph in graphs:
             window = None
             wnd = graph_configs[graph]["window"]
-            if (wnd in self.graph_dict):
-                window = self.graph_dict[wnd]
+            if (wnd in self.graph_window_dict):
+                window = self.graph_window_dict[wnd]
                 window.clear()
 
         is_new_window = False
@@ -304,14 +304,14 @@ class LogSParserMain(QMainWindow):
         for graph_number, graph in enumerate(graphs):
             window = None
             wnd = graph_configs[graph]["window"]
-            if (wnd in self.graph_dict):
-                window = self.graph_dict[wnd]
+            if (wnd in self.graph_window_dict):
+                window = self.graph_window_dict[wnd]
                 is_new_window = False
             else:
                 is_new_window = True
                 window = pg.GraphicsWindow(title=wnd)
 
-                self.graph_dict[wnd] = window
+                self.graph_window_dict[wnd] = window
 
             p = window.addPlot(name=graph, title=graph)
 
@@ -328,6 +328,123 @@ class LogSParserMain(QMainWindow):
             p.scene().sigMouseClicked.connect(functools.partial(self.graph_mouse_clicked, p))
 
             window.nextRow()
+
+    def load_graphs(self, graph_configs, table_data):
+
+        pg.setConfigOption('background', QColor("white"))
+        pg.setConfigOption('foreground', QColor("black"))
+        pg.setConfigOptions(antialias=True)
+
+        window_dict = graph_configs["window_dict"]
+        series_list = []
+
+        for window_name in window_dict:
+            window_handle = pg.GraphicsWindow(title=window_name)
+            self.graph_window_dict[window_name] = window_handle
+            window_handle.show()
+            plot_dict = window_dict[window_name]["plot_dict"]
+            first_plot_name_in_the_window = ""
+            for plot_name in plot_dict:
+                plot_row = plot_dict[plot_name]["row"]
+                # plot_column = plot_dict[plot_name]["column"]
+                # plot_row_span = plot_dict[plot_name]["row_span"]
+                # plot_column_span = plot_dict[plot_name]["column_span"]
+
+                plot_handle = window_handle.addPlot(
+                    name=plot_name,
+                    title=plot_name,
+                    row=plot_row,
+                    col=1,#plot_column,
+                    rowspan=1,#plot_row_span,
+                    colspan=1)#plot_column_span)
+
+                plot_handle.addLegend()
+
+                if first_plot_name_in_the_window == "":
+                    first_plot_name_in_the_window = plot_name
+                plot_handle.setXLink(first_plot_name_in_the_window)
+
+                marker = pg.InfiniteLine(angle=90, movable=False)
+                plot_handle.addItem(marker, ignoreBounds=True)
+                self.graph_marker_list.append(marker)
+                plot_handle.scene().sigMouseClicked.connect(functools.partial(self.graph_mouse_clicked, plot_handle))
+                plot_handle.scene().setClickRadius(50)
+
+                series_dict = plot_dict[plot_name]["series_dict"]
+                for series_name in series_dict:
+                    series_symbol = series_dict[series_name]["symbol"]
+                    series_color = series_dict[series_name]["color"]
+                    series_pattern = series_dict[series_name]["pattern"]
+                    series_list.append((series_name, series_symbol, series_color, series_pattern, [], [], plot_handle))
+
+        for row_number, row_data in enumerate(table_data):
+            for (series_name, series_symbol, series_color, series_pattern, x_point_list, y_point_list, plot_handle) in series_list:
+                cell_to_match = row_data[self.user_data_column_zero_based]
+                m = re.search(series_pattern, cell_to_match)
+                if m is not None:
+                    x_point_list.append(row_number)
+                    y_point_list.append(int(m.group(1)))
+
+        for (series_name, series_symbol, series_color, series_pattern, x_point_list, y_point_list, plot_handle) in series_list:
+            plot_handle.plot(
+                x_point_list,
+                y_point_list,
+                pen=pg.mkPen(width=1, color=QColor(series_color)),
+                symbol=series_symbol,
+                symbolPen='w',
+                symbolBrush=QColor(series_color), name=series_name)
+
+    # graphs = list(sorted(graph_configs.keys(), key=lambda k: graph_configs[k]["index"]))
+        # graph_data = [([], [],) for _ in graphs]
+        #
+        # self.graph_marker_list = []
+        #
+        # for row_number, row_data in enumerate(table_data):
+        #     for graph_number, graph_name in enumerate(graphs):
+        #         cell_to_match = row_data[graph_configs[graph_name]["column"]]
+        #         m = re.search(graph_configs[graph_name]["pattern"], cell_to_match)
+        #         if (m is not None):
+        #             graph_data[graph_number][0].append(row_number)  # X-Axis value
+        #             graph_data[graph_number][1].append(int(m.group(1)))  # Y-Axis value
+        #
+        # for graph in graphs:
+        #     window = None
+        #     wnd = graph_configs[graph]["window"]
+        #     if (wnd in self.graph_window_dict):
+        #         window = self.graph_window_dict[wnd]
+        #         window.clear()
+        #
+        # is_new_window = False
+        # first_plot_name = None
+        # for graph_number, graph in enumerate(graphs):
+        #     window = None
+        #     wnd = graph_configs[graph]["window"]
+        #     if (wnd in self.graph_window_dict):
+        #         window = self.graph_window_dict[wnd]
+        #         is_new_window = False
+        #     else:
+        #         is_new_window = True
+        #         window = pg.GraphicsWindow(title=wnd)
+        #
+        #         self.graph_window_dict[wnd] = window
+        #
+        #     p = window.addPlot(name=graph, title=graph)
+        #
+        #     p.plot(graph_data[graph_number][0],
+        #            graph_data[graph_number][1],
+        #            pen=pg.mkPen(width=1, color=QColor(graph_configs[graph]["color"])),
+        #            symbol=graph_configs[graph]["symbol"], symbolPen='w',
+        #            symbolBrush=QColor(graph_configs[graph]["color"]), name=graph)
+        #     p.showGrid(x=True, y=True)
+        #     if first_plot_name == None:
+        #         first_plot_name = graph
+        #     p.setXLink(first_plot_name)
+        #     marker = pg.InfiniteLine(angle=90, movable=False)
+        #     p.addItem(marker, ignoreBounds=True)
+        #     self.graph_marker_list.append(marker)
+        #     p.scene().sigMouseClicked.connect(functools.partial(self.graph_mouse_clicked, p))
+        #
+        #     window.nextRow()
 
     def graph_mouse_clicked(self, plt, evt):
         point = plt.vb.mapSceneToView(evt.scenePos())
