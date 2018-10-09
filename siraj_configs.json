@@ -63,31 +63,50 @@
             "background" : "yellow"
         }
     },
-    "graph_configs" :
-    {
-        "My First Graph" :
-        {
-            "index"		: 0,
-            "window" 	: "First Window",
-            "column"  	: 2,
-            "pattern" 	: "Value = (\\d+)",
-            "color"		: "green"
-        },
-        "Another Graph - Same Window" :
-        {
-            "index"		: 1,
-            "window" 	: "First Window",
-            "column"  	: 2,
-            "pattern" 	: "The number of items is (\\d+) item\\(s\\)",
-            "color"		: "brown"
-        },
-        "Third Graph - Different Window" :
-        {
-            "index"		: 0,
-            "window" 	: "Second Window",
-            "column"  	: 2,
-            "pattern" 	: "The number of items is (\\d+) item\\(s\\)",
-            "color"		: "red"
+
+    "graph_configs": {
+        "window_dict": {
+            "window #1": {
+                "plot_dict": {
+                    "plot #1": {
+		        "row" : 1,
+
+                        "series_dict": {
+                            "series #1": {
+                                "symbol": "t",
+                                "color": "red",
+                                "pattern" 	: "Value = (\\d+)"
+                            }
+                        }
+                    },
+                    "plot #2": {
+		        "row" : 2,
+
+                        "series_dict": {
+                            "series #2": {
+                                "symbol": "+",
+                                "color": "green",
+                                "pattern" 	: "The number of items is (\\d+) item\\(s\\)"
+                            }
+                        }
+                    }
+                }
+            },
+            "window #2": {
+                "plot_dict": {
+                    "plot #3": {
+		        "row" : 1,
+
+                        "series_dict": {
+                            "series #3": {
+                                "symbol": "o",
+                                "color": "blue",
+                                "pattern" 	: "The number of items is (\\d+) item\\(s\\)"
+                            }
+                        }
+                    }
+                }            
+            }
         }
     }
 }
