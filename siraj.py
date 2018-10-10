@@ -364,7 +364,7 @@ class LogSParserMain(QMainWindow):
                     first_plot_name_in_the_window = plot_name
                 plot_handle.setXLink(first_plot_name_in_the_window)
 
-                marker = pg.InfiniteLine(angle=90, movable=False)
+                marker = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen(width=1, color=QColor("red")))
                 plot_handle.addItem(marker, ignoreBounds=True)
                 self.graph_marker_list.append(marker)
                 plot_handle.scene().sigMouseClicked.connect(functools.partial(self.graph_mouse_clicked, plot_handle))
