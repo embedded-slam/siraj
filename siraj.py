@@ -272,63 +272,6 @@ class LogSParserMain(QMainWindow):
         self.table_conditional_formatting_config = self.config.get_config_item("table_conditional_formatting_configs")
         self.load_log_file(self.log_file_full_path)
 
-        
-    def load_graphs_old(self, graph_configs, table_data):
-        
-        pg.setConfigOption('background', QColor("white"))
-        pg.setConfigOption('foreground', QColor("black"))
-        pg.setConfigOptions(antialias=True)
-        graphs = list(sorted(graph_configs.keys(), key=lambda k: graph_configs[k]["index"]))
-        graph_data = [([],[],) for _ in graphs]
-
-        self.graph_marker_list = []
-
-        for row_number, row_data in enumerate(table_data):
-            for graph_number, graph_name in enumerate(graphs):
-                cell_to_match = row_data[graph_configs[graph_name]["column"]]
-                m = re.search(graph_configs[graph_name]["pattern"], cell_to_match)
-                if(m is not None):
-                    graph_data[graph_number][0].append(row_number)          # X-Axis value
-                    graph_data[graph_number][1].append(int(m.group(1)))     # Y-Axis value
-            
-
-        for graph in graphs:
-            window = None
-            wnd = graph_configs[graph]["window"]
-            if (wnd in self.graph_window_dict):
-                window = self.graph_window_dict[wnd]
-                window.clear()
-
-        is_new_window = False
-        first_plot_name = None
-        for graph_number, graph in enumerate(graphs):
-            window = None
-            wnd = graph_configs[graph]["window"]
-            if (wnd in self.graph_window_dict):
-                window = self.graph_window_dict[wnd]
-                is_new_window = False
-            else:
-                is_new_window = True
-                window = pg.GraphicsWindow(title=wnd)
-
-                self.graph_window_dict[wnd] = window
-
-            p = window.addPlot(name=graph, title=graph)
-
-            p.plot(graph_data[graph_number][0],
-                   graph_data[graph_number][1],
-                   pen=pg.mkPen(width=1, color=QColor(graph_configs[graph]["color"])), symbol=graph_configs[graph]["symbol"], symbolPen='w', symbolBrush=QColor(graph_configs[graph]["color"]), name=graph)
-            p.showGrid(x=True, y=True)
-            if first_plot_name == None:
-                first_plot_name = graph
-            p.setXLink(first_plot_name)
-            marker = pg.InfiniteLine(angle=90, movable=False)
-            p.addItem(marker, ignoreBounds=True)
-            self.graph_marker_list.append(marker)
-            p.scene().sigMouseClicked.connect(functools.partial(self.graph_mouse_clicked, p))
-
-            window.nextRow()
-
     def load_graphs(self, graph_configs, table_data):
 
         pg.setConfigOption('background', QColor("white"))
